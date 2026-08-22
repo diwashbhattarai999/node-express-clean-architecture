@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+
 import { createRoutes } from "./routes";
 
 /**
@@ -7,10 +8,10 @@ import { createRoutes } from "./routes";
  * @returns The Express application.
  */
 export const createApp = (): Express => {
-	const app = express();
+  const app = express();
 
-	app.use(express.json());
+  app.use(express.json());
   app.use(createRoutes());
 
-	return app;
+  return app;
 };

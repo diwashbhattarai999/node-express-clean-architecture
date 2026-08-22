@@ -16,6 +16,8 @@ const envSchema = z.object({
     .int("Port must be an integer")
     .positive("Port must be a positive number")
     .default(3000),
+
+  HOST: z.string("Host must be a string").default("0.0.0.0"),
 });
 
 const result = envSchema.safeParse(process.env);
