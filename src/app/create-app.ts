@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 
 import { corsMiddleware } from "./middleware/cors";
+import { httpLoggerMiddleware } from "./middleware/logger";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
 import { createRoutes } from "./routes";
@@ -19,6 +20,13 @@ export const createApp = (): Express => {
    * This is a request ID middleware that sets the request ID.
    */
   app.use(requestIdMiddleware);
+
+  /**
+   * HTTP Logger middleware.
+   *
+   * This is a HTTP logger middleware that logs the HTTP requests.
+   */
+  app.use(httpLoggerMiddleware);
 
   /**
    * Security middleware.

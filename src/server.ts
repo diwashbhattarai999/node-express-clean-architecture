@@ -4,6 +4,8 @@ import process from "node:process";
 import { createApp } from "@/app/create-app";
 import { env } from "@/config/env";
 
+import { logger } from "./shared/logger/logger";
+
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 const app = createApp();
@@ -32,7 +34,7 @@ const startServer = async (): Promise<void> => {
     server.listen(env.PORT, env.HOST);
   });
 
-  console.log(`Server listening on ${env.HOST}:${env.PORT}`);
+  logger.info(`Server started on http://${env.HOST}:${env.PORT}`);
 };
 
 /**
@@ -42,11 +44,11 @@ const startServer = async (): Promise<void> => {
  * @returns A promise that resolves when the server is shut down.
  */
 const shutdownServer = async (signal: NodeJS.Signals): Promise<void> => {
-  console.log(`Received ${signal}. Shutting down...`);
+  logger.warn({ signal }, `Received ${signal}. Shutting down...`);
 
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
-      console.warn("Graceful shutdown timed out. Closing connections...");
+      logger.warn("Graceful shutdown timed out. Closing connections...");
 
       server.closeAllConnections();
       resolve();
@@ -81,10 +83,10 @@ const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
   try {
     await shutdownServer(signal);
 
-    console.log("Server shut down successfully.");
+    logger.info("Server shut down successfully.");
     process.exit(0);
   } catch (error) {
-    console.error("Failed to shut down server gracefully:", error);
+    logger.error({ error }, "Failed to shut down server gracefully");
     process.exit(1);
   }
 };
@@ -114,6 +116,6 @@ process.once("SIGTERM", () => {
 try {
   await startServer();
 } catch (error) {
-  console.error("Failed to start server:", error);
+  logger.error({ error }, "Failed to start server");
   process.exit(1);
 }

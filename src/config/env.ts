@@ -2,6 +2,7 @@ import "dotenv/config";
 import { z } from "zod";
 
 import { Environment } from "@/shared/constants/environment";
+import { LogLevel } from "@/shared/constants/log-level";
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -29,6 +30,10 @@ const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(z.url())),
+
+  LOG_LEVEL: z
+    .enum(LogLevel, `Invalid log level. Must be one of: ${Object.values(LogLevel).join(", ")}`)
+    .default(LogLevel.DEBUG),
 });
 
 const result = envSchema.safeParse(process.env);
