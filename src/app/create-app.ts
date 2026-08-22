@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 
+import { corsMiddleware } from "./middleware/cors";
 import { createRoutes } from "./routes";
 
 /**
@@ -10,6 +11,7 @@ import { createRoutes } from "./routes";
 export const createApp = (): Express => {
   const app = express();
 
+  app.use(corsMiddleware);
   app.use(express.json());
   app.use(createRoutes());
 

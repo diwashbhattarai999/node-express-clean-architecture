@@ -12,12 +12,23 @@ const envSchema = z.object({
     .default(Environment.DEVELOPMENT),
 
   PORT: z.coerce
-    .number("Port must be a number")
+    .number("Port is required.")
     .int("Port must be an integer")
     .positive("Port must be a positive number")
     .default(3000),
 
-  HOST: z.string("Host must be a string").default("0.0.0.0"),
+  HOST: z.string("Host is required.").default("0.0.0.0"),
+
+  CORS_ORIGINS: z
+    .string("CORS Origins is required.")
+    .default("http://localhost:3000")
+    .transform((value) =>
+      value
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.url())),
 });
 
 const result = envSchema.safeParse(process.env);
