@@ -1,47 +1,41 @@
 {
-  "compilerOptions": {
-    "target": "ES2024",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+	"compilerOptions": {
+		"target": "ES2024",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 
-    "rootDir": "./src",
-    "outDir": "./dist",
+		"rootDir": ".",
+		"outDir": "./dist",
 
-    "lib": ["ES2024"],
-    "types": ["node"],
+		"lib": ["ES2024"],
+		"types": ["node"],
 
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+		"paths": {
+			"@/*": ["./src/*"]
+		},
 
-    "strict": true,
+		"strict": true,
 
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedSideEffectImports": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noUncheckedSideEffectImports": true,
 
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
 
-    "esModuleInterop": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
 
-    "forceConsistentCasingInFileNames": true,
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
 
-    "skipLibCheck": true,
-
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-
-    "noEmitOnError": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"],
-  "tsc-alias": {
-    "resolveFullPaths": true,
-    "resolveFullExtension": ".js"
-  }
+		"noEmitOnError": true
+	},
+	"include": ["src", "tests"],
+	"exclude": ["node_modules", "dist", "coverage"]
 }

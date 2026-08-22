@@ -1,6 +1,8 @@
 import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+	plugins: [tsconfigPaths()],
 	test: {
 		environment: "node",
 
@@ -16,13 +18,9 @@ export default defineConfig({
 
 		coverage: {
 			provider: "v8",
-
 			include: ["src/**/*.ts"],
-
 			exclude: ["src/**/*.d.ts", "src/**/index.ts", "src/server.ts"],
-
 			reporter: ["text", "json", "html"],
-
 			reportsDirectory: "./coverage",
 		},
 	},
