@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 
 import { corsMiddleware } from "./middleware/cors";
+import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
 import { createRoutes } from "./routes";
 
@@ -11,6 +12,13 @@ import { createRoutes } from "./routes";
  */
 export const createApp = (): Express => {
   const app = express();
+
+  /**
+   * Request ID middleware.
+   *
+   * This is a request ID middleware that sets the request ID.
+   */
+  app.use(requestIdMiddleware);
 
   /**
    * Security middleware.
