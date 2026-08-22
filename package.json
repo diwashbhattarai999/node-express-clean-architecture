@@ -1,40 +1,42 @@
 {
-  "name": "node-express-clean-architecture",
-  "version": "1.0.0",
-  "description": "Production-grade Node.js + Express starter template following Clean Architecture principles.",
-  "main": "index.js",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc && tsc-alias",
-    "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "format:check": "biome format . --write=false",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.9.0",
-      "onFail": "download"
-    }
-  },
-  "type": "module",
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.9",
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.2.0",
-    "tsc-alias": "^1.9.2",
-    "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "express": "^5.2.1"
-  }
+	"name": "node-express-clean-architecture",
+	"version": "1.0.0",
+	"description": "Production-grade Node.js + Express starter template following Clean Architecture principles.",
+	"main": "index.js",
+	"scripts": {
+		"dev": "tsx watch src/server.ts",
+		"build": "tsc && tsc-alias",
+		"start": "node dist/server.js",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"format:check": "biome format . --write=false",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"prepare": "lefthook install"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "^11.9.0",
+			"onFail": "download"
+		}
+	},
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.9",
+		"@types/express": "^5.0.6",
+		"@types/node": "^26.2.0",
+		"lefthook": "^2.1.10",
+		"tsc-alias": "^1.9.2",
+		"tsx": "^4.23.12",
+		"typescript": "^7.0.2"
+	},
+	"dependencies": {
+		"express": "^5.2.1"
+	}
 }
