@@ -1,0 +1,82 @@
+{
+	// Auto save
+	"files.autoSave": "onFocusChange",
+	"files.autoSaveWorkspaceFilesOnly": true,
+
+	// Editor defaults aligned with biome.json
+	"editor.tabSize": 2,
+	"editor.insertSpaces": true,
+	"editor.detectIndentation": false,
+	"editor.rulers": [100],
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode": "file",
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+
+	// Biome
+	"biome.enabled": true,
+	"biome.requireConfigFile": true,
+
+	// Disable formatters that conflict with Biome
+	"prettier.enable": false,
+	"eslint.enable": false,
+
+	// Language-specific formatters
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[markdown]": {
+		"files.trimTrailingWhitespace": false
+	},
+
+	// File hygiene
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	"files.exclude": {
+		"**/dist": true,
+		"**/coverage": true
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/coverage": true,
+		"**/.pnpm-store": true
+	},
+	"files.watcherExclude": {
+		"**/node_modules/**": true,
+		"**/dist/**": true,
+		"**/coverage/**": true
+	},
+
+	// TypeScript
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
+	"#js/ts.preferences.importModuleSpecifier#": "non-relative",
+	"#js/ts.updateImportsOnFileMove.enabled#": "always",
+
+	// Testing
+	"vitest.enable": true,
+	"vitest.commandLine": "pnpm vitest",
+
+	// Terminal
+	"terminal.integrated.defaultProfile.osx": "zsh"
+}

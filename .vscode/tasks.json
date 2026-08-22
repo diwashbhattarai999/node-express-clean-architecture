@@ -1,0 +1,59 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "dev",
+			"type": "shell",
+			"command": "pnpm dev",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "pnpm build",
+			"group": "build",
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "typecheck",
+			"type": "shell",
+			"command": "pnpm typecheck",
+			"group": "test",
+			"problemMatcher": ["$tsc"]
+		},
+		{
+			"label": "lint",
+			"type": "shell",
+			"command": "pnpm lint",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "test",
+			"type": "shell",
+			"command": "pnpm test",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "test:watch",
+			"type": "shell",
+			"command": "pnpm test:watch",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		}
+	]
+}

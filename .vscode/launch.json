@@ -1,0 +1,38 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Server",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["exec", "tsx", "src/server.ts"],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": ["<node_internals>/**"]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Current Test File",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["exec", "vitest", "run", "${relativeFile}"],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": ["<node_internals>/**"]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug All Tests",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["test"],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": ["<node_internals>/**"]
+		}
+	]
+}
