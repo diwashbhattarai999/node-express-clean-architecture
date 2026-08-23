@@ -1,6 +1,6 @@
 import { type IRouter, Router } from "express";
 
-import { healthController, readinessController } from "@/infrastructure/health/health.controller";
+import { healthController, readinessController } from "@/modules/health/health.controller";
 
 const router: IRouter = Router();
 

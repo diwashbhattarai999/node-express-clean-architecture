@@ -1,4 +1,4 @@
-import type { HealthCheckResult, ReadinessCheckResult } from "@/infrastructure/health/health.types";
+import type { HealthCheckResult, ReadinessCheckResult } from "@/modules/health/health.types";
 
 export class HealthService {
   getHealth(): HealthCheckResult {

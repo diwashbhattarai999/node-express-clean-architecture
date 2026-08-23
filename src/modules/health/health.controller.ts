@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { HealthService } from "@/infrastructure/health/health.service";
+import { HealthService } from "@/modules/health/health.service";
 import { HttpStatus } from "@/shared/http/http-status";
 import { sendSuccess } from "@/shared/http/send-response";
 

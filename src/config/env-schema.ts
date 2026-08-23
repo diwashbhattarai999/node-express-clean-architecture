@@ -84,6 +84,8 @@ export const envSchema = z.object({
   COOKIES_SECRET: z
     .string("Cookies secret is required.")
     .min(32, "Cookies secret must be at least 32 characters long"),
+
+  DATABASE_URL: z.url("Database URL is required."),
 });
 
 export type TEnv = z.infer<typeof envSchema>;
