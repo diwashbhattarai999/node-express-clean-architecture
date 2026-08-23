@@ -6,7 +6,8 @@ import { httpLoggerMiddleware } from "./middleware/logger";
 import { notFoundMiddleware } from "./middleware/not-found";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
-import { createRoutes } from "./routes";
+import { apiRouter } from "./routes";
+import { healthRouter } from "./routes/health.routes";
 
 export type CreateAppOptions = {
   /**
@@ -65,7 +66,8 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    *
    * This is a routes middleware that creates the routes.
    */
-  app.use(createRoutes());
+  app.use("/api", apiRouter);
+  app.use("/", healthRouter);
 
   /**
    * Configure middleware.
