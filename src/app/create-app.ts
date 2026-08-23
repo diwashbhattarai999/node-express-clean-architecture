@@ -1,3 +1,4 @@
+import compression from "compression";
 import express, { type Express } from "express";
 
 import { env } from "@/config/env";
@@ -94,6 +95,13 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    * This is a cookies middleware that parses the cookies.
    */
   app.use(cookieMiddleware);
+
+  /**
+   * Compression middleware.
+   *
+   * This is a compression middleware that compresses the response body.
+   */
+  app.use(compression({ threshold: 1024 }));
 
   /**
    * Routes middleware.
