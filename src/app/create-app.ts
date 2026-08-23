@@ -1,9 +1,12 @@
 import express, { type Express } from "express";
 
+import { env } from "@/config/env";
+
 import { corsMiddleware } from "./middleware/cors";
 import { errorHandler } from "./middleware/error-handler";
 import { httpLoggerMiddleware } from "./middleware/logger";
 import { notFoundMiddleware } from "./middleware/not-found";
+import { globalRateLimiter } from "./middleware/rate-limit";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
 import { apiRouter } from "./routes";
@@ -25,6 +28,15 @@ export type CreateAppOptions = {
  */
 export const createApp = (options: CreateAppOptions = {}): Express => {
   const app = express();
+
+  /**
+   * Trust proxy middleware.
+   *
+   * This is a trust proxy middleware that sets the trust proxy.
+   * It's needed if the app is behind a proxy.
+   * For example, if the app is behind a load balancer or a CDN.
+   */
+  app.set("trust proxy", env.TRUST_PROXY);
 
   /**
    * Request ID middleware.
@@ -60,6 +72,13 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    * This is a body parser middleware that parses the request body.
    */
   app.use(express.json());
+
+  /**
+   * Global rate limiter middleware.
+   *
+   * This is a global rate limiter middleware that limits the number of requests to the server.
+   */
+  app.use(globalRateLimiter);
 
   /**
    * Routes middleware.

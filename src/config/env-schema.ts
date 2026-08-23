@@ -35,6 +35,20 @@ export const envSchema = z.object({
   LOG_LEVEL: z
     .enum(LogLevel, `Invalid log level. Must be one of: ${Object.values(LogLevel).join(", ")}`)
     .default(LogLevel.DEBUG),
+
+  TRUST_PROXY: z.enum(["true", "false"]).transform((value) => value === "true"),
+
+  RATE_LIMIT_WINDOW_MS: z.coerce
+    .number("Rate limit window is required.")
+    .int("Rate limit window must be an integer")
+    .positive("Rate limit window must be a positive number")
+    .default(60000),
+
+  RATE_LIMIT_MAX_REQUESTS: z.coerce
+    .number("Rate limit max requests is required.")
+    .int("Rate limit max requests must be an integer")
+    .positive("Rate limit max requests must be a positive number")
+    .default(100),
 });
 
 export type TEnv = z.infer<typeof envSchema>;
