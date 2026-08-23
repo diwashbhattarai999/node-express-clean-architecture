@@ -1,10 +1,22 @@
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createApp } from "@/app/create-app";
+import { checkDatabaseHealth } from "@/infrastructure/database/health-check";
+
+vi.mock("@/infrastructure/database/health-check", () => ({
+  checkDatabaseHealth: vi.fn(),
+}));
+
+const mockedCheckDatabaseHealth = vi.mocked(checkDatabaseHealth);
 
 describe("Health", () => {
   const app = createApp();
+
+  beforeEach(() => {
+    mockedCheckDatabaseHealth.mockReset();
+    mockedCheckDatabaseHealth.mockResolvedValue(true);
+  });
 
   it("returns a success payload for GET /health", async () => {
     const response = await request(app).get("/health");
@@ -31,7 +43,7 @@ describe("Health", () => {
     });
   });
 
-  it("returns a success payload for GET /ready", async () => {
+  it("returns a success payload for GET /ready when the database is healthy", async () => {
     const response = await request(app).get("/ready");
 
     expect(response.status).toBe(200);
@@ -42,7 +54,28 @@ describe("Health", () => {
       message: "Service is ready.",
       data: {
         status: "ok",
-        checks: {},
+        checks: {
+          database: "ok",
+        },
+      },
+    });
+    expect(mockedCheckDatabaseHealth).toHaveBeenCalledOnce();
+  });
+
+  it("returns 503 for GET /ready when the database is unavailable", async () => {
+    mockedCheckDatabaseHealth.mockResolvedValue(false);
+
+    const response = await request(app).get("/ready");
+
+    expect(response.status).toBe(503);
+    expect(response.body).toEqual({
+      success: true,
+      message: "Service is not ready.",
+      data: {
+        status: "unavailable",
+        checks: {
+          database: "unavailable",
+        },
       },
     });
   });

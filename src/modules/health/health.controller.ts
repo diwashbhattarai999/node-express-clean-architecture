@@ -12,8 +12,14 @@ export const healthController: RequestHandler = (_req, res) => {
   sendSuccess(res, result, "Service is healthy.", HttpStatus.OK);
 };
 
-export const readinessController: RequestHandler = (_req, res) => {
-  const result = healthService.getReadiness();
+export const readinessController: RequestHandler = async (_req, res) => {
+  const result = await healthService.getReadiness();
 
-  sendSuccess(res, result, "Service is ready.", HttpStatus.OK);
+  if (result.status === "ok") {
+    sendSuccess(res, result, "Service is ready.", HttpStatus.OK);
+
+    return;
+  }
+
+  sendSuccess(res, result, "Service is not ready.", HttpStatus.SERVICE_UNAVAILABLE);
 };

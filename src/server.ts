@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 
 import { createApp } from "@/app/create-app";
 import { env } from "@/config/env";
+import { closeDatabase } from "@/infrastructure/database";
 import { logger } from "@/shared/logger/logger";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
@@ -46,10 +47,12 @@ const startServer = async (): Promise<void> => {
 
       logger.info("HTTP server closed successfully");
 
+      await closeDatabase();
+
       clearTimeout(timeout);
       process.exit(0);
     } catch (error) {
-      logger.error({ error }, "Failed to close HTTP server");
+      logger.error({ error }, "Failed during graceful shutdown");
 
       clearTimeout(timeout);
       process.exit(1);
