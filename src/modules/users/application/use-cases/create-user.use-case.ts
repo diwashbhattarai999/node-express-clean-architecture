@@ -1,9 +1,9 @@
 import type { CreateUserDto } from "@/modules/users/application/dto/create-user.dto";
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
+import type { UserRepository } from "@/modules/users/application/repositories/user.repository";
 import type { PasswordHasher } from "@/modules/users/application/services/password-hasher";
 import type { User } from "@/modules/users/domain/entities/user.entity";
 import { UserFactory } from "@/modules/users/domain/factories/user.factory";
-import type { UserRepository } from "@/modules/users/domain/repositories/user.repository";
 import { Email } from "@/modules/users/domain/value-objects/email.vo";
 
 export class CreateUserUseCase {

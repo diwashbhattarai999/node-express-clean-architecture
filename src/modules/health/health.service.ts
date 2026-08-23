@@ -1,4 +1,8 @@
-import type { HealthCheckResult, HealthStatus, ReadinessCheckResult } from "@/modules/health/health.types";
+import type {
+  HealthCheckResult,
+  HealthStatus,
+  ReadinessCheckResult,
+} from "@/modules/health/health.types";
 
 export type DatabaseHealthChecker = () => Promise<boolean>;
 

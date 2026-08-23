@@ -1,12 +1,32 @@
 import type { ErrorRequestHandler } from "express";
+import { ZodError } from "zod";
 
 import { env } from "@/config/env";
 import { Environment } from "@/shared/constants/environment";
 import { AppError } from "@/shared/errors/app-error";
 import { ErrorCode } from "@/shared/errors/error-code";
+import { ValidationError } from "@/shared/errors/validation-error";
 import type { ApiErrorResponse } from "@/shared/http/api-response";
 import { HttpStatus } from "@/shared/http/http-status";
 import { logger } from "@/shared/logger/logger";
+
+const toAppError = (error: unknown): AppError | null => {
+  if (error instanceof AppError) {
+    return error;
+  }
+
+  if (error instanceof ZodError) {
+    return new ValidationError(
+      error.issues.map((issue) => ({
+        path: issue.path,
+        message: issue.message,
+        code: issue.code,
+      })),
+    );
+  }
+
+  return null;
+};
 
 /**
  * Handles errors in the request pipeline.
@@ -17,11 +37,12 @@ import { logger } from "@/shared/logger/logger";
  * @param _next - The next function.
  */
 export const errorHandler: ErrorRequestHandler = (error, req, res, _next): void => {
-  const isAppError = error instanceof AppError;
+  const appError = toAppError(error);
+  const isAppError = appError !== null;
 
-  const statusCode = isAppError ? error.statusCode : HttpStatus.INTERNAL_SERVER_ERROR;
+  const statusCode = isAppError ? appError.statusCode : HttpStatus.INTERNAL_SERVER_ERROR;
 
-  const code = isAppError ? error.code : ErrorCode.INTERNAL_SERVER_ERROR;
+  const code = isAppError ? appError.code : ErrorCode.INTERNAL_SERVER_ERROR;
 
   const message =
     isAppError || env.NODE_ENV === Environment.LOCAL
@@ -44,10 +65,10 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next): void 
 
   const response: ApiErrorResponse = {
     success: false,
-    message,
+    message: isAppError ? appError.message : message,
     code,
     requestId: req.requestId,
-    ...(isAppError && error.details !== undefined ? { details: error.details } : {}),
+    ...(isAppError && appError.details !== undefined ? { details: appError.details } : {}),
   };
 
   res.status(statusCode).json(response);

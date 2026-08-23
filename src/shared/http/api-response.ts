@@ -1,14 +1,14 @@
 export interface ApiSuccessResponse<T> {
   success: true;
   message: string;
-  data: T;
+  data: T | null;
 }
 
 export interface ApiSuccessResponseWithMeta<T, M> {
   success: true;
   message: string;
-  data: T;
-  meta: M;
+  data: T | null;
+  meta: M | null;
 }
 
 export interface ApiErrorResponse {

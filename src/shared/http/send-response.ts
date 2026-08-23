@@ -13,14 +13,14 @@ import { HttpStatus, type THttpStatus } from "@/shared/http/http-status";
  */
 export const sendSuccess = <T>(
   res: Response,
-  data: T,
-  message: string = "Request processed successfully.",
   statusCode: THttpStatus = HttpStatus.OK,
+  message: string = "Request processed successfully.",
+  data?: T,
 ): void => {
   const response: ApiSuccessResponse<T> = {
     success: true,
     message,
-    data,
+    data: data ?? null,
   };
 
   res.status(statusCode).json(response);
@@ -37,16 +37,16 @@ export const sendSuccess = <T>(
  */
 export const sendSuccessWithMeta = <T, M>(
   res: Response,
-  data: T,
-  meta: M,
-  message: string = "Request processed successfully.",
   statusCode: THttpStatus = HttpStatus.OK,
+  message: string = "Request processed successfully.",
+  data?: T,
+  meta?: M,
 ): void => {
   const response: ApiSuccessResponseWithMeta<T, M> = {
     success: true,
     message,
-    data,
-    meta,
+    data: data ?? null,
+    meta: meta ?? null,
   };
 
   res.status(statusCode).json(response);
