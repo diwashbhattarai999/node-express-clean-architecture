@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { User } from '@/modules/users/domain/entities/user.entity';
+import { Email } from '@/modules/users/domain/value-objects/email.vo';
 
 describe('User', () => {
 	it('should create a user', () => {
 		const user = User.create({
 			id: 'user-123',
 			name: 'John Doe',
-			email: 'john@example.com',
+			email: Email.create('john@example.com'),
 			passwordHash: 'hashed-password',
 		});
 
 		expect(user.getId()).toBe('user-123');
 		expect(user.getName()).toBe('John Doe');
-		expect(user.getEmail()).toBe('john@example.com');
+		expect(user.getEmail().getValue()).toBe('john@example.com');
 		expect(user.getPasswordHash()).toBe('hashed-password');
 	});
 
@@ -21,7 +22,7 @@ describe('User', () => {
 		const user = User.create({
 			id: 'user-123',
 			name: 'John Doe',
-			email: 'john@example.com',
+			email: Email.create('john@example.com'),
 			passwordHash: 'hashed-password',
 		});
 
@@ -36,7 +37,7 @@ describe('User', () => {
     const user = User.create({
       id: 'user-123',
       name: 'John Doe',
-      email: 'john@example.com',
+      email: Email.create('john@example.com'),
       passwordHash: 'hashed-password',
       createdAt,
       updatedAt,
@@ -50,7 +51,7 @@ describe('User', () => {
     const user = User.create({
       id: 'user-123',
       name: 'John Doe',
-      email: 'john@example.com',
+      email: Email.create('john@example.com'),
       passwordHash: 'hashed-password',
     });
 

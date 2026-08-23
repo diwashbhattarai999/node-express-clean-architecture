@@ -1,6 +1,8 @@
+import type { Email } from "../value-objects/email.vo";
+
 export interface UserProps {
   name: string;
-  email: string;
+  email: Email;
   passwordHash: string;
   createdAt: Date;
   updatedAt: Date;
@@ -9,7 +11,7 @@ export interface UserProps {
 export interface CreateUserProps {
   id: string;
   name: string;
-  email: string;
+  email: Email;
   passwordHash: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -41,7 +43,7 @@ export class User {
     return this.props.name;
   }
 
-  public getEmail(): string {
+  public getEmail(): Email {
     return this.props.email;
   }
 

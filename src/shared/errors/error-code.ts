@@ -8,6 +8,8 @@ export const ErrorCode = {
   CONFLICT: "CONFLICT",
   TOO_MANY_REQUESTS: "TOO_MANY_REQUESTS",
   RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+
+  INVALID_EMAIL: "INVALID_EMAIL",
 } as const;
 
 export type TErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
