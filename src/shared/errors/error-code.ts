@@ -10,6 +10,7 @@ export const ErrorCode = {
   RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
 
   INVALID_EMAIL: "INVALID_EMAIL",
+  USER_EMAIL_ALREADY_EXISTS: "USER_EMAIL_ALREADY_EXISTS",
 } as const;
 
 export type TErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
