@@ -1,17 +1,28 @@
 import express, { type Express } from "express";
 
 import { corsMiddleware } from "./middleware/cors";
+import { errorHandler } from "./middleware/error-handler";
 import { httpLoggerMiddleware } from "./middleware/logger";
+import { notFoundMiddleware } from "./middleware/not-found";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
 import { createRoutes } from "./routes";
 
+export type CreateAppOptions = {
+  /**
+   * Registers additional routes/middleware before the not-found and error handlers.
+   * Useful for tests that need controlled failure paths.
+   */
+  configure?: (app: Express) => void;
+};
+
 /**
  * Creates an Express application.
  *
+ * @param options - Optional application configuration.
  * @returns The Express application.
  */
-export const createApp = (): Express => {
+export const createApp = (options: CreateAppOptions = {}): Express => {
   const app = express();
 
   /**
@@ -55,6 +66,28 @@ export const createApp = (): Express => {
    * This is a routes middleware that creates the routes.
    */
   app.use(createRoutes());
+
+  /**
+   * Configure middleware.
+   *
+   * This is a configure middleware that registers additional routes/middleware
+   * before the not-found and error handlers.
+   */
+  options.configure?.(app);
+
+  /**
+   * Not found middleware.
+   *
+   * This is a not found middleware that handles not found errors.
+   */
+  app.use(notFoundMiddleware);
+
+  /**
+   * Error handler middleware.
+   *
+   * This is a error handler middleware that handles errors in the request pipeline.
+   */
+  app.use(errorHandler);
 
   return app;
 };

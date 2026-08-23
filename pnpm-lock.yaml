@@ -210,9 +210,6 @@ importers:
       cors:
         specifier: ^2.8.6
         version: 2.8.6
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@7.2.0)
@@ -259,6 +256,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.11
         version: 4.1.11(vitest@4.1.11)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       lefthook:
         specifier: ^2.1.10
         version: 2.1.10

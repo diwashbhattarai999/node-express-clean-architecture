@@ -21,6 +21,7 @@ coverage/
 
 .env
 .env.*
+!.env.test
 !.env.example
 !.env.*.example
 

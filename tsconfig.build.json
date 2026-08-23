@@ -5,5 +5,9 @@
 		"outDir": "./dist"
 	},
 	"include": ["src"],
-	"exclude": ["node_modules", "dist", "coverage", "tests"]
+	"exclude": ["node_modules", "dist", "coverage", "tests"],
+	"tsc-alias": {
+		"resolveFullPaths": true,
+		"resolveFullExtension": ".js"
+	}
 }

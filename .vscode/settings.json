@@ -52,7 +52,6 @@
 	"files.insertFinalNewline": true,
 	"files.trimTrailingWhitespace": true,
 	"files.exclude": {
-		"**/dist": true,
 		"**/coverage": true
 	},
 	"search.exclude": {
@@ -66,6 +65,7 @@
 		"**/dist/**": true,
 		"**/coverage/**": true
 	},
+	"explorer.excludeGitIgnore": false,
 
 	// TypeScript
 	"js/ts.tsdk.path": "node_modules/typescript/lib",
