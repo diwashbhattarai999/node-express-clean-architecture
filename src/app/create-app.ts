@@ -12,7 +12,7 @@ import { globalRateLimiter } from "./middleware/rate-limit";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
 import { apiRouter } from "./routes";
-import { healthRouter } from "./routes/health.routes";
+import { rootRouter } from "./routes/root.routes";
 
 export type CreateAppOptions = {
   /**
@@ -109,7 +109,7 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    * This is a routes middleware that creates the routes.
    */
   app.use("/api", apiRouter);
-  app.use("/", healthRouter);
+  app.use("/", rootRouter);
 
   /**
    * Configure middleware.

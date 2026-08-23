@@ -38,11 +38,17 @@ const listUsersQuerySchema = paginationQuerySchema
   );
 
 export const createUserSchema = z.object({
-  body: z.object({
-    name: nameSchema,
-    email: emailSchema,
-    password: passwordSchema,
-  }),
+  body: z
+    .object({
+      name: nameSchema,
+      email: emailSchema,
+      password: passwordSchema,
+      confirmPassword: z.string().min(1, "Confirm password is required."),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    }),
 });
 
 export const listUsersSchema = z.object({
