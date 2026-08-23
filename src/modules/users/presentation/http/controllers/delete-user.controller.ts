@@ -12,6 +12,6 @@ export class DeleteUserController {
   async handle(req: ValidatedRequest<DeleteUserSchema>, res: Response): Promise<void> {
     await this.deleteUserUseCase.execute(req.params.id);
 
-    sendSuccess<null>(res, HttpStatus.NO_CONTENT, "User deleted successfully.");
+    sendSuccess<null>(res, HttpStatus.OK, "User deleted successfully.", null);
   }
 }
