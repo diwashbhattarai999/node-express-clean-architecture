@@ -47,6 +47,13 @@
 		"files.trimTrailingWhitespace": false
 	},
 
+	"json.schemas": [
+		{
+			"fileMatch": ["biome.json", "biome.jsonc"],
+			"url": "./node_modules/@biomejs/biome/configuration_schema.json"
+		}
+	],
+
 	// File hygiene
 	"files.eol": "\n",
 	"files.insertFinalNewline": true,
