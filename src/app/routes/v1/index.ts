@@ -1,7 +1,7 @@
 import { type IRouter, Router } from "express";
 
 import { createApplicationModules } from "@/app/composition";
-import { createUsersRouter } from "@/modules/users/presentation/routes/user.routes";
+import { createUsersRouter } from "@/modules/users/presentation/http/routes/user.routes";
 
 const modules = createApplicationModules();
 

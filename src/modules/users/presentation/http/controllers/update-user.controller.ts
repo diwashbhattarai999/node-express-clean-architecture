@@ -2,8 +2,11 @@ import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
 import type { UpdateUserUseCase } from "@/modules/users/application/use-cases/update-user.use-case";
-import type { UpdateUserSchema } from "@/modules/users/presentation/http/schemas/user.schema";
-import { toUserResponse, type UserResponse } from "@/modules/users/presentation/http/user.response";
+import {
+  toUserResponse,
+  type UserResponse,
+} from "@/modules/users/presentation/http/mappers/user.response";
+import type { UpdateUserSchema } from "@/modules/users/presentation/http/validators/user.schema";
 import { HttpStatus } from "@/shared/http/http-status";
 import { sendSuccess } from "@/shared/http/send-response";
 

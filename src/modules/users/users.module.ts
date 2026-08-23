@@ -5,11 +5,11 @@ import { ListUsersUseCase } from "@/modules/users/application/use-cases/list-use
 import { UpdateUserUseCase } from "@/modules/users/application/use-cases/update-user.use-case";
 import { PostgresUserRepository } from "@/modules/users/infrastructure/repositories/postgres-user.repository";
 import { Argon2PasswordHasher } from "@/modules/users/infrastructure/security/argon2-password-hasher";
-import { CreateUserController } from "@/modules/users/presentation/controllers/create-user.controller";
-import { DeleteUserController } from "@/modules/users/presentation/controllers/delete-user.controller";
-import { GetUserByIdController } from "@/modules/users/presentation/controllers/get-user-by-id.controller";
-import { ListUsersController } from "@/modules/users/presentation/controllers/list-users.controller";
-import { UpdateUserController } from "@/modules/users/presentation/controllers/update-user.controller";
+import { CreateUserController } from "@/modules/users/presentation/http/controllers/create-user.controller";
+import { DeleteUserController } from "@/modules/users/presentation/http/controllers/delete-user.controller";
+import { GetUserByIdController } from "@/modules/users/presentation/http/controllers/get-user-by-id.controller";
+import { ListUsersController } from "@/modules/users/presentation/http/controllers/list-users.controller";
+import { UpdateUserController } from "@/modules/users/presentation/http/controllers/update-user.controller";
 
 export function createUsersModule() {
   const userRepository = new PostgresUserRepository();

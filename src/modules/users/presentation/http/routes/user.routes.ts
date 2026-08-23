@@ -1,14 +1,14 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
-import type { createUsersModule } from "@/modules/users/infrastructure/users.module";
 import {
   createUserSchema,
   deleteUserSchema,
   getUserByIdSchema,
   listUsersSchema,
   updateUserSchema,
-} from "@/modules/users/presentation/http/schemas/user.schema";
+} from "@/modules/users/presentation/http/validators/user.schema";
+import type { createUsersModule } from "@/modules/users/users.module";
 
 export function createUsersRouter(usersModule: ReturnType<typeof createUsersModule>): IRouter {
   const router = Router();

@@ -1,4 +1,4 @@
-import { createUsersModule } from "@/modules/users/infrastructure/users.module";
+import { createUsersModule } from "@/modules/users/users.module";
 
 export function createApplicationModules() {
   return {

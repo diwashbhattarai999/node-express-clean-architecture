@@ -2,11 +2,11 @@ import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
 import type { ListUsersUseCase } from "@/modules/users/application/use-cases/list-users.use-case";
-import type { ListUsersSchema } from "@/modules/users/presentation/http/schemas/user.schema";
 import {
   toUserResponseList,
   type UserResponse,
-} from "@/modules/users/presentation/http/user.response";
+} from "@/modules/users/presentation/http/mappers/user.response";
+import type { ListUsersSchema } from "@/modules/users/presentation/http/validators/user.schema";
 import type { IPagination } from "@/shared/http/api-response";
 import { HttpStatus } from "@/shared/http/http-status";
 import { createPaginationMeta } from "@/shared/http/pagination";

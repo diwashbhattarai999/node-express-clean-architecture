@@ -11,14 +11,9 @@ export interface UpdateUserData {
 
 export interface UserRepository {
   findById(id: string): Promise<User | null>;
-
   findByEmail(email: Email): Promise<User | null>;
-
   findMany(criteria: ListUsersDto): Promise<PaginatedResult<User>>;
-
   create(user: User): Promise<User>;
-
   update(id: string, data: UpdateUserData): Promise<User | null>;
-
   delete(id: string): Promise<boolean>;
 }
