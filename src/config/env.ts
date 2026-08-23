@@ -20,6 +20,8 @@ const envSchema = z.object({
 
   HOST: z.string("Host is required.").default("0.0.0.0"),
 
+  BASE_URL: z.url("Base URL is required."),
+
   CORS_ORIGINS: z
     .string("CORS Origins is required.")
     .default("http://localhost:3000")

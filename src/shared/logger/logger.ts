@@ -26,7 +26,7 @@ export const logger = pino({
     censor: "[REDACTED]",
   },
 
-  ...(env.NODE_ENV === Environment.DEVELOPMENT
+  ...(env.NODE_ENV === Environment.LOCAL
     ? {
         transport: {
           target: "pino-pretty",

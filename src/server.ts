@@ -34,7 +34,7 @@ const startServer = async (): Promise<void> => {
     server.listen(env.PORT, env.HOST);
   });
 
-  logger.info(`Server started on http://${env.HOST}:${env.PORT}`);
+  logger.info(`Server started on ${env.BASE_URL} — Environment: ${env.NODE_ENV}`);
 };
 
 /**
