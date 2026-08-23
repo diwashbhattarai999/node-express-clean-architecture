@@ -36,8 +36,38 @@ export const envSchema = z.object({
     .enum(LogLevel, `Invalid log level. Must be one of: ${Object.values(LogLevel).join(", ")}`)
     .default(LogLevel.DEBUG),
 
-  // TRUST_PROXY: z.enum(["true", "false"]).transform((value) => value === "true"),
-  TRUST_PROXY: z.union([z.boolean(), z.coerce.number().int().nonnegative()]).default(false),
+  TRUST_PROXY: z
+    .preprocess(
+      (value) => {
+        if (value === undefined || value === null || value === "") {
+          return false;
+        }
+
+        if (typeof value === "boolean" || typeof value === "number") {
+          return value;
+        }
+
+        if (typeof value === "string") {
+          const normalized = value.trim().toLowerCase();
+
+          if (normalized === "true") {
+            return true;
+          }
+
+          if (normalized === "false") {
+            return false;
+          }
+
+          if (/^\d+$/.test(normalized)) {
+            return Number(normalized);
+          }
+        }
+
+        return value;
+      },
+      z.union([z.boolean(), z.number().int().nonnegative()]),
+    )
+    .default(false),
 
   RATE_LIMIT_WINDOW_MS: z.coerce
     .number("Rate limit window is required.")
