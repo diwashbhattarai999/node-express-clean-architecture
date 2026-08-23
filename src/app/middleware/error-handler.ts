@@ -7,21 +7,22 @@ import { AppError } from "@/shared/errors/app-error";
 import { ErrorCode } from "@/shared/errors/error-code";
 import { ValidationError } from "@/shared/errors/validation-error";
 import type { ApiErrorResponse } from "@/shared/http/api-response";
+import { toFieldErrors } from "@/shared/http/field-error";
 import { HttpStatus } from "@/shared/http/http-status";
 import { logger } from "@/shared/logger/logger";
 
-const toAppError = (error: unknown): AppError | null => {
+const toAppError = (error: unknown, req: Parameters<ErrorRequestHandler>[1]): AppError | null => {
   if (error instanceof AppError) {
     return error;
   }
 
   if (error instanceof ZodError) {
     return new ValidationError(
-      error.issues.map((issue) => ({
-        path: issue.path,
-        message: issue.message,
-        code: issue.code,
-      })),
+      toFieldErrors(error.issues, {
+        body: req.body,
+        params: req.params,
+        query: req.query,
+      }),
     );
   }
 
@@ -37,7 +38,7 @@ const toAppError = (error: unknown): AppError | null => {
  * @param _next - The next function.
  */
 export const errorHandler: ErrorRequestHandler = (error, req, res, _next): void => {
-  const appError = toAppError(error);
+  const appError = toAppError(error, req);
   const isAppError = appError !== null;
 
   const statusCode = isAppError ? appError.statusCode : HttpStatus.INTERNAL_SERVER_ERROR;

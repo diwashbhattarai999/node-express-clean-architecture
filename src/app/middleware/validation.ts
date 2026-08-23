@@ -2,6 +2,7 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { ZodType, z } from "zod";
 
 import { ValidationError } from "@/shared/errors/validation-error";
+import { toFieldErrors } from "@/shared/http/field-error";
 
 type RequestValidationShape = {
   body?: unknown;
@@ -36,6 +37,29 @@ export type ValidatedRequestHandler<TSchema extends ZodType<RequestValidationSha
 ) => Promise<void> | void;
 
 /**
+ * Express 5 defines `req.query` as a getter-only property, so assignment fails.
+ * Redefine the property with the validated value when needed.
+ */
+const setRequestProperty = <TKey extends "body" | "params" | "query">(
+  req: Request,
+  key: TKey,
+  value: Request[TKey],
+): void => {
+  if (key === "query") {
+    Object.defineProperty(req, "query", {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+
+    return;
+  }
+
+  req[key] = value;
+};
+
+/**
  * Adapts a validated controller handler to an Express `RequestHandler`.
  * Use after `validate(schema)` so `req` is typed from that schema.
  */
@@ -54,22 +78,16 @@ export const asHandler =
 export const validate =
   <TSchema extends ZodType<RequestValidationShape>>(schema: TSchema): RequestHandler =>
   (req: Request, _res: Response, next: NextFunction): void => {
-    const result = schema.safeParse({
-      body: req.body,
-      params: req.params,
-      query: req.query,
-    });
+    const payload = {
+      body: req.body as unknown,
+      params: req.params as unknown,
+      query: req.query as unknown,
+    };
+
+    const result = schema.safeParse(payload);
 
     if (!result.success) {
-      next(
-        new ValidationError(
-          result.error.issues.map((issue) => ({
-            path: issue.path,
-            message: issue.message,
-            code: issue.code,
-          })),
-        ),
-      );
+      next(new ValidationError(toFieldErrors(result.error.issues, payload)));
 
       return;
     }
@@ -77,15 +95,15 @@ export const validate =
     const data = result.data;
 
     if ("body" in data) {
-      req.body = data.body;
+      setRequestProperty(req, "body", data.body as Request["body"]);
     }
 
     if ("params" in data && data.params !== undefined) {
-      req.params = data.params as Request["params"];
+      setRequestProperty(req, "params", data.params as Request["params"]);
     }
 
     if ("query" in data && data.query !== undefined) {
-      req.query = data.query as Request["query"];
+      setRequestProperty(req, "query", data.query as Request["query"]);
     }
 
     next();

@@ -3,17 +3,19 @@ import { z } from "zod";
 import { paginationQuerySchema, sortOrderSchema } from "@/shared/http/pagination.schema";
 
 const nameSchema = z
-  .string()
+  .string({ error: "Name is required." })
   .trim()
   .min(1, "Name is required.")
   .max(100, "Name must be at most 100 characters.");
 
-const emailSchema = z.email("Email must be valid.");
+const emailSchema = z.email({ error: "Email must be valid." });
 
-const passwordSchema = z.string().min(8, "Password must be at least 8 characters.");
+const passwordSchema = z
+  .string({ error: "Password is required." })
+  .min(8, "Password must be at least 8 characters.");
 
 const userIdParamsSchema = z.object({
-  id: z.uuid("User id must be a valid UUID."),
+  id: z.uuid({ error: "User id must be a valid UUID." }),
 });
 
 const listUsersQuerySchema = paginationQuerySchema
@@ -43,7 +45,7 @@ export const createUserSchema = z.object({
       name: nameSchema,
       email: emailSchema,
       password: passwordSchema,
-      confirmPassword: z.string().min(1, "Confirm password is required."),
+      confirmPassword: z.string({ error: "Confirm password is required." }),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "Passwords do not match.",
