@@ -36,7 +36,8 @@ export const envSchema = z.object({
     .enum(LogLevel, `Invalid log level. Must be one of: ${Object.values(LogLevel).join(", ")}`)
     .default(LogLevel.DEBUG),
 
-  TRUST_PROXY: z.enum(["true", "false"]).transform((value) => value === "true"),
+  // TRUST_PROXY: z.enum(["true", "false"]).transform((value) => value === "true"),
+  TRUST_PROXY: z.union([z.boolean(), z.coerce.number().int().nonnegative()]).default(false),
 
   RATE_LIMIT_WINDOW_MS: z.coerce
     .number("Rate limit window is required.")
