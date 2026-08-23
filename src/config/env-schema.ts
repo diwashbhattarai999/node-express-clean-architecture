@@ -49,6 +49,10 @@ export const envSchema = z.object({
     .int("Rate limit max requests must be an integer")
     .positive("Rate limit max requests must be a positive number")
     .default(100),
+
+  COOKIES_SECRET: z
+    .string("Cookies secret is required.")
+    .min(32, "Cookies secret must be at least 32 characters long"),
 });
 
 export type TEnv = z.infer<typeof envSchema>;

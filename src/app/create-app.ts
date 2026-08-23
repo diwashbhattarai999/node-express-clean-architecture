@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 
 import { env } from "@/config/env";
 
+import { cookieMiddleware } from "./middleware/cookies";
 import { corsMiddleware } from "./middleware/cors";
 import { errorHandler } from "./middleware/error-handler";
 import { httpLoggerMiddleware } from "./middleware/logger";
@@ -71,7 +72,14 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    *
    * This is a body parser middleware that parses the request body.
    */
-  app.use(express.json());
+  app.use(express.json({ limit: "10mb" }));
+
+  /**
+   * URL encoded body parser middleware.
+   *
+   * This is a URL encoded body parser middleware that parses the request body.
+   */
+  app.use(express.urlencoded({ extended: true, limit: "10mb", parameterLimit: 10000 }));
 
   /**
    * Global rate limiter middleware.
@@ -79,6 +87,13 @@ export const createApp = (options: CreateAppOptions = {}): Express => {
    * This is a global rate limiter middleware that limits the number of requests to the server.
    */
   app.use(globalRateLimiter);
+
+  /**
+   * Cookies middleware.
+   *
+   * This is a cookies middleware that parses the cookies.
+   */
+  app.use(cookieMiddleware);
 
   /**
    * Routes middleware.
