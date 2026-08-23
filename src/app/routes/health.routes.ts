@@ -1,13 +1,10 @@
 import { type IRouter, Router } from "express";
 
-import { sendSuccess } from "@/shared/http/send-response";
+import { healthController, readinessController } from "@/infrastructure/health/health.controller";
 
 const router: IRouter = Router();
 
-router.get("/health", (_req, res) => {
-  sendSuccess(res, {
-    status: "ok",
-  });
-});
+router.get("/health", healthController);
+router.get("/ready", readinessController);
 
 export { router as healthRouter };
