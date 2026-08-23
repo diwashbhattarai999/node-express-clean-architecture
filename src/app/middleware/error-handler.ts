@@ -4,6 +4,7 @@ import { env } from "@/config/env";
 import { Environment } from "@/shared/constants/environment";
 import { AppError } from "@/shared/errors/app-error";
 import { ErrorCode } from "@/shared/errors/error-code";
+import type { ApiErrorResponse } from "@/shared/http/api-response";
 import { HttpStatus } from "@/shared/http/http-status";
 import { logger } from "@/shared/logger/logger";
 
@@ -41,11 +42,13 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next): void 
     "Request failed",
   );
 
-  res.status(statusCode).json({
+  const response: ApiErrorResponse = {
     success: false,
     message,
     code,
     requestId: req.requestId,
     ...(isAppError && error.details !== undefined ? { details: error.details } : {}),
-  });
+  };
+
+  res.status(statusCode).json(response);
 };
