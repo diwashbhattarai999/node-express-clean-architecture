@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { Environment } from "@/shared/constants/environment";
-import { LogLevel } from "@/shared/constants/log-level";
+import { Environment } from "@/config/environment";
+import { LogLevel } from "@/shared/logger/log-level";
 
 export const envSchema = z.object({
   NODE_ENV: z

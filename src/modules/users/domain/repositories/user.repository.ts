@@ -1,7 +1,7 @@
 import type { User } from "@/modules/users/domain/entities/user.entity";
 import type { Email } from "@/modules/users/domain/value-objects/email.vo";
-import type { PaginatedResult } from "@/shared/kernal/pagination/paginated-result";
-import type { SortOrder } from "@/shared/kernal/sorting/sorting";
+import type { PaginatedResult } from "@/shared/kernel/pagination/paginated-result";
+import type { SortOrder } from "@/shared/kernel/sorting/sorting";
 
 export type UserSortField = "name" | "email" | "createdAt" | "updatedAt";
 

@@ -1,3 +1,3 @@
-import type { CreateUserInput } from "@/modules/users/presentation/http/validators/user.schema";
+import type { CreateUserInput } from "@/modules/users/presentation/http/validators/create-user.validator";
 
 export type CreateUserDto = CreateUserInput;

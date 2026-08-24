@@ -2,7 +2,7 @@ import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 
 import { env } from "@/config/env";
-import { Environment } from "@/shared/constants/environment";
+import { Environment } from "@/config/environment";
 import { AppError } from "@/shared/errors/app-error";
 import { ErrorCode } from "@/shared/errors/error-code";
 import { ValidationError } from "@/shared/errors/validation-error";

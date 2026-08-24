@@ -2,13 +2,11 @@ import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
 import type { CreateUserUseCase } from "@/modules/users/application/use-cases/create-user.use-case";
-import {
-  toUserResponse,
-  type UserResponse,
-} from "@/modules/users/presentation/http/mappers/user.response";
-import type { CreateUserSchema } from "@/modules/users/presentation/http/validators/user.schema";
 import { HttpStatus } from "@/shared/http/http-status";
 import { sendSuccess } from "@/shared/http/send-response";
+
+import { toUserResponse, type UserResponse } from "../mappers/user.response";
+import type { CreateUserSchema } from "../validators/create-user.validator";
 
 export class CreateUserController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {}

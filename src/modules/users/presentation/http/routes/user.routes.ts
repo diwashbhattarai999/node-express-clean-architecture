@@ -7,7 +7,7 @@ import {
   getUserByIdSchema,
   listUsersSchema,
   updateUserSchema,
-} from "@/modules/users/presentation/http/validators/user.schema";
+} from "@/modules/users/presentation/http/validators";
 import type { createUsersModule } from "@/modules/users/users.module";
 
 export function createUsersRouter(usersModule: ReturnType<typeof createUsersModule>): IRouter {

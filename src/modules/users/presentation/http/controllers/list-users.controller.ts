@@ -2,15 +2,13 @@ import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
 import type { ListUsersUseCase } from "@/modules/users/application/use-cases/list-users.use-case";
-import {
-  toUserResponseList,
-  type UserResponse,
-} from "@/modules/users/presentation/http/mappers/user.response";
-import type { ListUsersSchema } from "@/modules/users/presentation/http/validators/user.schema";
 import type { IPagination } from "@/shared/http/api-response";
 import { HttpStatus } from "@/shared/http/http-status";
 import { createPaginationMeta } from "@/shared/http/pagination";
 import { sendSuccessWithMeta } from "@/shared/http/send-response";
+
+import { toUserResponseList, type UserResponse } from "../mappers/user.response";
+import type { ListUsersSchema } from "../validators/list-users.validator";
 
 export class ListUsersController {
   constructor(private readonly listUsersUseCase: ListUsersUseCase) {}

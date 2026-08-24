@@ -1,7 +1,7 @@
 import helmet from "helmet";
 
 import { env } from "@/config/env";
-import { Environment } from "@/shared/constants/environment";
+import { Environment } from "@/config/environment";
 
 export const securityMiddleware = helmet({
   /**
