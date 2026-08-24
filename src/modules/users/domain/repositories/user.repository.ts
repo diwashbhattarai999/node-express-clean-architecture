@@ -1,22 +1,20 @@
 import type { User } from "@/modules/users/domain/entities/user.entity";
 import type { Email } from "@/modules/users/domain/value-objects/email.vo";
 import type { PaginatedResult } from "@/shared/kernal/pagination/paginated-result";
-import type { Pagination } from "@/shared/kernal/pagination/pagination";
-import type { Sort } from "@/shared/kernal/sorting/sorting";
+import type { SortOrder } from "@/shared/kernal/sorting/sorting";
 
 export type UserSortField = "name" | "email" | "createdAt" | "updatedAt";
 
 export interface FindUsersCriteria {
-  pagination: Pagination;
-
+  page: number;
+  limit: number;
+  sortBy: UserSortField;
+  sortOrder: SortOrder;
   search?: string | undefined;
   name?: string | undefined;
   email?: string | undefined;
-
   createdFrom?: Date | undefined;
   createdTo?: Date | undefined;
-
-  sort: Sort<UserSortField>;
 }
 
 export interface UpdateUserData {

@@ -25,8 +25,8 @@ export class ListUsersController {
       toUserResponseList(result.items),
       createPaginationMeta({
         totalRecords: result.total,
-        page: req.query.pagination.page,
-        limit: req.query.pagination.limit,
+        page: req.query.page,
+        limit: req.query.limit,
         recordShown: result.items.length,
       }),
     );

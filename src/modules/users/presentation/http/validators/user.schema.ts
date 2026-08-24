@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { paginationQuerySchema, sortSchema } from "@/shared/http/pagination.schema";
+import { paginationQuerySchema, sortOrderSchema } from "@/shared/http/pagination.schema";
 
 const nameSchema = z
   .string({ error: "Name is required." })
@@ -25,9 +25,8 @@ const listUsersQuerySchema = paginationQuerySchema
     email: z.string().trim().min(1, "Email filter must not be empty.").optional(),
     createdFrom: z.coerce.date().optional(),
     createdTo: z.coerce.date().optional(),
-    sort: sortSchema.extend({
-      field: z.enum(["name", "email", "createdAt", "updatedAt"]).default("createdAt"),
-    }),
+    sortBy: z.enum(["name", "email", "createdAt", "updatedAt"]).default("createdAt"),
+    sortOrder: sortOrderSchema,
   })
   .refine(
     (query) =>

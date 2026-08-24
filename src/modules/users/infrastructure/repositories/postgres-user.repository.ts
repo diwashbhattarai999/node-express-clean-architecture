@@ -68,9 +68,9 @@ export class PostgresUserRepository implements IUserRepository {
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    const sortColumn = sortColumnMap[criteria.sort.field];
-    const orderByClause = criteria.sort.order === "asc" ? asc(sortColumn) : desc(sortColumn);
-    const offset = getPaginationOffset(criteria.pagination.page, criteria.pagination.limit);
+    const sortColumn = sortColumnMap[criteria.sortBy];
+    const orderByClause = criteria.sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
+    const offset = getPaginationOffset(criteria.page, criteria.limit);
 
     const [totalResult] = await db.select({ value: count() }).from(users).where(whereClause);
 
@@ -79,7 +79,7 @@ export class PostgresUserRepository implements IUserRepository {
       .from(users)
       .where(whereClause)
       .orderBy(orderByClause)
-      .limit(criteria.pagination.limit)
+      .limit(criteria.limit)
       .offset(offset);
 
     return {

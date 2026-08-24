@@ -47,25 +47,21 @@ describe("ListUsersUseCase", () => {
     const userRepository = {
       findMany: vi.fn().mockResolvedValue({
         items: users,
-        totalRecords: 2,
+        total: 2,
       }),
     } as unknown as IUserRepository;
 
     const useCase = new ListUsersUseCase(userRepository);
     const criteria: ListUsersDto = {
-      pagination: {
-        page: 1,
-        limit: 10,
-      },
-      sort: {
-        field: "createdAt",
-        order: "desc",
-      },
+      page: 1,
+      limit: 10,
+      sortBy: "createdAt",
+      sortOrder: "desc",
     };
 
     await expect(useCase.execute(criteria)).resolves.toEqual({
       items: users,
-      totalRecords: 2,
+      total: 2,
     });
     expect(userRepository.findMany).toHaveBeenCalledWith(criteria);
   });
