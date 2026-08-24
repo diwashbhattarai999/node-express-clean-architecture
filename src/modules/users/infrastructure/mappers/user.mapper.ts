@@ -1,4 +1,4 @@
-import type { UserRecord } from "@/infrastructure/database/schema/users.schema";
+import type { UserRecord } from "@/infrastructure/database/drizzle/schema/users.schema";
 import type { UpdateUserData } from "@/modules/users/application/repositories/user.repository";
 import { User } from "@/modules/users/domain/entities/user.entity";
 import { Email } from "@/modules/users/domain/value-objects/email.vo";

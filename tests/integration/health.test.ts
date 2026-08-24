@@ -2,7 +2,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createApp } from "@/app/create-app";
-import { checkDatabaseHealth } from "@/infrastructure/database/health-check";
+import { checkDatabaseHealth } from "@/infrastructure/database/drizzle/health-check";
 
 vi.mock("@/infrastructure/database/health-check", () => ({
   checkDatabaseHealth: vi.fn(),

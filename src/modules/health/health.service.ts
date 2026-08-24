@@ -7,7 +7,7 @@ import type {
 export type DatabaseHealthChecker = () => Promise<boolean>;
 
 const defaultDatabaseHealthChecker: DatabaseHealthChecker = async () => {
-  const { checkDatabaseHealth } = await import("@/infrastructure/database/health-check");
+  const { checkDatabaseHealth } = await import("@/infrastructure/database/drizzle/health-check");
 
   return checkDatabaseHealth();
 };

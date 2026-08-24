@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 
 import { createApp } from "@/app/create-app";
 import { env } from "@/config/env";
-import { closeDatabase } from "@/infrastructure/database";
+import { closeDatabase } from "@/infrastructure/database/drizzle";
 import { logger } from "@/shared/logger/logger";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

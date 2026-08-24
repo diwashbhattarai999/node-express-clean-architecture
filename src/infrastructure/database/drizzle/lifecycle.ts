@@ -1,4 +1,4 @@
-import { sql } from "@/infrastructure/database/client";
+import { sql } from "@/infrastructure/database/drizzle/client";
 import { logger } from "@/shared/logger/logger";
 
 /**

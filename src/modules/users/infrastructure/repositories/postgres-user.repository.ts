@@ -1,8 +1,8 @@
 import { and, asc, count, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
 
-import { db } from "@/infrastructure/database";
-import { isUniqueViolation } from "@/infrastructure/database/errors";
-import { users } from "@/infrastructure/database/schema/users.schema";
+import { db } from "@/infrastructure/database/drizzle";
+import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
+import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import type { ListUsersDto } from "@/modules/users/application/dto/list-users.dto";
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
 import type {
