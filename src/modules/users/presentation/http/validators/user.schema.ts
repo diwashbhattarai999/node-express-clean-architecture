@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { paginationQuerySchema, sortOrderSchema } from "@/shared/http/pagination.schema";
+import { paginationQuerySchema, sortSchema } from "@/shared/http/pagination.schema";
 
 const nameSchema = z
   .string({ error: "Name is required." })
@@ -25,8 +25,9 @@ const listUsersQuerySchema = paginationQuerySchema
     email: z.string().trim().min(1, "Email filter must not be empty.").optional(),
     createdFrom: z.coerce.date().optional(),
     createdTo: z.coerce.date().optional(),
-    sortBy: z.enum(["name", "email", "createdAt", "updatedAt"]).default("createdAt"),
-    sortOrder: sortOrderSchema,
+    sort: sortSchema.extend({
+      field: z.enum(["name", "email", "createdAt", "updatedAt"]).default("createdAt"),
+    }),
   })
   .refine(
     (query) =>
@@ -86,3 +87,9 @@ export type ListUsersSchema = typeof listUsersSchema;
 export type GetUserByIdSchema = typeof getUserByIdSchema;
 export type UpdateUserSchema = typeof updateUserSchema;
 export type DeleteUserSchema = typeof deleteUserSchema;
+
+export type CreateUserInput = z.infer<CreateUserSchema>["body"];
+export type ListUsersInput = z.infer<ListUsersSchema>["query"];
+export type GetUserByIdInput = z.infer<GetUserByIdSchema>["params"];
+export type UpdateUserInput = z.infer<UpdateUserSchema>["body"];
+export type DeleteUserInput = z.infer<DeleteUserSchema>["params"];

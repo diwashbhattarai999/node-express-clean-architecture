@@ -24,9 +24,9 @@ export class ListUsersController {
       "Users retrieved successfully.",
       toUserResponseList(result.items),
       createPaginationMeta({
-        totalRecords: result.totalRecords,
-        page: req.query.page,
-        limit: req.query.limit,
+        totalRecords: result.total,
+        page: req.query.pagination.page,
+        limit: req.query.pagination.limit,
         recordShown: result.items.length,
       }),
     );

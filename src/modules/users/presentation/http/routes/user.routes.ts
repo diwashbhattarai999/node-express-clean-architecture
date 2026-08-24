@@ -13,35 +13,15 @@ import type { createUsersModule } from "@/modules/users/users.module";
 export function createUsersRouter(usersModule: ReturnType<typeof createUsersModule>): IRouter {
   const router = Router();
 
-  router.post(
-    "/",
-    validate(createUserSchema),
-    asHandler(usersModule.createUserController.handle.bind(usersModule.createUserController)),
-  );
+  router.post("/", validate(createUserSchema), asHandler(usersModule.createUserController));
 
-  router.get(
-    "/",
-    validate(listUsersSchema),
-    asHandler(usersModule.listUsersController.handle.bind(usersModule.listUsersController)),
-  );
+  router.get("/", validate(listUsersSchema), asHandler(usersModule.listUsersController));
 
-  router.get(
-    "/:id",
-    validate(getUserByIdSchema),
-    asHandler(usersModule.getUserByIdController.handle.bind(usersModule.getUserByIdController)),
-  );
+  router.get("/:id", validate(getUserByIdSchema), asHandler(usersModule.getUserByIdController));
 
-  router.patch(
-    "/:id",
-    validate(updateUserSchema),
-    asHandler(usersModule.updateUserController.handle.bind(usersModule.updateUserController)),
-  );
+  router.patch("/:id", validate(updateUserSchema), asHandler(usersModule.updateUserController));
 
-  router.delete(
-    "/:id",
-    validate(deleteUserSchema),
-    asHandler(usersModule.deleteUserController.handle.bind(usersModule.deleteUserController)),
-  );
+  router.delete("/:id", validate(deleteUserSchema), asHandler(usersModule.deleteUserController));
 
   return router;
 }

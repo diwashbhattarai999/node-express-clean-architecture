@@ -17,10 +17,7 @@ type InferPart<T, K extends keyof RequestValidationShape, Fallback> = T extends 
   : Fallback;
 
 /**
- * Express request typed from a request validation schema.
- *
- * Schema shape:
- * `z.object({ body?: ..., params?: ..., query?: ... })`
+ * Express request typed from a Zod request schema.
  */
 export type ValidatedRequest<TSchema extends ZodType<RequestValidationShape>> = Omit<
   Request,
@@ -37,8 +34,39 @@ export type ValidatedRequestHandler<TSchema extends ZodType<RequestValidationSha
 ) => Promise<void> | void;
 
 /**
- * Express 5 defines `req.query` as a getter-only property, so assignment fails.
- * Redefine the property with the validated value when needed.
+ * Generic HTTP controller contract.
+ *
+ * The controller owns the handle method.
+ * The adapter invokes it without requiring bind().
+ */
+export interface HttpController<TSchema extends ZodType<RequestValidationShape>> {
+  handle: ValidatedRequestHandler<TSchema>;
+}
+
+/**
+ * Adapts a typed controller to an Express RequestHandler.
+ *
+ * This is the framework boundary:
+ *
+ * Express Request
+ *      ↓
+ * ValidatedRequest<TSchema>
+ *      ↓
+ * Controller
+ */
+export const asHandler =
+  <TSchema extends ZodType<RequestValidationShape>>(
+    controller: HttpController<TSchema>,
+  ): RequestHandler =>
+  (req, res, next) => {
+    Promise.resolve(controller.handle(req as ValidatedRequest<TSchema>, res)).catch(next);
+  };
+
+/**
+ * Replaces a request property with its validated value.
+ *
+ * Express 5 exposes req.query through a getter, so it needs
+ * to be redefined rather than assigned directly.
  */
 const setRequestProperty = <TKey extends "body" | "params" | "query">(
   req: Request,
@@ -60,20 +88,7 @@ const setRequestProperty = <TKey extends "body" | "params" | "query">(
 };
 
 /**
- * Adapts a validated controller handler to an Express `RequestHandler`.
- * Use after `validate(schema)` so `req` is typed from that schema.
- */
-export const asHandler =
-  <TSchema extends ZodType<RequestValidationShape>>(
-    handler: ValidatedRequestHandler<TSchema>,
-  ): RequestHandler =>
-  (req, res, next) => {
-    Promise.resolve(handler(req as ValidatedRequest<TSchema>, res)).catch(next);
-  };
-
-/**
- * Validates `body`, `params`, and/or `query` from a single Zod request schema
- * and replaces those request properties with the parsed values.
+ * Validates body, params and query using one Zod schema.
  */
 export const validate =
   <TSchema extends ZodType<RequestValidationShape>>(schema: TSchema): RequestHandler =>

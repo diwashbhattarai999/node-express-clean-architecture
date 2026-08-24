@@ -3,13 +3,13 @@ import { and, asc, count, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
-import type { ListUsersDto } from "@/modules/users/application/dto/list-users.dto";
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
-import type {
-  UpdateUserData,
-  UserRepository,
-} from "@/modules/users/application/repositories/user.repository";
 import type { User } from "@/modules/users/domain/entities/user.entity";
+import type {
+  FindUsersCriteria,
+  IUserRepository,
+  UpdateUserData,
+} from "@/modules/users/domain/repositories/user.repository";
 import type { Email } from "@/modules/users/domain/value-objects/email.vo";
 import {
   toDomainUser,
@@ -25,7 +25,7 @@ const sortColumnMap = {
   updatedAt: users.updatedAt,
 } as const;
 
-export class PostgresUserRepository implements UserRepository {
+export class PostgresUserRepository implements IUserRepository {
   async findById(id: string) {
     const [record] = await db.select().from(users).where(eq(users.id, id)).limit(1);
 
@@ -42,7 +42,7 @@ export class PostgresUserRepository implements UserRepository {
     return record ? toDomainUser(record) : null;
   }
 
-  async findMany(criteria: ListUsersDto) {
+  async findMany(criteria: FindUsersCriteria) {
     const conditions = [];
 
     if (criteria.search) {
@@ -68,9 +68,9 @@ export class PostgresUserRepository implements UserRepository {
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    const sortColumn = sortColumnMap[criteria.sortBy];
-    const orderByClause = criteria.sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
-    const offset = getPaginationOffset(criteria.page, criteria.limit);
+    const sortColumn = sortColumnMap[criteria.sort.field];
+    const orderByClause = criteria.sort.order === "asc" ? asc(sortColumn) : desc(sortColumn);
+    const offset = getPaginationOffset(criteria.pagination.page, criteria.pagination.limit);
 
     const [totalResult] = await db.select({ value: count() }).from(users).where(whereClause);
 
@@ -79,12 +79,12 @@ export class PostgresUserRepository implements UserRepository {
       .from(users)
       .where(whereClause)
       .orderBy(orderByClause)
-      .limit(criteria.limit)
+      .limit(criteria.pagination.limit)
       .offset(offset);
 
     return {
       items: records.map(toDomainUser),
-      totalRecords: totalResult?.value ?? 0,
+      total: totalResult?.value ?? 0,
     };
   }
 

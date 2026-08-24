@@ -1,20 +1,10 @@
 import type { IPagination } from "@/shared/http/api-response";
 
-export type SortOrder = "asc" | "desc";
+import type { Pagination } from "../kernal/pagination/pagination";
 
-export interface PaginationParams {
-  page: number;
-  limit: number;
-}
-
-export interface PaginationMetaInput extends PaginationParams {
+export interface PaginationMetaInput extends Pagination {
   totalRecords: number;
   recordShown: number;
-}
-
-export interface PaginatedResult<T> {
-  items: T[];
-  totalRecords: number;
 }
 
 export function getPaginationOffset(page: number, limit: number): number {

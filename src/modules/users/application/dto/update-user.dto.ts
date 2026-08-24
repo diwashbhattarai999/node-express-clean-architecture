@@ -1,5 +1,3 @@
-export interface UpdateUserDto {
-  name?: string | undefined;
-  email?: string | undefined;
-  password?: string | undefined;
-}
+import type { UpdateUserInput } from "@/modules/users/presentation/http/validators/user.schema";
+
+export type UpdateUserDto = UpdateUserInput;

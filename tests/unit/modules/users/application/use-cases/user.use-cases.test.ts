@@ -2,13 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
 import { UserNotFoundError } from "@/modules/users/application/errors/user-not-found.error";
-import type { UserRepository } from "@/modules/users/application/repositories/user.repository";
-import type { PasswordHasher } from "@/modules/users/application/services/password-hasher";
+import type { IUserRepository } from "@/modules/users/domain/repositories/user.repository";
+import type { IPasswordHasher } from "@/modules/users/application/ports/password-hasher";
 import { DeleteUserUseCase } from "@/modules/users/application/use-cases/delete-user.use-case";
 import { GetUserByIdUseCase } from "@/modules/users/application/use-cases/get-user-by-id.use-case";
 import { ListUsersUseCase } from "@/modules/users/application/use-cases/list-users.use-case";
 import { UpdateUserUseCase } from "@/modules/users/application/use-cases/update-user.use-case";
 import { UserFactory } from "@/modules/users/domain/factories/user.factory";
+import type { ListUsersDto } from "@/modules/users/application/dto/list-users.dto";
 
 const createUser = (overrides: Partial<{ name: string; email: string }> = {}) =>
   UserFactory.create({
@@ -22,7 +23,7 @@ describe("GetUserByIdUseCase", () => {
     const user = createUser();
     const userRepository = {
       findById: vi.fn().mockResolvedValue(user),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const useCase = new GetUserByIdUseCase(userRepository);
 
@@ -32,7 +33,7 @@ describe("GetUserByIdUseCase", () => {
   it("throws when the user does not exist", async () => {
     const userRepository = {
       findById: vi.fn().mockResolvedValue(null),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const useCase = new GetUserByIdUseCase(userRepository);
 
@@ -48,14 +49,18 @@ describe("ListUsersUseCase", () => {
         items: users,
         totalRecords: 2,
       }),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const useCase = new ListUsersUseCase(userRepository);
-    const criteria = {
-      page: 1,
-      limit: 10,
-      sortBy: "createdAt" as const,
-      sortOrder: "desc" as const,
+    const criteria: ListUsersDto = {
+      pagination: {
+        page: 1,
+        limit: 10,
+      },
+      sort: {
+        field: "createdAt",
+        order: "desc",
+      },
     };
 
     await expect(useCase.execute(criteria)).resolves.toEqual({
@@ -75,12 +80,12 @@ describe("UpdateUserUseCase", () => {
       findById: vi.fn().mockResolvedValue(existingUser),
       findByEmail: vi.fn(),
       update: vi.fn().mockResolvedValue(updatedUser),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const passwordHasher = {
       hash: vi.fn(),
       compare: vi.fn(),
-    } as unknown as PasswordHasher;
+    } as unknown as IPasswordHasher;
 
     const useCase = new UpdateUserUseCase(userRepository, passwordHasher);
 
@@ -97,12 +102,12 @@ describe("UpdateUserUseCase", () => {
     const userRepository = {
       findById: vi.fn().mockResolvedValue(existingUser),
       findByEmail: vi.fn().mockResolvedValue(otherUser),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const passwordHasher = {
       hash: vi.fn(),
       compare: vi.fn(),
-    } as unknown as PasswordHasher;
+    } as unknown as IPasswordHasher;
 
     const useCase = new UpdateUserUseCase(userRepository, passwordHasher);
 
@@ -116,7 +121,7 @@ describe("DeleteUserUseCase", () => {
   it("deletes the user when it exists", async () => {
     const userRepository = {
       delete: vi.fn().mockResolvedValue(true),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const useCase = new DeleteUserUseCase(userRepository);
 
@@ -126,7 +131,7 @@ describe("DeleteUserUseCase", () => {
   it("throws when the user does not exist", async () => {
     const userRepository = {
       delete: vi.fn().mockResolvedValue(false),
-    } as unknown as UserRepository;
+    } as unknown as IUserRepository;
 
     const useCase = new DeleteUserUseCase(userRepository);
 

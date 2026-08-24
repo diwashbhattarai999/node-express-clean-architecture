@@ -1,15 +1,15 @@
 import type { UpdateUserDto } from "@/modules/users/application/dto/update-user.dto";
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
 import { UserNotFoundError } from "@/modules/users/application/errors/user-not-found.error";
-import type { UserRepository } from "@/modules/users/application/repositories/user.repository";
-import type { PasswordHasher } from "@/modules/users/application/services/password-hasher";
+import type { IPasswordHasher } from "@/modules/users/application/ports/password-hasher";
 import type { User } from "@/modules/users/domain/entities/user.entity";
+import type { IUserRepository } from "@/modules/users/domain/repositories/user.repository";
 import { Email } from "@/modules/users/domain/value-objects/email.vo";
 
 export class UpdateUserUseCase {
   public constructor(
-    private readonly userRepository: UserRepository,
-    private readonly passwordHasher: PasswordHasher,
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHasher: IPasswordHasher,
   ) {}
 
   public async execute(id: string, dto: UpdateUserDto): Promise<User> {

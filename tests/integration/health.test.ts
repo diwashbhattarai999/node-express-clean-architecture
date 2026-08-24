@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "@/app/create-app";
 import { checkDatabaseHealth } from "@/infrastructure/database/drizzle/health-check";
 
-vi.mock("@/infrastructure/database/health-check", () => ({
+vi.mock("@/infrastructure/database/drizzle/health-check", () => ({
   checkDatabaseHealth: vi.fn(),
 }));
 

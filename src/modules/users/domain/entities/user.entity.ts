@@ -1,4 +1,4 @@
-import type { Email } from "../value-objects/email.vo";
+import type { Email } from "@/modules/users/domain/value-objects/email.vo";
 
 export interface UserProps {
   name: string;
