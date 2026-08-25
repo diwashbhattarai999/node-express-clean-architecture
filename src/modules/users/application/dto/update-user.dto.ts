@@ -1,3 +1,5 @@
-import type { UpdateUserInput } from "@/modules/users/presentation/http/validators/update-user.validator";
-
-export type UpdateUserDto = UpdateUserInput;
+export interface UpdateUserDto {
+  name?: string | undefined;
+  email?: string | undefined;
+  password?: string | undefined;
+}

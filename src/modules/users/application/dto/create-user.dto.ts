@@ -1,3 +1,6 @@
-import type { CreateUserInput } from "@/modules/users/presentation/http/validators/create-user.validator";
-
-export type CreateUserDto = CreateUserInput;
+export interface CreateUserDto {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
