@@ -40,10 +40,10 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
 | 21 | File uploads & storage | Optional | 0/10 | Multipart + object storage |
-| 22 | Docker | Partial | 4/13 | Postgres Compose only; app Dockerfile pending |
+| 22 | Docker | Done | — | Multi-stage app image, Compose app+Postgres, migrate on start |
 | 23 | CI/CD | Partial | 8/16 | Lint, typecheck, test, build; no deploy / image scan |
 | 24 | Git & release management | Partial | 6/14 | Conventional Commits + hooks; release automation later |
-| 25 | Dependency management | Partial | 4/10 | Dependabot; pin engines/`packageManager` |
+| 25 | Dependency management | Partial | 6/10 | Dependabot + pinned `packageManager` / engines |
 | 26 | Performance & reliability | Partial | 3/12 | Rate limiting; timeouts, load tests later |
 | 27 | Production operations | Partial | 7/14 | Health, ready, shutdown, logging; metrics later |
 | 28 | Documentation | Partial | 10/18 | README + architecture; ADRs / contrib guide later |
@@ -61,6 +61,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 1 | Project foundation |
 | 2 | Repo hygiene & code quality |
 | 10 | Validation |
+| 22 | Docker |
 
 ### Partial (in progress)
 
@@ -72,20 +73,19 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 6 | Shared architecture | Base entity, events, ID/date helpers |
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
-| 9 | Database | Transactions, seeding, real test DB; fix drizzle schema path |
+| 9 | Database | Transactions, seeding, real test DB |
 | 11 | Errors | Unauthorized / Forbidden / Conflict conventions |
 | 12 | Observability | Metrics, tracing, OpenTelemetry |
 | 13 | Authentication | Sessions/tokens/middleware (AUTH.md) |
 | 15 | Security | Audit process, production checklist |
 | 20 | Pagination | Cursor pagination (optional) |
-| 22 | Docker | App Dockerfile, multi-stage, `.dockerignore` |
-| 23 | CI/CD | Coverage gate, audit, Docker build, deploy |
+| 23 | CI/CD | Coverage gate, audit, Docker build in CI, deploy |
 | 24 | Git & release | Branch/PR/release/changelog automation |
-| 25 | Dependencies | Engines pin, vulnerability scanning in CI |
+| 25 | Dependencies | Vulnerability scanning in CI |
 | 26 | Performance | Timeouts, load testing |
 | 27 | Operations | Metrics, alerting, rollback strategy |
 | 28 | Docs | ADRs, contribution / security docs |
-| 30 | Hardening | Docker runtime, full production checklist |
+| 30 | Hardening | Full production checklist |
 
 ### Not started
 
@@ -110,10 +110,8 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 
 | Order | Focus | Status |
 | --- | --- | --- |
-| 1 | Fix drizzle config + pin Node/pnpm engines | Not started |
-| 2 | App Docker image | Not started |
-| 3 | Authentication (AUTH.md) + protect APIs | Partial |
-| 4 | Authorization / RBAC | Not started |
-| 5 | OpenAPI / Swagger | Not started |
-| 6 | Coverage gates, real DB tests, E2E | Partial |
-| 7 | Optional infra (Redis, email, jobs, uploads, OTel) | Optional |
+| 1 | Authentication (AUTH.md) + protect APIs | Partial |
+| 2 | Authorization / RBAC | Not started |
+| 3 | OpenAPI / Swagger | Not started |
+| 4 | Coverage gates, real DB tests, E2E | Partial |
+| 5 | Optional infra (Redis, email, jobs, uploads, OTel) | Optional |

@@ -7,9 +7,9 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | Priority | Item | Phase | Notes |
 | --- | --- | --- | --- |
 | P0 | Root `README.md` (overview, setup, env, DB, scripts) | 28 | Done |
-| P0 | Fix `drizzle.config.ts` schema path | 9 | Points at `schema/*.ts`; actual schema is under `drizzle/schema/` |
-| P0 | Pin `packageManager` / Node engines in `package.json` | 25 | CI uses pnpm 11 + Node 22; package metadata does not |
-| P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Compose only runs Postgres today |
+| P0 | Fix `drizzle.config.ts` schema path | 9 | Done (`drizzle/schema/`) |
+| P0 | Pin `packageManager` / Node engines in `package.json` | 25 | Done (`pnpm@11.22.0`, `node>=22`) |
+| P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Done — `pnpm docker:up` |
 | P1 | Authentication module (per `docs/AUTH.md`) | 13 | Password hash/verify exists; no login/session/tokens/middleware |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Users API is currently open |
 | P2 | Authorization / RBAC | 14 | Design + middleware + use-case rules |
@@ -35,10 +35,8 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
 ## Suggested next sequence
 
-1. Fix drizzle config + engines/`packageManager`
-2. App Docker image
-3. Auth (sessions/tokens per AUTH.md) → lock down users API
-4. RBAC + error conventions
-5. OpenAPI
-6. Coverage / real DB tests / E2E
-7. Optional infra (Redis, email, jobs, uploads, OTel)
+1. Authentication (AUTH.md) → lock down APIs
+2. Authorization / RBAC + error conventions
+3. OpenAPI / Swagger
+4. Coverage gates, real DB tests, E2E
+5. Optional infra (Redis, email, jobs, uploads, OTel)

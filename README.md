@@ -58,13 +58,18 @@ curl http://localhost:3000/ready
 | `pnpm test` | Vitest (unit + integration) |
 | `pnpm test:watch` | Vitest watch mode |
 | `pnpm test:coverage` | Vitest with coverage |
-| `pnpm db:up` | Start Postgres via Docker Compose |
+| `pnpm db:up` | Start Postgres only |
 | `pnpm db:down` | Stop Compose services |
 | `pnpm db:reset` | Wipe volumes and recreate Postgres |
 | `pnpm db:logs` | Tail Postgres logs |
 | `pnpm db:generate` | Generate Drizzle migrations |
-| `pnpm db:migrate` | Run migrations |
+| `pnpm db:migrate` | Run migrations (host) |
 | `pnpm db:studio` | Drizzle Studio |
+| `pnpm docker:build` | Build the app image |
+| `pnpm docker:up` | Build and start app + Postgres |
+| `pnpm docker:down` | Stop Compose stack |
+| `pnpm docker:logs` | Tail app logs |
+| `pnpm docker:reset` | Wipe volumes and rebuild the stack |
 
 ## Architecture
 
@@ -124,7 +129,7 @@ Invalid config fails fast at startup.
 
 Postgres runs via Docker Compose (`docker-compose.yml`). Schema and migrations live under `drizzle/` and `src/infrastructure/database/drizzle/`.
 
-Typical workflow:
+Host workflow (app on the machine, DB in Docker):
 
 ```bash
 pnpm db:up
@@ -132,6 +137,21 @@ pnpm db:up
 pnpm db:generate
 pnpm db:migrate
 ```
+
+## Docker
+
+Production-style multi-stage image (`Dockerfile`): non-root user, builds TypeScript, installs production deps only, runs migrations on start via `docker/entrypoint.sh`.
+
+```bash
+cp .env.example .env   # if needed
+pnpm docker:up
+curl http://localhost:3000/health
+curl http://localhost:3000/ready
+```
+
+Compose overrides `DATABASE_URL` to `postgres:5432` on the internal network. Host tools still use `localhost:5433` from `.env.example`.
+
+Set `RUN_MIGRATIONS=false` on the app service to skip automatic migrations.
 
 ## Testing
 
