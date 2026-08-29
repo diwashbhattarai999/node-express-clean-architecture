@@ -25,7 +25,7 @@ export class CreateUserUseCase {
 
     const user = UserFactory.create({
       name: dto.name,
-      email: email.getValue(),
+      email: dto.email,
       passwordHash,
     });
 
