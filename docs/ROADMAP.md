@@ -46,7 +46,7 @@ I would structure the work into phases so we can move slowly, one concern at a t
 - [x] Configure test artifact exclusions
 - [x] Configure IDE exclusions
 - [x] Configure OS exclusions
-- [ ] Review `.gitignore` after Docker/database setup
+- [x] Review `.gitignore` after Docker/database setup
 
 
 
@@ -63,35 +63,35 @@ I would structure the work into phases so we can move slowly, one concern at a t
 
 ### Biome
 
-- [ ] Finalize Biome 2.5.9 configuration
-- [ ] Configure formatter
-- [ ] Configure linter
-- [ ] Configure recommended rules/presets
-- [ ] Configure import organization
-- [ ] Configure ignored/generated files
-- [ ] Configure TypeScript formatting
-- [ ] Configure JSON formatting
-- [ ] Configure project-wide formatting
-- [ ] Configure project-wide linting
-- [ ] Verify `biome lint`
-- [ ] Verify `biome format`
-- [ ] Verify `biome check`
+- [x] Finalize Biome 2.5.9 configuration
+- [x] Configure formatter
+- [x] Configure linter
+- [x] Configure recommended rules/presets
+- [x] Configure import organization
+- [x] Configure ignored/generated files
+- [x] Configure TypeScript formatting
+- [x] Configure JSON formatting
+- [x] Configure project-wide formatting
+- [x] Configure project-wide linting
+- [x] Verify `biome lint`
+- [x] Verify `biome format`
+- [x] Verify `biome check`
 
 
 
 ### Git hooks
 
-- [ ] Install Lefthook
-- [ ] Configure `pre-commit`
-- [ ] Configure staged-file checking
-- [ ] Configure formatting checks
-- [ ] Configure lint checks
-- [ ] Configure type checking
-- [ ] Configure commit message hook
-- [ ] Configure commitlint
-- [ ] Configure Conventional Commits
-- [ ] Test invalid commit messages
-- [ ] Test valid commit messages
+- [x] Install Lefthook
+- [x] Configure `pre-commit`
+- [x] Configure staged-file checking
+- [x] Configure formatting checks
+- [x] Configure lint checks
+- [x] Configure type checking
+- [x] Configure commit message hook
+- [x] Configure commitlint
+- [x] Configure Conventional Commits
+- [x] Test invalid commit messages
+- [x] Test valid commit messages
 
 ---
 
@@ -99,26 +99,26 @@ I would structure the work into phases so we can move slowly, one concern at a t
 
 # Phase 3 — Testing Foundation
 
-- [ ] Install Vitest
-- [ ] Configure Vitest
-- [ ] Configure TypeScript integration
-- [ ] Configure test environment
-- [ ] Configure test file conventions
-- [ ] Configure test discovery
-- [ ] Configure coverage
+- [x] Install Vitest
+- [x] Configure Vitest
+- [x] Configure TypeScript integration
+- [x] Configure test environment
+- [x] Configure test file conventions
+- [x] Configure test discovery
+- [x] Configure coverage
 - [ ] Configure coverage thresholds
-- [ ] Configure coverage exclusions
-- [ ] Create unit test structure
-- [ ] Create integration test structure
+- [x] Configure coverage exclusions
+- [x] Create unit test structure
+- [x] Create integration test structure
 - [ ] Create E2E test structure
-- [ ] Create first test
-- [ ] Create test scripts
-- [ ] Verify watch mode
-- [ ] Verify CI test mode
-- [ ] Verify coverage
-- [ ] Decide mocking strategy
-- [ ] Decide fixture strategy
-- [ ] Decide test-data builder/factory strategy
+- [x] Create first test
+- [x] Create test scripts
+- [x] Verify watch mode
+- [x] Verify CI test mode
+- [x] Verify coverage
+- [x] Decide mocking strategy
+- [x] Decide fixture strategy
+- [x] Decide test-data builder/factory strategy
 
 ---
 
@@ -126,25 +126,25 @@ I would structure the work into phases so we can move slowly, one concern at a t
 
 # Phase 4 — Application Bootstrap
 
-- [ ] Design application bootstrap
-- [ ] Separate `app.ts` from `server.ts`
-- [ ] Create application factory
-- [ ] Create composition root
-- [ ] Establish dependency wiring
-- [ ] Establish configuration loading
-- [ ] Establish startup lifecycle
-- [ ] Establish shutdown lifecycle
-- [ ] Handle `SIGTERM`
-- [ ] Handle `SIGINT`
-- [ ] Handle uncaught exceptions
-- [ ] Handle unhandled promise rejections
-- [ ] Implement graceful shutdown
+- [x] Design application bootstrap
+- [x] Separate `app.ts` from `server.ts`
+- [x] Create application factory
+- [x] Create composition root
+- [x] Establish dependency wiring
+- [x] Establish configuration loading
+- [x] Establish startup lifecycle
+- [x] Establish shutdown lifecycle
+- [x] Handle `SIGTERM`
+- [x] Handle `SIGINT`
+- [x] Handle uncaught exceptions
+- [x] Handle unhandled promise rejections
+- [x] Implement graceful shutdown
 - [ ] Configure HTTP server timeouts
 - [ ] Configure keep-alive behavior
-- [ ] Configure request handling
-- [ ] Add health endpoint
-- [ ] Add readiness endpoint
-- [ ] Establish startup failure behavior
+- [x] Configure request handling
+- [x] Add health endpoint
+- [x] Add readiness endpoint
+- [x] Establish startup failure behavior
 
 ---
 
@@ -152,32 +152,32 @@ I would structure the work into phases so we can move slowly, one concern at a t
 
 # Phase 5 — Configuration System
 
-- [ ] Design configuration architecture
-- [ ] Create typed environment configuration
-- [ ] Validate environment variables
-- [ ] Fail fast on invalid configuration
-- [ ] Separate configuration from application code
-- [ ] Define environment naming conventions
-- [ ] Create `.env.example`
-- [ ] Define development configuration
-- [ ] Define test configuration
-- [ ] Define production configuration
-- [ ] Prevent secrets from being logged
-- [ ] Prevent direct `process.env` usage throughout application
-- [ ] Establish configuration injection
+- [x] Design configuration architecture
+- [x] Create typed environment configuration
+- [x] Validate environment variables
+- [x] Fail fast on invalid configuration
+- [x] Separate configuration from application code
+- [x] Define environment naming conventions
+- [x] Create `.env.example`
+- [x] Define development configuration
+- [x] Define test configuration
+- [x] Define production configuration
+- [x] Prevent secrets from being logged
+- [x] Prevent direct `process.env` usage throughout application
+- [x] Establish configuration injection
 
 Potential configuration categories:
 
-- [ ] Application
-- [ ] HTTP
-- [ ] Database
+- [x] Application
+- [x] HTTP
+- [x] Database
 - [ ] Authentication
 - [ ] JWT/token
 - [ ] Redis/cache
 - [ ] Email
-- [ ] Logging
-- [ ] CORS
-- [ ] Rate limiting
+- [x] Logging
+- [x] CORS
+- [x] Rate limiting
 - [ ] External services
 
 ---
@@ -193,21 +193,21 @@ Before implementing real features, establish reusable primitives.
 - [ ] Base entity strategy
 - [ ] Entity identity strategy
 - [ ] Entity equality strategy
-- [ ] Value object strategy
-- [ ] Domain error strategy
+- [x] Value object strategy
+- [x] Domain error strategy
 - [ ] Domain event strategy
 - [ ] Domain service strategy
-- [ ] Domain repository contract strategy
+- [x] Domain repository contract strategy
 
 
 
 ### Application
 
-- [ ] Use-case conventions
-- [ ] Input DTO conventions
-- [ ] Output DTO conventions
-- [ ] Application error strategy
-- [ ] Port/interface conventions
+- [x] Use-case conventions
+- [x] Input DTO conventions
+- [x] Output DTO conventions
+- [x] Application error strategy
+- [x] Port/interface conventions
 - [ ] Result/error strategy
 - [ ] Transaction boundary strategy
 
@@ -215,14 +215,14 @@ Before implementing real features, establish reusable primitives.
 
 ### Shared
 
-- [ ] Shared error primitives
-- [ ] Shared types
-- [ ] Shared constants
+- [x] Shared error primitives
+- [x] Shared types
+- [x] Shared constants
 - [ ] Shared utilities
 - [ ] ID generation strategy
 - [ ] Date/time abstraction
-- [ ] Pagination primitives
-- [ ] Common response types where appropriate
+- [x] Pagination primitives
+- [x] Common response types where appropriate
 
 We will be careful here not to create a giant `shared/` dumping ground.
 
@@ -232,32 +232,32 @@ We will be careful here not to create a giant `shared/` dumping ground.
 
 # Phase 7 — HTTP / Presentation Architecture
 
-- [ ] Express application configuration
-- [ ] Middleware architecture
-- [ ] Route architecture
-- [ ] Controller architecture
-- [ ] Request DTO architecture
-- [ ] Response DTO architecture
-- [ ] Serializer architecture
-- [ ] HTTP validation architecture
-- [ ] Error middleware
-- [ ] 404 handling
-- [ ] Request ID
+- [x] Express application configuration
+- [x] Middleware architecture
+- [x] Route architecture
+- [x] Controller architecture
+- [x] Request DTO architecture
+- [x] Response DTO architecture
+- [x] Serializer architecture
+- [x] HTTP validation architecture
+- [x] Error middleware
+- [x] 404 handling
+- [x] Request ID
 - [ ] Request context
-- [ ] Content-type handling
-- [ ] JSON handling
-- [ ] CORS
-- [ ] Security headers
-- [ ] Compression strategy
-- [ ] Request size limits
+- [x] Content-type handling
+- [x] JSON handling
+- [x] CORS
+- [x] Security headers
+- [x] Compression strategy
+- [x] Request size limits
 - [ ] HTTP timeout configuration
-- [ ] Pagination conventions
-- [ ] Filtering conventions
-- [ ] Sorting conventions
-- [ ] API versioning strategy
-- [ ] HTTP status code conventions
-- [ ] API response conventions
-- [ ] API error response conventions
+- [x] Pagination conventions
+- [x] Filtering conventions
+- [x] Sorting conventions
+- [x] API versioning strategy
+- [x] HTTP status code conventions
+- [x] API response conventions
+- [x] API error response conventions
 
 ---
 
@@ -269,57 +269,57 @@ This will be our architecture proving ground.
 
 ### User Domain
 
-- [ ] User entity
-- [ ] User identity
-- [ ] User invariants
-- [ ] Email value object
-- [ ] User domain errors
-- [ ] User repository contract
-- [ ] User factory if justified
+- [x] User entity
+- [x] User identity
+- [x] User invariants
+- [x] Email value object
+- [x] User domain errors
+- [x] User repository contract
+- [x] User factory if justified
 
 
 
 ### Create User
 
-- [ ] Create-user input DTO
-- [ ] Create-user output DTO
-- [ ] Create-user use case
-- [ ] User creation rules
-- [ ] Duplicate-user behavior
-- [ ] Password handling boundary
-- [ ] Repository interaction
+- [x] Create-user input DTO
+- [x] Create-user output DTO
+- [x] Create-user use case
+- [x] User creation rules
+- [x] Duplicate-user behavior
+- [x] Password handling boundary
+- [x] Repository interaction
 - [ ] Transaction boundary if necessary
 
 
 
 ### Infrastructure
 
-- [ ] User repository implementation
-- [ ] Database mapping
-- [ ] Persistence model
-- [ ] Domain ↔ persistence mapping
+- [x] User repository implementation
+- [x] Database mapping
+- [x] Persistence model
+- [x] Domain ↔ persistence mapping
 
 
 
 ### Presentation
 
-- [ ] Create-user controller
-- [ ] Create-user request validation
-- [ ] Create-user route
-- [ ] Response serializer
-- [ ] HTTP error mapping
+- [x] Create-user controller
+- [x] Create-user request validation
+- [x] Create-user route
+- [x] Response serializer
+- [x] HTTP error mapping
 
 
 
 ### Tests
 
-- [ ] Entity tests
-- [ ] Value-object tests
-- [ ] Use-case tests
+- [x] Entity tests
+- [x] Value-object tests
+- [x] Use-case tests
 - [ ] Repository tests
-- [ ] Controller tests
-- [ ] HTTP integration test
-- [ ] Full vertical-slice test
+- [x] Controller tests
+- [x] HTTP integration test
+- [x] Full vertical-slice test
 
 This feature will determine whether our architecture is actually good.
 
@@ -329,25 +329,25 @@ This feature will determine whether our architecture is actually good.
 
 # Phase 9 — Database & Persistence
 
-- [ ] Select database library/ORM
-- [ ] Evaluate Prisma vs Drizzle
-- [ ] Establish database architecture
-- [ ] Configure PostgreSQL
-- [ ] Configure database connection
-- [ ] Configure connection pooling
-- [ ] Configure migrations
-- [ ] Configure schema management
-- [ ] Define persistence models
-- [ ] Define repository implementations
-- [ ] Define domain-to-database mapping
-- [ ] Define database-to-domain mapping
+- [x] Select database library/ORM
+- [x] Evaluate Prisma vs Drizzle
+- [x] Establish database architecture
+- [x] Configure PostgreSQL
+- [x] Configure database connection
+- [x] Configure connection pooling
+- [x] Configure migrations
+- [x] Configure schema management
+- [x] Define persistence models
+- [x] Define repository implementations
+- [x] Define domain-to-database mapping
+- [x] Define database-to-domain mapping
 - [ ] Define transaction abstraction
 - [ ] Implement transaction handling
 - [ ] Handle connection failures
-- [ ] Handle database shutdown
+- [x] Handle database shutdown
 - [ ] Configure test database strategy
 - [ ] Configure database seeding
-- [ ] Configure migration workflow
+- [x] Configure migration workflow
 
 ---
 
@@ -355,16 +355,16 @@ This feature will determine whether our architecture is actually good.
 
 # Phase 10 — Validation
 
-- [ ] Select validation library
-- [ ] Configure Zod
-- [ ] Define request validation
-- [ ] Define query validation
-- [ ] Define path-parameter validation
-- [ ] Define environment validation
-- [ ] Define validation error format
-- [ ] Keep domain validation separate from HTTP validation
-- [ ] Avoid duplicating validation unnecessarily
-- [ ] Establish DTO/schema relationship
+- [x] Select validation library
+- [x] Configure Zod
+- [x] Define request validation
+- [x] Define query validation
+- [x] Define path-parameter validation
+- [x] Define environment validation
+- [x] Define validation error format
+- [x] Keep domain validation separate from HTTP validation
+- [x] Avoid duplicating validation unnecessarily
+- [x] Establish DTO/schema relationship
 
 Important distinction:
 
@@ -382,23 +382,23 @@ Both are necessary, but they solve different problems.
 
 # Phase 11 — Error Architecture
 
-- [ ] Domain errors
-- [ ] Application errors
-- [ ] Infrastructure errors
-- [ ] Validation errors
-- [ ] Not-found errors
+- [x] Domain errors
+- [x] Application errors
+- [x] Infrastructure errors
+- [x] Validation errors
+- [x] Not-found errors
 - [ ] Conflict errors
 - [ ] Unauthorized errors
 - [ ] Forbidden errors
-- [ ] Internal errors
-- [ ] Error codes
-- [ ] Error metadata
-- [ ] Error serialization
-- [ ] HTTP status mapping
-- [ ] Production error sanitization
-- [ ] Development error details
-- [ ] Error logging strategy
-- [ ] Error correlation/request IDs
+- [x] Internal errors
+- [x] Error codes
+- [x] Error metadata
+- [x] Error serialization
+- [x] HTTP status mapping
+- [x] Production error sanitization
+- [x] Development error details
+- [x] Error logging strategy
+- [x] Error correlation/request IDs
 
 ---
 
@@ -406,27 +406,27 @@ Both are necessary, but they solve different problems.
 
 # Phase 12 — Logging & Observability
 
-- [ ] Select Pino
-- [ ] Configure structured logging
-- [ ] Configure log levels
-- [ ] Configure development logging
-- [ ] Configure production logging
-- [ ] Request logging
-- [ ] Request IDs
-- [ ] Correlation IDs
-- [ ] Error logging
-- [ ] Sensitive-data redaction
-- [ ] Database logging strategy
+- [x] Select Pino
+- [x] Configure structured logging
+- [x] Configure log levels
+- [x] Configure development logging
+- [x] Configure production logging
+- [x] Request logging
+- [x] Request IDs
+- [x] Correlation IDs
+- [x] Error logging
+- [x] Sensitive-data redaction
+- [x] Database logging strategy
 - [ ] External-service logging strategy
-- [ ] Startup/shutdown logging
-- [ ] Health/readiness logging policy
+- [x] Startup/shutdown logging
+- [x] Health/readiness logging policy
 
 Then later:
 
 - [ ] Metrics
 - [ ] Tracing
 - [ ] OpenTelemetry evaluation
-- [ ] Application performance monitoring
+- [x] Application performance monitoring
 
 ---
 
@@ -435,8 +435,8 @@ Then later:
 # Phase 13 — Authentication
 
 - [ ] Authentication architecture
-- [ ] Password hashing
-- [ ] Password verification
+- [x] Password hashing
+- [x] Password verification
 - [ ] Credential policy
 - [ ] Token strategy
 - [ ] Access tokens
@@ -479,22 +479,22 @@ depending on the requirements.
 
 # Phase 15 — Security
 
-- [ ] Helmet/security headers
-- [ ] CORS policy
-- [ ] Rate limiting
-- [ ] Request size limits
-- [ ] Input validation
+- [x] Helmet/security headers
+- [x] CORS policy
+- [x] Rate limiting
+- [x] Request size limits
+- [x] Input validation
 - [ ] Output sanitization where necessary
-- [ ] Password security
+- [x] Password security
 - [ ] Secret management
 - [ ] Secure cookies if applicable
 - [ ] CSRF strategy if applicable
 - [ ] SSRF considerations for external URLs
-- [ ] SQL injection protection
+- [x] SQL injection protection
 - [ ] Prototype pollution considerations
 - [ ] Dependency vulnerability scanning
 - [ ] Security audit process
-- [ ] Sensitive-data logging prevention
+- [x] Sensitive-data logging prevention
 - [ ] Production security checklist
 
 ---
@@ -524,7 +524,7 @@ Only if required:
 Create a consistent architecture for external integrations.
 
 - [ ] External API client abstraction
-- [ ] HTTP client strategy
+- [x] HTTP client strategy
 - [ ] Timeout strategy
 - [ ] Retry strategy
 - [ ] Exponential backoff
@@ -583,16 +583,16 @@ If the starter is intended to support these:
 
 # Phase 20 — Database/API Pagination
 
-- [ ] Pagination abstraction
-- [ ] Offset pagination evaluation
+- [x] Pagination abstraction
+- [x] Offset pagination evaluation
 - [ ] Cursor pagination evaluation
-- [ ] Pagination DTO
-- [ ] Pagination response format
-- [ ] Sorting
-- [ ] Filtering
-- [ ] Search
-- [ ] Query parameter conventions
-- [ ] Database-efficient pagination
+- [x] Pagination DTO
+- [x] Pagination response format
+- [x] Sorting
+- [x] Filtering
+- [x] Search
+- [x] Query parameter conventions
+- [x] Database-efficient pagination
 
 ---
 
@@ -625,12 +625,12 @@ If included in the starter:
 - [ ] Non-root container user
 - [ ] Minimal production image
 - [ ] `.dockerignore`
-- [ ] Docker Compose
-- [ ] PostgreSQL container
+- [x] Docker Compose
+- [x] PostgreSQL container
 - [ ] Redis container if needed
-- [ ] Health checks
+- [x] Health checks
 - [ ] Container shutdown
-- [ ] Environment configuration
+- [x] Environment configuration
 - [ ] Container security
 
 ---
@@ -639,16 +639,16 @@ If included in the starter:
 
 # Phase 23 — CI/CD
 
-- [ ] Select CI platform
-- [ ] Install dependencies
-- [ ] Dependency caching
-- [ ] Biome validation
-- [ ] TypeScript validation
-- [ ] Unit tests
-- [ ] Integration tests
+- [x] Select CI platform
+- [x] Install dependencies
+- [x] Dependency caching
+- [x] Biome validation
+- [x] TypeScript validation
+- [x] Unit tests
+- [x] Integration tests
 - [ ] E2E tests
 - [ ] Coverage
-- [ ] Build verification
+- [x] Build verification
 - [ ] Dependency audit
 - [ ] Docker build
 - [ ] Docker image scanning
@@ -662,14 +662,14 @@ If included in the starter:
 
 # Phase 24 — Git & Release Management
 
-- [ ] Conventional Commits
-- [ ] Commitlint
-- [ ] Lefthook
-- [ ] Pre-commit checks
-- [ ] Commit-msg checks
+- [x] Conventional Commits
+- [x] Commitlint
+- [x] Lefthook
+- [x] Pre-commit checks
+- [x] Commit-msg checks
 - [ ] Branch naming convention
 - [ ] Pull request conventions
-- [ ] PR checks
+- [x] PR checks
 - [ ] Release strategy
 - [ ] Versioning strategy
 - [ ] Changelog strategy
@@ -688,12 +688,12 @@ We will choose one if we actually need automated package/release management.
 
 # Phase 25 — Dependency Management
 
-- [ ] Dependency update strategy
-- [ ] Lockfile policy
+- [x] Dependency update strategy
+- [x] Lockfile policy
 - [ ] Production dependency audit
 - [ ] Dev dependency audit
-- [ ] Automated dependency updates
-- [ ] Renovate/Dependabot evaluation
+- [x] Automated dependency updates
+- [x] Renovate/Dependabot evaluation
 - [ ] Vulnerability scanning
 - [ ] License checking
 - [ ] Node.js version policy
@@ -705,8 +705,8 @@ We will choose one if we actually need automated package/release management.
 
 # Phase 26 — Performance & Reliability
 
-- [ ] HTTP performance baseline
-- [ ] Database query performance
+- [x] HTTP performance baseline
+- [x] Database query performance
 - [ ] Connection pool tuning
 - [ ] Cache performance
 - [ ] Memory considerations
@@ -715,7 +715,7 @@ We will choose one if we actually need automated package/release management.
 - [ ] Retry policy
 - [ ] Graceful degradation
 - [ ] Backpressure considerations
-- [ ] Rate limiting
+- [x] Rate limiting
 - [ ] Load testing strategy
 
 ---
@@ -724,18 +724,18 @@ We will choose one if we actually need automated package/release management.
 
 # Phase 27 — Production Operations
 
-- [ ] Health endpoint
-- [ ] Readiness endpoint
+- [x] Health endpoint
+- [x] Readiness endpoint
 - [ ] Liveness strategy
-- [ ] Graceful shutdown
-- [ ] Startup validation
-- [ ] Environment validation
-- [ ] Logging
+- [x] Graceful shutdown
+- [x] Startup validation
+- [x] Environment validation
+- [x] Logging
 - [ ] Metrics
 - [ ] Tracing
 - [ ] Alerting considerations
 - [ ] Error monitoring
-- [ ] Database monitoring
+- [x] Database monitoring
 - [ ] Resource limits
 - [ ] Deployment rollback strategy
 
@@ -747,13 +747,13 @@ We will choose one if we actually need automated package/release management.
 
 - [ ] README
 - [ ] Project overview
-- [ ] Architecture overview
+- [x] Architecture overview
 - [ ] Architecture decision records
 - [ ] Directory structure documentation
-- [ ] Dependency rules
+- [x] Dependency rules
 - [ ] Development setup
 - [ ] Environment setup
-- [ ] Database setup
+- [x] Database setup
 - [ ] Testing documentation
 - [ ] API documentation
 - [ ] Docker documentation
@@ -802,23 +802,23 @@ domain → Pino
 Before declaring the starter production-ready:
 
 - [ ] Fresh clone works
-- [ ] Fresh `pnpm install` works
-- [ ] Development server works
-- [ ] Production build works
-- [ ] Production server works
-- [ ] Typecheck passes
-- [ ] Biome passes
-- [ ] Tests pass
-- [ ] Coverage works
-- [ ] Git hooks work
-- [ ] Commitlint works
+- [x] Fresh `pnpm install` works
+- [x] Development server works
+- [x] Production build works
+- [x] Production server works
+- [x] Typecheck passes
+- [x] Biome passes
+- [x] Tests pass
+- [x] Coverage works
+- [x] Git hooks work
+- [x] Commitlint works
 - [ ] Docker build works
 - [ ] Docker runtime works
-- [ ] Environment validation works
-- [ ] Health check works
-- [ ] Graceful shutdown works
+- [x] Environment validation works
+- [x] Health check works
+- [x] Graceful shutdown works
 - [ ] Security baseline passes
-- [ ] CI passes from a clean environment
+- [x] CI passes from a clean environment
 - [ ] Documentation is complete
 - [ ] No unnecessary dependencies
 - [ ] No dead configuration
