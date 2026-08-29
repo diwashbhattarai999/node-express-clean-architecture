@@ -1,0 +1,50 @@
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      express:
+        patterns:
+          - express
+          - express-*
+          - "@types/express"
+          - "@types/express-*"
+      drizzle:
+        patterns:
+          - drizzle-orm
+          - drizzle-kit
+          - postgres
+      biome:
+        patterns:
+          - "@biomejs/*"
+      vitest:
+        patterns:
+          - vitest
+          - "@vitest/*"
+      logging:
+        patterns:
+          - pino
+          - pino-*
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+      types:
+        patterns:
+          - "@types/*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
