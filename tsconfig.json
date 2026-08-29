@@ -11,7 +11,8 @@
 		"types": ["node"],
 
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@tests/*": ["./tests/*"]
 		},
 
 		"strict": true,
