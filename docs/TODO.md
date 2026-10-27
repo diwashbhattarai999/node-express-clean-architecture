@@ -2,7 +2,7 @@
 
 Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
-**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + users integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), users CRUD vertical slice, Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
+**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + users/uploads integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), users CRUD vertical slice, uploads module (multipart + MIME/size), Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
 
 | Priority | Item | Phase | Notes |
 | --- | --- | --- | --- |
@@ -26,7 +26,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P5 | Redis / caching layer (if required) | 16 | Client + readiness done; cache port/abstraction later |
 | P5 | Email abstraction + provider | 17 | Port + Resend/noop done; wire into auth flows later |
 | P5 | Background jobs / queue | 18 | — |
-| P5 | File uploads / object storage | 21 | Object storage port done; multipart HTTP upload later |
+| P5 | File uploads / object storage | 21 | Done — multipart uploads + object storage |
 | P5 | Metrics, tracing, OpenTelemetry | 12 / 27 | Logging only today |
 | P6 | Architecture enforcement (dependency-cruiser or similar) | 29 | Documented rules; not automated |
 | P6 | Shared domain base entity / ID / date abstractions | 6 | Ad-hoc today |
@@ -39,4 +39,4 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 2. Authorization / RBAC + error conventions
 3. OpenAPI / Swagger
 4. Coverage gates, real DB tests, E2E
-5. Optional infra (Redis cache abstraction, email, jobs, uploads, OTel)
+5. Optional infra (Redis cache abstraction, jobs, OTel)

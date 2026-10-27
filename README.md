@@ -147,6 +147,18 @@ File/object IO goes through `IObjectStorage` (`putObject`, `getObject`, `deleteO
 | `local` | Writes under `STORAGE_LOCAL_PATH` (default `./uploads`) |
 | `s3` | AWS S3 via `@aws-sdk/client-s3` (optional custom `STORAGE_ENDPOINT`) |
 
+## File uploads
+
+Sample `uploads` module on top of `IObjectStorage` (no auth yet):
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| `POST` | `/api/v1/uploads` | Multipart field `file`; size + MIME checks; stores as `uploads/<uuid>-<name>` |
+| `GET` | `/api/v1/uploads/:key` | Metadata (`exists`, public/signed URLs). Encode nested keys (`uploads%2F…`) |
+| `DELETE` | `/api/v1/uploads/:key` | Deletes the object (404 if missing) |
+
+Rejects oversized or disallowed MIME types with `422` (defaults in `uploads.constants.ts`; intended to become per-route later). Signed URL is returned when the storage adapter can produce one; otherwise `null` without failing the upload.
+
 ## Database
 
 Postgres runs via Docker Compose (`docker-compose.yml`). Schema and migrations live under `drizzle/` and `src/infrastructure/database/drizzle/`.

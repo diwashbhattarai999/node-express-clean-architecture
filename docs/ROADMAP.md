@@ -39,7 +39,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 18 | Background jobs & messaging | Optional | 0/13 | Queues, workers, domain events |
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
-| 21 | File uploads & storage | Partial | 4/10 | Object storage adapters; multipart HTTP later |
+| 21 | File uploads & storage | Done | — | Object storage + multipart uploads module |
 | 22 | Docker | Done | — | Multi-stage API image, Compose API+Postgres+Redis, migrate on start |
 | 23 | CI/CD | Partial | 8/16 | Lint, typecheck, test, build; no deploy / image scan |
 | 24 | Git & release management | Partial | 6/14 | Conventional Commits + hooks; release automation later |
@@ -61,6 +61,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 1 | Project foundation |
 | 2 | Repo hygiene & code quality |
 | 10 | Validation |
+| 21 | File uploads & storage |
 | 22 | Docker |
 
 ### Partial (in progress)
@@ -72,7 +73,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 5 | Config | Auth categories |
 | 16 | Caching | Cache port, TTL, invalidation |
 | 17 | External services | HTTP client, retries |
-| 21 | File uploads | Multipart handling, MIME validation |
 | 6 | Shared architecture | Base entity, events, ID/date helpers |
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
@@ -114,4 +114,4 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 2 | Authorization / RBAC | Not started |
 | 3 | OpenAPI / Swagger | Not started |
 | 4 | Coverage gates, real DB tests, E2E | Partial |
-| 5 | Optional infra (Redis, email, jobs, uploads, OTel) | Optional |
+| 5 | Optional infra (Redis cache, jobs, OTel) | Optional |
