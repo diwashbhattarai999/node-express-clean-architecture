@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CI workflow now relies on `package.json` for pnpm version selection to avoid pnpm/action-setup version conflicts.
+
 ## [1.1.0] - 2026-10-28
 
 ### Added
