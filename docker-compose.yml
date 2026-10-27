@@ -1,21 +1,68 @@
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: starter-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Override host .env for container networking / production runtime
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-starter}
+      HOST: 0.0.0.0
+      PORT: 3000
+      BASE_URL: http://localhost:${PORT:-3000}
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    init: true
+
   postgres:
     image: postgres:18-alpine
-    container_name: node-express-clean-architecture-postgres
+    container_name: starter-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: node_express_clean_architecture
+      POSTGRES_DB: ${POSTGRES_DB:-starter}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
+      # Postgres 18+ requires mounting /var/lib/postgresql (not .../data)
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d node_express_clean_architecture"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-starter}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    container_name: starter-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 volumes:
   postgres_data:
+  redis_data:

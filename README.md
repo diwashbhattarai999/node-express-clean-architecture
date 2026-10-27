@@ -65,10 +65,10 @@ curl http://localhost:3000/ready
 | `pnpm db:generate` | Generate Drizzle migrations |
 | `pnpm db:migrate` | Run migrations (host) |
 | `pnpm db:studio` | Drizzle Studio |
-| `pnpm docker:build` | Build the app image |
-| `pnpm docker:up` | Build and start app + Postgres |
+| `pnpm docker:build` | Build the API image |
+| `pnpm docker:up` | Build and start API + Postgres + Redis |
 | `pnpm docker:down` | Stop Compose stack |
-| `pnpm docker:logs` | Tail app logs |
+| `pnpm docker:logs` | Tail API logs |
 | `pnpm docker:reset` | Wipe volumes and rebuild the stack |
 
 ## Architecture

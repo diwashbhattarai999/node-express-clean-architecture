@@ -21,15 +21,24 @@
     "db:logs": "docker compose logs -f postgres",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "docker:build": "docker compose build api",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f api",
+    "docker:reset": "docker compose down -v && docker compose up -d --build"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
+	"packageManager": "pnpm@11.22.0",
+	"engines": {
+		"node": ">=22"
+	},
 	"devEngines": {
 		"packageManager": {
 			"name": "pnpm",
-			"version": "^11.9.0",
+			"version": "11.22.0",
 			"onFail": "download"
 		}
 	},
