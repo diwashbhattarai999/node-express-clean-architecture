@@ -19,7 +19,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P3 | Real test DB strategy + repository tests | 8 / 9 | Integration tests mock the repository |
 | P3 | E2E test structure and smoke flows | 3 / 23 | `tests/e2e` empty / unused |
 | P3 | Include `tests/**` in Biome | 2 | Biome currently scopes to `src/**` only |
-| P4 | HTTP server timeouts + keep-alive | 4 / 7 | Shutdown timeout only |
+| P4 | HTTP server timeouts + keep-alive | 4 / 7 | Done — `HTTP_SERVER_*` on `createServer` |
 | P4 | Transaction abstraction for multi-step writes | 6 / 9 | Not needed yet for simple CRUD |
 | P4 | Database seeding | 9 | — |
 | P4 | Dependency audit / vulnerability scanning in CI | 15 / 23 / 25 | Dependabot present; no audit step |

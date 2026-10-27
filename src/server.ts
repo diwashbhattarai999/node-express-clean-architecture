@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 
 import { createApp } from "@/app/create-app";
+import { configureHttpServer } from "@/app/http/configure-http-server";
 import { env } from "@/config/env";
 import { closeDatabase } from "@/infrastructure/database/drizzle";
 import { closeRedis, connectRedis } from "@/infrastructure/redis";
@@ -12,7 +13,11 @@ const startServer = async (): Promise<void> => {
   await connectRedis();
 
   const app = createApp();
-  const server = createServer(app);
+  const server = configureHttpServer(createServer(app), {
+    requestTimeoutMs: env.HTTP_SERVER_REQUEST_TIMEOUT_MS,
+    headersTimeoutMs: env.HTTP_SERVER_HEADERS_TIMEOUT_MS,
+    keepAliveTimeoutMs: env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS,
+  });
 
   let isShuttingDown = false;
 

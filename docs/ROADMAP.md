@@ -22,7 +22,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 1 | Project foundation | Done | 20/20 | pnpm, TypeScript, ESM, aliases, build |
 | 2 | Repo hygiene & code quality | Done | 38/38 | Biome, Lefthook, Commitlint, `.gitignore` |
 | 3 | Testing foundation | Partial | 18/20 | Vitest + unit/integration; no E2E / coverage thresholds |
-| 4 | Application bootstrap | Partial | 17/19 | App factory, composition, lifecycle; HTTP timeouts pending |
+| 4 | Application bootstrap | Done | 19/19 | App factory, composition, lifecycle, HTTP timeouts + keep-alive |
 | 5 | Configuration system | Partial | 22/24 | Zod env + Redis/email; auth config later |
 | 6 | Core shared architecture | Partial | 13/23 | Errors, pagination, use-case patterns; base entity/events later |
 | 7 | HTTP / presentation | Partial | 24/26 | Middleware, routes, validation; request context pending |
@@ -60,6 +60,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | --- | --- |
 | 1 | Project foundation |
 | 2 | Repo hygiene & code quality |
+| 4 | Application bootstrap |
 | 10 | Validation |
 | 17 | External services |
 | 21 | File uploads & storage |
@@ -70,7 +71,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | # | Phase | Main gaps |
 | --- | --- | --- |
 | 3 | Testing | Coverage thresholds, E2E |
-| 4 | Bootstrap | HTTP timeouts, keep-alive |
 | 5 | Config | Auth categories |
 | 16 | Caching | Cache port, TTL, invalidation |
 | 6 | Shared architecture | Base entity, events, ID/date helpers |

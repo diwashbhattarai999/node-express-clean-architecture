@@ -122,6 +122,9 @@ Copy `.env.example` to `.env`. Important variables:
 | `HTTP_CLIENT_TIMEOUT_MS` | Outbound HTTP timeout (default `10000`) |
 | `HTTP_CLIENT_MAX_RETRIES` | Retries after the first attempt (default `2`) |
 | `HTTP_CLIENT_RETRY_BASE_DELAY_MS` | Exponential backoff base delay (default `200`) |
+| `HTTP_SERVER_REQUEST_TIMEOUT_MS` | Node `requestTimeout` (default `30000`) |
+| `HTTP_SERVER_HEADERS_TIMEOUT_MS` | Node `headersTimeout`; must be greater than keep-alive (default `70000`) |
+| `HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS` | Node `keepAliveTimeout` (default `65000`) |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |

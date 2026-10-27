@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Object storage port (`IObjectStorage`) with local and S3 adapters
 - File uploads module (`POST`/`GET`/`DELETE` `/api/v1/uploads`) with multer and size/MIME validation (module defaults; not env-driven)
 - Outbound HTTP client port (`IHttpClient`) with Axios adapter, timeouts, retries/backoff, and redacted request logging
+- HTTP server `requestTimeout`, `headersTimeout`, and `keepAliveTimeout` configured from `HTTP_SERVER_*` env
 
 ### Changed
 

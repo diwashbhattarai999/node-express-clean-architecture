@@ -180,8 +180,35 @@ export const envSchema = z
       .int("HTTP client retry base delay must be an integer")
       .positive("HTTP client retry base delay must be a positive number")
       .default(200),
+
+    HTTP_SERVER_REQUEST_TIMEOUT_MS: z.coerce
+      .number("HTTP server request timeout is required.")
+      .int("HTTP server request timeout must be an integer")
+      .positive("HTTP server request timeout must be a positive number")
+      .default(30_000),
+
+    HTTP_SERVER_HEADERS_TIMEOUT_MS: z.coerce
+      .number("HTTP server headers timeout is required.")
+      .int("HTTP server headers timeout must be an integer")
+      .positive("HTTP server headers timeout must be a positive number")
+      .default(70_000),
+
+    HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS: z.coerce
+      .number("HTTP server keep-alive timeout is required.")
+      .int("HTTP server keep-alive timeout must be an integer")
+      .positive("HTTP server keep-alive timeout must be a positive number")
+      .default(65_000),
   })
   .superRefine((env, context) => {
+    if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {
+      context.addIssue({
+        code: "custom",
+        path: ["HTTP_SERVER_HEADERS_TIMEOUT_MS"],
+        message:
+          "HTTP_SERVER_HEADERS_TIMEOUT_MS must be greater than HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS.",
+      });
+    }
+
     if (env.EMAIL_PROVIDER === EmailProvider.RESEND) {
       if (!env.EMAIL_FROM) {
         context.addIssue({
