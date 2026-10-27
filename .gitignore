@@ -157,6 +157,9 @@ docker-compose.override.yml
 *.db
 *.db-journal
 
+uploads/
+uploads-test/
+
 
 # ============================================================
 # Generated documentation / API artifacts

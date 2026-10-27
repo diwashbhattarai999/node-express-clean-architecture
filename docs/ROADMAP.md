@@ -35,11 +35,11 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 14 | Authorization | Not started | 0/10 | RBAC / policies |
 | 15 | Security | Partial | 8/17 | Helmet, CORS, rate limit; audit/checklist pending |
 | 16 | Caching | Partial | 2/9 | Redis client + health; cache abstraction later |
-| 17 | External services | Partial | 3/13 | Email port + Resend; HTTP client / storage later |
+| 17 | External services | Partial | 5/13 | Email + object storage; HTTP client later |
 | 18 | Background jobs & messaging | Optional | 0/13 | Queues, workers, domain events |
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
-| 21 | File uploads & storage | Optional | 0/10 | Multipart + object storage |
+| 21 | File uploads & storage | Partial | 4/10 | Object storage adapters; multipart HTTP later |
 | 22 | Docker | Done | — | Multi-stage API image, Compose API+Postgres+Redis, migrate on start |
 | 23 | CI/CD | Partial | 8/16 | Lint, typecheck, test, build; no deploy / image scan |
 | 24 | Git & release management | Partial | 6/14 | Conventional Commits + hooks; release automation later |
@@ -71,7 +71,8 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 4 | Bootstrap | HTTP timeouts, keep-alive |
 | 5 | Config | Auth categories |
 | 16 | Caching | Cache port, TTL, invalidation |
-| 17 | External services | HTTP client, storage, retries |
+| 17 | External services | HTTP client, retries |
+| 21 | File uploads | Multipart handling, MIME validation |
 | 6 | Shared architecture | Base entity, events, ID/date helpers |
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
@@ -102,7 +103,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | # | Phase |
 | --- | --- |
 | 18 | Background jobs & messaging |
-| 21 | File uploads & storage |
 
 ---
 

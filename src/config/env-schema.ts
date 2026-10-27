@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { EmailProvider } from "@/config/email-provider";
 import { Environment } from "@/config/environment";
+import { StorageProvider } from "@/config/storage-provider";
 import { LogLevel } from "@/shared/logger/log-level";
 
 const emptyToUndefined = (value: unknown): unknown => {
@@ -114,25 +115,98 @@ export const envSchema = z
     EMAIL_FROM_NAME: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
 
     RESEND_API_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+    STORAGE_PROVIDER: z
+      .enum(
+        StorageProvider,
+        `Invalid storage provider. Must be one of: ${Object.values(StorageProvider).join(", ")}`,
+      )
+      .default(StorageProvider.LOCAL),
+
+    STORAGE_LOCAL_PATH: z.preprocess(emptyToUndefined, z.string().min(1).default("./uploads")),
+
+    STORAGE_PUBLIC_BASE_URL: z.preprocess(emptyToUndefined, z.url().optional()),
+
+    STORAGE_BUCKET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+    STORAGE_REGION: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+    STORAGE_ENDPOINT: z.preprocess(emptyToUndefined, z.url().optional()),
+
+    STORAGE_ACCESS_KEY_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+    STORAGE_SECRET_ACCESS_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+    STORAGE_FORCE_PATH_STYLE: z
+      .preprocess((value) => {
+        if (value === undefined || value === null || value === "") {
+          return undefined;
+        }
+
+        if (typeof value === "boolean") {
+          return value;
+        }
+
+        if (typeof value === "string") {
+          const normalized = value.trim().toLowerCase();
+
+          if (normalized === "true") {
+            return true;
+          }
+
+          if (normalized === "false") {
+            return false;
+          }
+        }
+
+        return value;
+      }, z.boolean().optional())
+      .optional(),
   })
   .superRefine((env, context) => {
-    if (env.EMAIL_PROVIDER !== EmailProvider.RESEND) {
+    if (env.EMAIL_PROVIDER === EmailProvider.RESEND) {
+      if (!env.EMAIL_FROM) {
+        context.addIssue({
+          code: "custom",
+          path: ["EMAIL_FROM"],
+          message: "EMAIL_FROM is required when EMAIL_PROVIDER is resend.",
+        });
+      }
+
+      if (!env.RESEND_API_KEY) {
+        context.addIssue({
+          code: "custom",
+          path: ["RESEND_API_KEY"],
+          message: "RESEND_API_KEY is required when EMAIL_PROVIDER is resend.",
+        });
+      }
+    }
+
+    if (env.STORAGE_PROVIDER === StorageProvider.LOCAL) {
       return;
     }
 
-    if (!env.EMAIL_FROM) {
+    if (!env.STORAGE_BUCKET) {
       context.addIssue({
         code: "custom",
-        path: ["EMAIL_FROM"],
-        message: "EMAIL_FROM is required when EMAIL_PROVIDER is resend.",
+        path: ["STORAGE_BUCKET"],
+        message: "STORAGE_BUCKET is required when STORAGE_PROVIDER is s3.",
       });
     }
 
-    if (!env.RESEND_API_KEY) {
+    if (!env.STORAGE_ACCESS_KEY_ID) {
       context.addIssue({
         code: "custom",
-        path: ["RESEND_API_KEY"],
-        message: "RESEND_API_KEY is required when EMAIL_PROVIDER is resend.",
+        path: ["STORAGE_ACCESS_KEY_ID"],
+        message: "STORAGE_ACCESS_KEY_ID is required when STORAGE_PROVIDER is s3.",
+      });
+    }
+
+    if (!env.STORAGE_SECRET_ACCESS_KEY) {
+      context.addIssue({
+        code: "custom",
+        path: ["STORAGE_SECRET_ACCESS_KEY"],
+        message: "STORAGE_SECRET_ACCESS_KEY is required when STORAGE_PROVIDER is s3.",
       });
     }
   });

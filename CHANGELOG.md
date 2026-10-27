@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cursor agent rules under `.cursor/rules/` (architecture, TypeScript, testing, changelog)
 - Redis client (`REDIS_URL`), readiness `PING` check, and graceful Redis shutdown
 - Provider-agnostic email port (`IEmailSender`) with Resend and noop adapters
+- Object storage port (`IObjectStorage`) with local and S3 adapters
 
 ### Changed
 

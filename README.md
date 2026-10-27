@@ -116,6 +116,9 @@ Copy `.env.example` to `.env`. Important variables:
 | `EMAIL_FROM` | Default from address (required for `resend`) |
 | `EMAIL_FROM_NAME` | Optional from display name |
 | `RESEND_API_KEY` | Resend API key (required for `resend`) |
+| `STORAGE_PROVIDER` | `local` \| `s3` (default `local`) |
+| `STORAGE_LOCAL_PATH` | Local root directory (default `./uploads`) |
+| `STORAGE_BUCKET` / keys / endpoint | Required for `s3` |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
@@ -134,6 +137,15 @@ Invalid config fails fast at startup.
 ## Email
 
 Sending goes through `IEmailSender`. Switch providers with `EMAIL_PROVIDER` (`noop` for local/tests, `resend` for real delivery). Use cases depend only on the port — add another adapter under `src/infrastructure/email/` when needed.
+
+## Object storage
+
+File/object IO goes through `IObjectStorage` (`putObject`, `getObject`, `deleteObject`, `exists`, `getSignedUrl`, `getPublicUrl`).
+
+| Provider | Notes |
+| --- | --- |
+| `local` | Writes under `STORAGE_LOCAL_PATH` (default `./uploads`) |
+| `s3` | AWS S3 via `@aws-sdk/client-s3` (optional custom `STORAGE_ENDPOINT`) |
 
 ## Database
 
