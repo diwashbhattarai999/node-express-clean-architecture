@@ -100,7 +100,7 @@ describe("Users API", () => {
         confirmPassword: "StrongPassword123!",
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(409);
       expect(response.body).toMatchObject({
         success: false,
         code: "USER_EMAIL_ALREADY_EXISTS",

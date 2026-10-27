@@ -7,7 +7,7 @@ export class UserEmailAlreadyExistsError extends AppError {
     super({
       code: ErrorCode.USER_EMAIL_ALREADY_EXISTS,
       message: "A user with this email address already exists.",
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode: HttpStatus.CONFLICT,
     });
   }
 }

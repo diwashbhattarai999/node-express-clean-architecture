@@ -98,6 +98,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and compos
 - `GET /ready` — readiness (Postgres + Redis; `503` if either is unhealthy)
 - Responses use a consistent envelope (`success`, `message`, `data`)
 - Validation failures return `422` with field-level errors
+- Shared `AppError` conventions: `401` (`UnauthorizedError`), `403` (`ForbiddenError`), `409` (`ConflictError`); duplicate resources (e.g. email already exists) return `409`
 
 The `users` module is a sample vertical slice to prove the architecture—not a fixed product API. Replace or extend modules as needed. Auth design: [docs/AUTH.md](docs/AUTH.md).
 

@@ -29,7 +29,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 8 | Users vertical slice | Partial | 29/31 | Sample CRUD; repo tests / transactions pending |
 | 9 | Database & persistence | Partial | 14/19 | Drizzle + Postgres + Compose; transactions, seeding, test DB |
 | 10 | Validation | Done | 10/10 | Zod request/query/path + env |
-| 11 | Error architecture | Partial | 14/17 | AppError + field errors; auth/conflict conventions pending |
+| 11 | Error architecture | Done | 17/17 | AppError, field errors, Unauthorized / Forbidden / Conflict |
 | 12 | Logging & observability | Partial | 14/18 | Pino + request IDs; metrics/tracing later |
 | 13 | Authentication | Partial | 2/14 | Password hash only; see AUTH.md |
 | 14 | Authorization | Not started | 0/10 | RBAC / policies |
@@ -62,6 +62,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 2 | Repo hygiene & code quality |
 | 4 | Application bootstrap |
 | 10 | Validation |
+| 11 | Error architecture |
 | 17 | External services |
 | 21 | File uploads & storage |
 | 22 | Docker |
@@ -77,7 +78,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
 | 9 | Database | Transactions, seeding, real test DB |
-| 11 | Errors | Unauthorized / Forbidden / Conflict conventions |
 | 12 | Observability | Metrics, tracing, OpenTelemetry |
 | 13 | Authentication | Sessions/tokens/middleware (AUTH.md) |
 | 15 | Security | Audit process, production checklist |

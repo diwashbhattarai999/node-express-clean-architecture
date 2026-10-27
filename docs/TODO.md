@@ -13,7 +13,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P1 | Authentication module (per `docs/AUTH.md`) | 13 | Password hash/verify exists; no login/session/tokens/middleware |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Users API is currently open |
 | P2 | Authorization / RBAC | 14 | Design + middleware + use-case rules |
-| P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Email-already-exists is 400 today; auth errors missing |
+| P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Done — shared 401/403/409 errors; email conflict is 409 |
 | P2 | OpenAPI / Swagger UI synced with routes | 19 | Not started |
 | P3 | Coverage thresholds in Vitest + CI coverage gate | 3 / 23 | Coverage configured, no thresholds |
 | P3 | Real test DB strategy + repository tests | 8 / 9 | Integration tests mock the repository |
