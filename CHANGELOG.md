@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auth persistence schemas: login identities, password/external credentials, sessions, challenges, MFA/passkeys, audit events
 - Database schema reference doc ([`docs/DATABASE.md`](docs/DATABASE.md))
 - Platform auth DDL: `user_profiles`, `auth_tokens`, `mfa_challenges`, `login_attempts`, `passkeys`, `security_audit_logs`, `roles` / `user_roles`
+- Auth/authz HTTP API contract doc ([`docs/AUTH_API.md`](docs/AUTH_API.md)) covering 92 planned endpoints
 
 ### Changed
 

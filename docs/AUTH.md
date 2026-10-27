@@ -787,59 +787,45 @@ Passkeys are treated as authentication credentials belonging to the user.
 
 # 22. Complete API Inventory
 
-```text
-REGISTRATION
-POST   /auth/register
-GET    /auth/oauth/:provider
-POST   /auth/magic-link/request
-POST   /auth/magic-link/verify
+**Normative HTTP contracts** (methods, paths, bodies, query params, auth, errors): [AUTH_API.md](AUTH_API.md).
 
-LOGIN
-POST   /auth/login
-GET    /auth/oauth/:provider
-POST   /auth/magic-link/request
-POST   /auth/magic-link/verify
+High-level surface (see AUTH_API.md for full detail, including RBAC/admin/audit/MFA):
+
+```text
+REGISTRATION / LOGIN
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/magic-link/request
+POST   /api/v1/auth/magic-link/consume
+GET    /api/v1/auth/oauth/:provider/authorize
 
 SESSION
-POST   /auth/refresh
-POST   /auth/logout
-POST   /auth/logout-all
-GET    /auth/sessions
-DELETE /auth/sessions/:sessionId
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/logout-all
+GET    /api/v1/auth/sessions
+DELETE /api/v1/auth/sessions/:sessionId
 
-CURRENT USER
-GET    /auth/me
+CURRENT USER / PROFILE
+GET    /api/v1/auth/me
+GET    /api/v1/users/me
+PATCH  /api/v1/users/me/username
 
-EMAIL
-POST   /auth/email/verification/resend
-POST   /auth/email/verify
+EMAIL / PHONE / PASSWORD
+POST   /api/v1/auth/email/verify
+POST   /api/v1/auth/email/verification/resend
+POST   /api/v1/auth/phone/verify
+POST   /api/v1/auth/password/forgot
+POST   /api/v1/auth/password/reset
+POST   /api/v1/auth/password/change
 
-PHONE
-POST   /auth/phone/verification/resend
-POST   /auth/phone/verify
+OAUTH / AUTHZ / ADMIN
+GET    /api/v1/auth/providers
+GET    /api/v1/authz/me/roles
+GET    /api/v1/authz/me/permissions
+…      /api/v1/admin/roles, /api/v1/admin/users, /api/v1/admin/audit-logs
 
-PASSWORD
-POST   /auth/password/forgot
-POST   /auth/password/reset
-POST   /auth/password/change
-
-USERNAME
-PUT    /auth/username
-
-IDENTITIES
-POST   /auth/identities/:provider/link
-DELETE /auth/identities/:provider
-
-MFA
-POST   /auth/mfa/setup
-POST   /auth/mfa/verify
-DELETE /auth/mfa
-
-PASSKEYS
-POST   /auth/passkeys/register/options
-POST   /auth/passkeys/register
-POST   /auth/passkeys/login/options
-POST   /auth/passkeys/login
+MFA / PASSKEYS (future — AUTH_API.md §10)
 ```
 
 ---

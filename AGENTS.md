@@ -8,6 +8,7 @@ Instructions for AI coding agents working in this repository.
 - [CHANGELOG.md](CHANGELOG.md) — keep `[Unreleased]` updated
 - [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — remaining work
 - [docs/AUTH.md](docs/AUTH.md) — auth design (not fully implemented)
+- [docs/AUTH_API.md](docs/AUTH_API.md) — auth/authz HTTP contracts
 
 ## Cursor rules
 

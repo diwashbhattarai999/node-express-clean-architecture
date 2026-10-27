@@ -31,7 +31,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 10 | Validation | Done | 10/10 | Zod request/query/path + env |
 | 11 | Error architecture | Done | 17/17 | AppError, field errors, Unauthorized / Forbidden / Conflict |
 | 12 | Logging & observability | Partial | 14/18 | Pino + request IDs; metrics/tracing later |
-| 13 | Authentication | Partial | 5/14 | Full platform auth DDL + password hash; flows/middleware pending (AUTH.md) |
+| 13 | Authentication | Partial | 6/14 | DDL + AUTH_API contracts; flows/middleware pending (AUTH.md) |
 | 14 | Authorization | Partial | 2/10 | `roles` / `user_roles` tables only; middleware/policies pending |
 | 15 | Security | Partial | 8/17 | Helmet, CORS, rate limit; audit/checklist pending |
 | 16 | Caching | Partial | 2/9 | Redis client + health; cache abstraction later |
@@ -79,7 +79,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 8 | Users slice | Repository tests, transactions |
 | 9 | Database | Transactions, seeding, real test DB |
 | 12 | Observability | Metrics, tracing, OpenTelemetry |
-| 13 | Authentication | Login/register/sessions/tokens/middleware (platform DDL done; AUTH.md) |
+| 13 | Authentication | Login/register/sessions/tokens/middleware (DDL + AUTH_API.md; AUTH.md) |
 | 14 | Authorization | Middleware / policies (`roles` tables only) |
 | 15 | Security | Audit process, production checklist |
 | 20 | Pagination | Cursor pagination (optional) |
