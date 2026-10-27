@@ -112,6 +112,10 @@ Copy `.env.example` to `.env`. Important variables:
 | `BASE_URL` | Public API base URL |
 | `DATABASE_URL` | Postgres connection string |
 | `REDIS_URL` | Redis connection string |
+| `EMAIL_PROVIDER` | `resend` \| `noop` (default `noop`) |
+| `EMAIL_FROM` | Default from address (required for `resend`) |
+| `EMAIL_FROM_NAME` | Optional from display name |
+| `RESEND_API_KEY` | Resend API key (required for `resend`) |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
@@ -126,6 +130,10 @@ redis://localhost:6379
 ```
 
 Invalid config fails fast at startup.
+
+## Email
+
+Sending goes through `IEmailSender`. Switch providers with `EMAIL_PROVIDER` (`noop` for local/tests, `resend` for real delivery). Use cases depend only on the port — add another adapter under `src/infrastructure/email/` when needed.
 
 ## Database
 

@@ -23,7 +23,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 2 | Repo hygiene & code quality | Done | 38/38 | Biome, Lefthook, Commitlint, `.gitignore` |
 | 3 | Testing foundation | Partial | 18/20 | Vitest + unit/integration; no E2E / coverage thresholds |
 | 4 | Application bootstrap | Partial | 17/19 | App factory, composition, lifecycle; HTTP timeouts pending |
-| 5 | Configuration system | Partial | 20/24 | Zod env + Redis URL; auth/email config later |
+| 5 | Configuration system | Partial | 22/24 | Zod env + Redis/email; auth config later |
 | 6 | Core shared architecture | Partial | 13/23 | Errors, pagination, use-case patterns; base entity/events later |
 | 7 | HTTP / presentation | Partial | 24/26 | Middleware, routes, validation; request context pending |
 | 8 | Users vertical slice | Partial | 29/31 | Sample CRUD; repo tests / transactions pending |
@@ -35,7 +35,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 14 | Authorization | Not started | 0/10 | RBAC / policies |
 | 15 | Security | Partial | 8/17 | Helmet, CORS, rate limit; audit/checklist pending |
 | 16 | Caching | Partial | 2/9 | Redis client + health; cache abstraction later |
-| 17 | External services | Optional | 1/13 | HTTP client / email / storage abstractions |
+| 17 | External services | Partial | 3/13 | Email port + Resend; HTTP client / storage later |
 | 18 | Background jobs & messaging | Optional | 0/13 | Queues, workers, domain events |
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
@@ -69,8 +69,9 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | --- | --- | --- |
 | 3 | Testing | Coverage thresholds, E2E |
 | 4 | Bootstrap | HTTP timeouts, keep-alive |
-| 5 | Config | Auth / email categories |
+| 5 | Config | Auth categories |
 | 16 | Caching | Cache port, TTL, invalidation |
+| 17 | External services | HTTP client, storage, retries |
 | 6 | Shared architecture | Base entity, events, ID/date helpers |
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
@@ -100,7 +101,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 
 | # | Phase |
 | --- | --- |
-| 17 | External services |
 | 18 | Background jobs & messaging |
 | 21 | File uploads & storage |
 

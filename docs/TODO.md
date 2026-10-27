@@ -2,7 +2,7 @@
 
 Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
-**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + users integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), users CRUD vertical slice, Drizzle/Postgres + Redis client + Compose, Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
+**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + users integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), users CRUD vertical slice, Drizzle/Postgres + Redis client + Compose, email port with Resend/noop adapters, Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
 
 | Priority | Item | Phase | Notes |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P4 | Database seeding | 9 | — |
 | P4 | Dependency audit / vulnerability scanning in CI | 15 / 23 / 25 | Dependabot present; no audit step |
 | P5 | Redis / caching layer (if required) | 16 | Client + readiness done; cache port/abstraction later |
-| P5 | Email abstraction + provider | 17 | Needed for verification/recovery in AUTH |
+| P5 | Email abstraction + provider | 17 | Port + Resend/noop done; wire into auth flows later |
 | P5 | Background jobs / queue | 18 | — |
 | P5 | File uploads / object storage | 21 | — |
 | P5 | Metrics, tracing, OpenTelemetry | 12 / 27 | Logging only today |

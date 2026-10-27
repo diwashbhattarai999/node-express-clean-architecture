@@ -11,6 +11,7 @@ export const ErrorCode = {
 
   INVALID_EMAIL: "INVALID_EMAIL",
   USER_EMAIL_ALREADY_EXISTS: "USER_EMAIL_ALREADY_EXISTS",
+  EMAIL_SEND_FAILED: "EMAIL_SEND_FAILED",
 } as const;
 
 export type TErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
