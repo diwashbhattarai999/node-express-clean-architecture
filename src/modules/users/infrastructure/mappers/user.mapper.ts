@@ -1,12 +1,21 @@
-import type { UserRecord } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { User } from "@/modules/users/domain/entities/user.entity";
 import type { UpdateUserData } from "@/modules/users/domain/repositories/user.repository";
 import { Email } from "@/modules/users/domain/value-objects/email.vo";
 
-export function toDomainUser(record: UserRecord): User {
+/** Joined account row used by the sample users repository (user + email identity + password). */
+export type UserAccountRow = {
+  id: string;
+  displayName: string | null;
+  email: string;
+  passwordHash: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export function toDomainUser(record: UserAccountRow): User {
   return User.create({
     id: record.id,
-    name: record.name,
+    name: record.displayName ?? "",
     email: Email.create(record.email),
     passwordHash: record.passwordHash,
     createdAt: record.createdAt,
@@ -16,7 +25,7 @@ export function toDomainUser(record: UserRecord): User {
 
 export function toPersistenceUser(user: User): {
   id: string;
-  name: string;
+  displayName: string;
   email: string;
   passwordHash: string;
   createdAt: Date;
@@ -24,7 +33,7 @@ export function toPersistenceUser(user: User): {
 } {
   return {
     id: user.getId(),
-    name: user.getName(),
+    displayName: user.getName(),
     email: user.getEmail().getValue(),
     passwordHash: user.getPasswordHash(),
     createdAt: user.getCreatedAt(),
@@ -33,12 +42,12 @@ export function toPersistenceUser(user: User): {
 }
 
 export function toPersistenceUserUpdate(data: UpdateUserData): Partial<{
-  name: string;
+  displayName: string;
   email: string;
   passwordHash: string;
 }> {
   return {
-    ...(data.name !== undefined && { name: data.name }),
+    ...(data.name !== undefined && { displayName: data.name }),
     ...(data.email !== undefined && { email: data.email }),
     ...(data.passwordHash !== undefined && {
       passwordHash: data.passwordHash,

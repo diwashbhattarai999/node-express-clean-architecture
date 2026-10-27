@@ -1,7 +1,9 @@
-import { and, asc, count, desc, eq, gte, ilike, lte, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, lte, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
+import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
+import { passwordCredentials } from "@/infrastructure/database/drizzle/schema/auth/password-credentials.schema";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { UserEmailAlreadyExistsError } from "@/modules/users/application/errors/user-email-already-exists.error";
 import type { User } from "@/modules/users/domain/entities/user.entity";
@@ -15,48 +17,75 @@ import {
   toDomainUser,
   toPersistenceUser,
   toPersistenceUserUpdate,
+  type UserAccountRow,
 } from "@/modules/users/infrastructure/mappers/user.mapper";
 import { getPaginationOffset } from "@/shared/http/pagination";
 
-const sortColumnMap = {
-  name: users.name,
-  email: users.email,
+const accountSelect = {
+  id: users.id,
+  displayName: users.displayName,
+  email: loginIdentities.normalizedIdentifier,
+  passwordHash: passwordCredentials.passwordHash,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 } as const;
 
+const emailIdentityJoin = and(
+  eq(loginIdentities.userId, users.id),
+  eq(loginIdentities.type, "email"),
+  eq(loginIdentities.isPrimary, true),
+);
+
+const sortColumnMap = {
+  name: users.displayName,
+  email: loginIdentities.normalizedIdentifier,
+  createdAt: users.createdAt,
+  updatedAt: users.updatedAt,
+} as const;
+
+const accountFrom = () =>
+  db
+    .select(accountSelect)
+    .from(users)
+    .innerJoin(loginIdentities, emailIdentityJoin)
+    .innerJoin(passwordCredentials, eq(passwordCredentials.userId, users.id));
+
 export class PostgresUserRepository implements IUserRepository {
   async findById(id: string) {
-    const [record] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [record] = await accountFrom().where(eq(users.id, id)).limit(1);
 
-    return record ? toDomainUser(record) : null;
+    return record ? toDomainUser(record as UserAccountRow) : null;
   }
 
   async findByEmail(email: Email) {
-    const [record] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email.getValue()))
+    const [record] = await accountFrom()
+      .where(eq(loginIdentities.normalizedIdentifier, email.getValue()))
       .limit(1);
 
-    return record ? toDomainUser(record) : null;
+    return record ? toDomainUser(record as UserAccountRow) : null;
   }
 
   async findMany(criteria: FindUsersCriteria) {
-    const conditions = [];
+    const conditions: SQL[] = [];
 
     if (criteria.search) {
       const searchTerm = `%${criteria.search}%`;
+      const searchCondition = or(
+        ilike(users.displayName, searchTerm),
+        ilike(loginIdentities.normalizedIdentifier, searchTerm),
+      );
 
-      conditions.push(or(ilike(users.name, searchTerm), ilike(users.email, searchTerm)));
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     if (criteria.name) {
-      conditions.push(ilike(users.name, `%${criteria.name}%`));
+      conditions.push(ilike(users.displayName, `%${criteria.name}%`));
     }
 
     if (criteria.email) {
-      conditions.push(ilike(users.email, `%${criteria.email}%`));
+      conditions.push(ilike(loginIdentities.normalizedIdentifier, `%${criteria.email}%`));
     }
 
     if (criteria.createdFrom) {
@@ -72,29 +101,71 @@ export class PostgresUserRepository implements IUserRepository {
     const orderByClause = criteria.sortOrder === "asc" ? asc(sortColumn) : desc(sortColumn);
     const offset = getPaginationOffset(criteria.page, criteria.limit);
 
-    const [totalResult] = await db.select({ value: count() }).from(users).where(whereClause);
-
-    const records = await db
-      .select()
+    const [totalResult] = await db
+      .select({ value: count() })
       .from(users)
+      .innerJoin(loginIdentities, emailIdentityJoin)
+      .innerJoin(passwordCredentials, eq(passwordCredentials.userId, users.id))
+      .where(whereClause);
+
+    const records = await accountFrom()
       .where(whereClause)
       .orderBy(orderByClause)
       .limit(criteria.limit)
       .offset(offset);
 
     return {
-      items: records.map(toDomainUser),
+      items: records.map((record) => toDomainUser(record as UserAccountRow)),
       total: totalResult?.value ?? 0,
     };
   }
 
   async create(user: User) {
-    try {
-      const [record] = await db.insert(users).values(toPersistenceUser(user)).returning();
+    const persistence = toPersistenceUser(user);
+    const now = new Date();
 
-      if (!record) {
-        throw new Error("Failed to create user.");
-      }
+    try {
+      const record = await db.transaction(async (tx) => {
+        const [createdUser] = await tx
+          .insert(users)
+          .values({
+            id: persistence.id,
+            displayName: persistence.displayName,
+            status: "active",
+            activatedAt: now,
+            createdAt: persistence.createdAt,
+            updatedAt: persistence.updatedAt,
+          })
+          .returning();
+
+        if (!createdUser) {
+          throw new Error("Failed to create user.");
+        }
+
+        await tx.insert(loginIdentities).values({
+          userId: createdUser.id,
+          type: "email",
+          identifier: persistence.email,
+          normalizedIdentifier: persistence.email,
+          verifiedAt: now,
+          isPrimary: true,
+        });
+
+        await tx.insert(passwordCredentials).values({
+          userId: createdUser.id,
+          passwordHash: persistence.passwordHash,
+          passwordChangedAt: now,
+        });
+
+        return {
+          id: createdUser.id,
+          displayName: createdUser.displayName,
+          email: persistence.email,
+          passwordHash: persistence.passwordHash,
+          createdAt: createdUser.createdAt,
+          updatedAt: createdUser.updatedAt,
+        } satisfies UserAccountRow;
+      });
 
       return toDomainUser(record);
     } catch (error) {
@@ -114,16 +185,58 @@ export class PostgresUserRepository implements IUserRepository {
     }
 
     try {
-      const [record] = await db
-        .update(users)
-        .set({
-          ...updateData,
+      await db.transaction(async (tx) => {
+        const userPatch: {
+          displayName?: string;
+          updatedAt: Date;
+        } = {
           updatedAt: new Date(),
-        })
-        .where(eq(users.id, id))
-        .returning();
+        };
 
-      return record ? toDomainUser(record) : null;
+        if (updateData.displayName !== undefined) {
+          userPatch.displayName = updateData.displayName;
+        }
+
+        const [updatedUser] = await tx
+          .update(users)
+          .set(userPatch)
+          .where(eq(users.id, id))
+          .returning({ id: users.id });
+
+        if (!updatedUser) {
+          return;
+        }
+
+        if (updateData.email !== undefined) {
+          await tx
+            .update(loginIdentities)
+            .set({
+              identifier: updateData.email,
+              normalizedIdentifier: updateData.email,
+              updatedAt: new Date(),
+            })
+            .where(
+              and(
+                eq(loginIdentities.userId, id),
+                eq(loginIdentities.type, "email"),
+                eq(loginIdentities.isPrimary, true),
+              ),
+            );
+        }
+
+        if (updateData.passwordHash !== undefined) {
+          await tx
+            .update(passwordCredentials)
+            .set({
+              passwordHash: updateData.passwordHash,
+              passwordChangedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(passwordCredentials.userId, id));
+        }
+      });
+
+      return this.findById(id);
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw new UserEmailAlreadyExistsError();

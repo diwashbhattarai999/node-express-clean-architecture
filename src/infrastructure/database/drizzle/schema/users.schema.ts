@@ -1,38 +1,47 @@
-import { index, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+
+import { userStatusEnum } from "./enums";
+import { withTimestamps } from "./helpers";
 
 export const users = pgTable(
   "users",
   {
     id: uuid("id").defaultRandom().primaryKey(),
 
-    name: varchar("name", {
+    status: userStatusEnum("status").default("pending_verification").notNull(),
+
+    displayName: varchar("display_name", {
       length: 100,
-    }).notNull(),
+    }),
 
-    email: varchar("email", {
-      length: 255,
-    }).notNull(),
+    avatarUrl: varchar("avatar_url", {
+      length: 2048,
+    }),
 
-    passwordHash: varchar("password_hash", {
-      length: 255,
-    }).notNull(),
-
-    createdAt: timestamp("created_at", {
+    activatedAt: timestamp("activated_at", {
       withTimezone: true,
       mode: "date",
-    })
-      .defaultNow()
-      .notNull(),
+    }),
 
-    updatedAt: timestamp("updated_at", {
+    suspendedAt: timestamp("suspended_at", {
       withTimezone: true,
       mode: "date",
-    })
-      .defaultNow()
-      .notNull(),
+    }),
+
+    disabledAt: timestamp("disabled_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+
+    deletedAt: timestamp("deleted_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+
+    ...withTimestamps(),
   },
   (table) => [
-    uniqueIndex("users_email_unique_idx").on(table.email),
+    index("users_status_created_at_idx").on(table.status, table.createdAt),
     index("users_created_at_idx").on(table.createdAt),
   ],
 );

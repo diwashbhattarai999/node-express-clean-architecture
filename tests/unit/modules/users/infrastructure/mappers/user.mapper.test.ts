@@ -14,7 +14,7 @@ describe("user.mapper", () => {
 
     const user = toDomainUser({
       id: "550e8400-e29b-41d4-a716-446655440000",
-      name: "John Doe",
+      displayName: "John Doe",
       email: "john@example.com",
       passwordHash: "hashed-password",
       createdAt,
@@ -38,7 +38,7 @@ describe("user.mapper", () => {
 
     expect(toPersistenceUser(user)).toEqual({
       id: user.getId(),
-      name: "John Doe",
+      displayName: "John Doe",
       email: "john@example.com",
       passwordHash: "hashed-password",
       createdAt: user.getCreatedAt(),
@@ -53,7 +53,7 @@ describe("user.mapper", () => {
         email: "updated@example.com",
       }),
     ).toEqual({
-      name: "Updated",
+      displayName: "Updated",
       email: "updated@example.com",
     });
 

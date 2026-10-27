@@ -29,6 +29,14 @@ A `User` represents the account.
 
 Authentication mechanisms belong to the user but are modeled independently.
 
+### Persistence
+
+Full table/column reference: [DATABASE.md](DATABASE.md).
+
+Drizzle schemas: [`src/infrastructure/database/drizzle/schema/`](../src/infrastructure/database/drizzle/schema/) (migrations in `drizzle/`).
+
+Access tokens are not stored. Raw secrets are never persisted — only hashes.
+
 ```text
 User
  │
