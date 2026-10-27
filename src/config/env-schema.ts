@@ -162,6 +162,24 @@ export const envSchema = z
         return value;
       }, z.boolean().optional())
       .optional(),
+
+    HTTP_CLIENT_TIMEOUT_MS: z.coerce
+      .number("HTTP client timeout is required.")
+      .int("HTTP client timeout must be an integer")
+      .positive("HTTP client timeout must be a positive number")
+      .default(10_000),
+
+    HTTP_CLIENT_MAX_RETRIES: z.coerce
+      .number("HTTP client max retries is required.")
+      .int("HTTP client max retries must be an integer")
+      .nonnegative("HTTP client max retries must be zero or greater")
+      .default(2),
+
+    HTTP_CLIENT_RETRY_BASE_DELAY_MS: z.coerce
+      .number("HTTP client retry base delay is required.")
+      .int("HTTP client retry base delay must be an integer")
+      .positive("HTTP client retry base delay must be a positive number")
+      .default(200),
   })
   .superRefine((env, context) => {
     if (env.EMAIL_PROVIDER === EmailProvider.RESEND) {

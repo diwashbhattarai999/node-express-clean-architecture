@@ -119,6 +119,9 @@ Copy `.env.example` to `.env`. Important variables:
 | `STORAGE_PROVIDER` | `local` \| `s3` (default `local`) |
 | `STORAGE_LOCAL_PATH` | Local root directory (default `./uploads`) |
 | `STORAGE_BUCKET` / keys / endpoint | Required for `s3` |
+| `HTTP_CLIENT_TIMEOUT_MS` | Outbound HTTP timeout (default `10000`) |
+| `HTTP_CLIENT_MAX_RETRIES` | Retries after the first attempt (default `2`) |
+| `HTTP_CLIENT_RETRY_BASE_DELAY_MS` | Exponential backoff base delay (default `200`) |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
@@ -137,6 +140,12 @@ Invalid config fails fast at startup.
 ## Email
 
 Sending goes through `IEmailSender`. Switch providers with `EMAIL_PROVIDER` (`noop` for local/tests, `resend` for real delivery). Use cases depend only on the port — add another adapter under `src/infrastructure/email/` when needed.
+
+## Outbound HTTP
+
+Raw REST calls go through `IHttpClient` (Axios adapter in infrastructure). Timeouts, retries with exponential backoff + jitter, and redacted outbound logs are built in. Inject `httpClient` from the composition root into use cases that need third-party HTTP. Email (Resend) and object storage (AWS SDK) keep using their vendor SDKs — they do not go through `IHttpClient`.
+
+Circuit breakers, payment, and push/SMS notification ports are out of starter scope for now.
 
 ## Object storage
 

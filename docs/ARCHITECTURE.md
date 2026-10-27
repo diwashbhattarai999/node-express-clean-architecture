@@ -31,6 +31,16 @@ Each business module owns its own:
 
 The `shared` directory contains only genuinely cross-cutting abstractions and utilities.
 
+Cross-cutting **ports** for external IO live under `shared` and are implemented in `infrastructure`:
+
+| Port | Shared | Infrastructure |
+| --- | --- | --- |
+| Email | `IEmailSender` | Resend / noop |
+| Object storage | `IObjectStorage` | Local filesystem / S3 |
+| Outbound HTTP | `IHttpClient` | Axios (`AxiosHttpClient`) |
+
+Application and domain depend only on the ports. Axios and vendor SDKs stay in infrastructure. Compose implementations in `src/app/composition.ts`.
+
 ## Dependency Injection
 
 - Dependencies are manually injected.

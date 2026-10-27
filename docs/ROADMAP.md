@@ -35,7 +35,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 14 | Authorization | Not started | 0/10 | RBAC / policies |
 | 15 | Security | Partial | 8/17 | Helmet, CORS, rate limit; audit/checklist pending |
 | 16 | Caching | Partial | 2/9 | Redis client + health; cache abstraction later |
-| 17 | External services | Partial | 5/13 | Email + object storage; HTTP client later |
+| 17 | External services | Done | — | Email, object storage, Axios `IHttpClient` (timeouts/retries) |
 | 18 | Background jobs & messaging | Optional | 0/13 | Queues, workers, domain events |
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
@@ -61,6 +61,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 1 | Project foundation |
 | 2 | Repo hygiene & code quality |
 | 10 | Validation |
+| 17 | External services |
 | 21 | File uploads & storage |
 | 22 | Docker |
 
@@ -72,7 +73,6 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 4 | Bootstrap | HTTP timeouts, keep-alive |
 | 5 | Config | Auth categories |
 | 16 | Caching | Cache port, TTL, invalidation |
-| 17 | External services | HTTP client, retries |
 | 6 | Shared architecture | Base entity, events, ID/date helpers |
 | 7 | HTTP | Request context |
 | 8 | Users slice | Repository tests, transactions |
