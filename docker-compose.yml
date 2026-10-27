@@ -11,6 +11,7 @@ services:
       # Override host .env for container networking / production runtime
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-starter}
+      REDIS_URL: redis://redis:6379
       HOST: 0.0.0.0
       PORT: 3000
       BASE_URL: http://localhost:${PORT:-3000}

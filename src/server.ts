@@ -3,11 +3,14 @@ import { createServer } from "node:http";
 import { createApp } from "@/app/create-app";
 import { env } from "@/config/env";
 import { closeDatabase } from "@/infrastructure/database/drizzle";
+import { closeRedis, connectRedis } from "@/infrastructure/redis";
 import { logger } from "@/shared/logger/logger";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 const startServer = async (): Promise<void> => {
+  await connectRedis();
+
   const app = createApp();
   const server = createServer(app);
 
@@ -48,6 +51,7 @@ const startServer = async (): Promise<void> => {
       logger.info("HTTP server closed successfully");
 
       await closeDatabase();
+      await closeRedis();
 
       clearTimeout(timeout);
       process.exit(0);

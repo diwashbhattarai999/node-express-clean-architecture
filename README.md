@@ -95,7 +95,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and compos
 
 - Versioned feature routes live under `/api/v1/...`
 - `GET /health` — liveness
-- `GET /ready` — readiness (includes DB check; `503` if unhealthy)
+- `GET /ready` — readiness (Postgres + Redis; `503` if either is unhealthy)
 - Responses use a consistent envelope (`success`, `message`, `data`)
 - Validation failures return `422` with field-level errors
 
@@ -111,16 +111,18 @@ Copy `.env.example` to `.env`. Important variables:
 | `HOST` / `PORT` | Listen address (default `0.0.0.0:3000`) |
 | `BASE_URL` | Public API base URL |
 | `DATABASE_URL` | Postgres connection string |
+| `REDIS_URL` | Redis connection string |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
 | `RATE_LIMIT_*` | Global rate limit window/max |
 | `TRUST_PROXY` | Proxy trust setting |
 
-Default local DB URL (matches Compose):
+Default local URLs (host → Compose ports):
 
 ```text
 postgresql://postgres:postgres@localhost:5433/node_express_clean_architecture
+redis://localhost:6379
 ```
 
 Invalid config fails fast at startup.
