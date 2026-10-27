@@ -1,0 +1,133 @@
+import { randomUUID } from "node:crypto";
+
+import type { RegisterDto } from "@/modules/auth/application/dto/register.dto";
+import { buildEmailVerificationMessage } from "@/modules/auth/application/emails/email-verification.message";
+import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
+import type {
+  IAuthAccountRepository,
+  RegisteredAccount,
+} from "@/modules/auth/application/ports/auth-account.repository";
+import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
+import {
+  generateEmailVerificationToken,
+  generatePhoneOtp,
+} from "@/modules/auth/application/utils/generate-verification-secrets";
+import { hashToken } from "@/modules/auth/application/utils/hash-token";
+import type { IEmailSender } from "@/shared/email/email-sender.port";
+import { logger } from "@/shared/logger/logger";
+
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const PHONE_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const PHONE_OTP_MAX_ATTEMPTS = 5;
+
+export type RegisterUseCaseOptions = {
+  appBaseUrl: string;
+};
+
+export class RegisterUseCase {
+  public constructor(
+    private readonly authAccountRepository: IAuthAccountRepository,
+    private readonly passwordHasher: IPasswordHasher,
+    private readonly emailSender: IEmailSender,
+    private readonly options: RegisterUseCaseOptions,
+  ) {}
+
+  public async execute(dto: RegisterDto): Promise<RegisteredAccount> {
+    const email = dto.email?.trim().toLowerCase();
+    const phone = dto.phone?.trim();
+    const displayName = dto.displayName?.trim() || null;
+
+    if (email) {
+      const existing = await this.authAccountRepository.findIdentityByNormalized("email", email);
+
+      if (existing) {
+        throw new IdentityAlreadyExistsError();
+      }
+    }
+
+    if (phone) {
+      const existing = await this.authAccountRepository.findIdentityByNormalized("phone", phone);
+
+      if (existing) {
+        throw new IdentityAlreadyExistsError();
+      }
+    }
+
+    const passwordHash = await this.passwordHasher.hash(dto.password);
+    const userId = randomUUID();
+    const now = Date.now();
+
+    let rawEmailToken: string | undefined;
+    let rawPhoneOtp: string | undefined;
+
+    const verificationToken = email
+      ? (() => {
+          rawEmailToken = generateEmailVerificationToken();
+
+          return {
+            purpose: "email_verification" as const,
+            tokenHash: hashToken(rawEmailToken),
+            expiresAt: new Date(now + EMAIL_VERIFICATION_TTL_MS),
+          };
+        })()
+      : (() => {
+          rawPhoneOtp = generatePhoneOtp();
+
+          return {
+            purpose: "phone_verification" as const,
+            tokenHash: hashToken(rawPhoneOtp),
+            expiresAt: new Date(now + PHONE_OTP_TTL_MS),
+            maxAttempts: PHONE_OTP_MAX_ATTEMPTS,
+          };
+        })();
+
+    const account = await this.authAccountRepository.register({
+      id: userId,
+      displayName,
+      passwordHash,
+      ...(email
+        ? {
+            email: {
+              identifier: email,
+              normalizedIdentifier: email,
+            },
+          }
+        : {}),
+      ...(phone
+        ? {
+            phone: {
+              identifier: phone,
+              normalizedIdentifier: phone,
+            },
+          }
+        : {}),
+      verificationToken,
+    });
+
+    if (email && rawEmailToken) {
+      try {
+        await this.emailSender.send(
+          buildEmailVerificationMessage({
+            email,
+            token: rawEmailToken,
+            appBaseUrl: this.options.appBaseUrl,
+          }),
+        );
+      } catch (error) {
+        logger.warn(
+          { err: error, userId: account.id },
+          "Failed to send registration verification email; account was created",
+        );
+      }
+    }
+
+    if (phone && rawPhoneOtp) {
+      logger.info(
+        { userId: account.id },
+        "Phone registration OTP created; SMS delivery is not configured yet",
+      );
+    }
+
+    return account;
+  }
+}

@@ -1,3 +1,4 @@
+import type { IPasswordHasher } from "@/modules/users/application/ports/password-hasher";
 import { CreateUserUseCase } from "@/modules/users/application/use-cases/create-user.use-case";
 import { DeleteUserUseCase } from "@/modules/users/application/use-cases/delete-user.use-case";
 import { GetUserByIdUseCase } from "@/modules/users/application/use-cases/get-user-by-id.use-case";
@@ -11,9 +12,13 @@ import { GetUserByIdController } from "@/modules/users/presentation/http/control
 import { ListUsersController } from "@/modules/users/presentation/http/controllers/list-users.controller";
 import { UpdateUserController } from "@/modules/users/presentation/http/controllers/update-user.controller";
 
-export function createUsersModule() {
+export type CreateUsersModuleOptions = {
+  passwordHasher?: IPasswordHasher;
+};
+
+export function createUsersModule(options: CreateUsersModuleOptions = {}) {
   const userRepository = new PostgresUserRepository();
-  const passwordHasher = new Argon2PasswordHasher();
+  const passwordHasher = options.passwordHasher ?? new Argon2PasswordHasher();
 
   const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher);
   const getUserByIdUseCase = new GetUserByIdUseCase(userRepository);

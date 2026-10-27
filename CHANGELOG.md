@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database schema reference doc ([`docs/DATABASE.md`](docs/DATABASE.md))
 - Platform auth DDL: `user_profiles`, `auth_tokens`, `mfa_challenges`, `login_attempts`, `passkeys`, `security_audit_logs`, `roles` / `user_roles`
 - Auth/authz HTTP API contract doc ([`docs/AUTH_API.md`](docs/AUTH_API.md)) covering 92 planned endpoints
+- `POST /api/v1/auth/register` — email/phone registration with pending verification (no session)
+- Auth email verification message builder (`buildEmailVerificationMessage`) and Argon2id password hasher under the auth module
 
 ### Changed
 
