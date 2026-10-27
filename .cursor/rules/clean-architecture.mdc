@@ -1,0 +1,41 @@
+---
+description: Clean Architecture dependency rules and module layout
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Clean Architecture
+
+Dependencies point **inward** toward domain. See `docs/ARCHITECTURE.md`.
+
+## Allowed direction
+
+- `presentation` → `application` → `domain`
+- `infrastructure` implements ports/contracts from application/domain
+- Composition root (`src/app/`) wires concrete implementations
+
+## Forbidden
+
+```typescript
+// ❌ domain importing Express, Drizzle, Pino, Redis, etc.
+import { Router } from "express"; // in domain/
+
+// ❌ application importing infrastructure concretions
+import { PostgresUserRepository } from "../infrastructure/...";
+```
+
+```typescript
+// ✅ application depends on a port
+import type { IUserRepository } from "../../domain/repositories/user.repository";
+```
+
+## Feature modules
+
+Place new features under `src/modules/<feature>/` with:
+
+- `domain/` — entities, VOs, repository contracts, domain errors
+- `application/` — use cases, DTOs, ports, application errors
+- `infrastructure/` — DB repos, mappers, external adapters
+- `presentation/http/` — controllers, validators, routes, response mappers
+
+`shared/` is only for genuine cross-cutting utilities (errors, HTTP helpers, logger).

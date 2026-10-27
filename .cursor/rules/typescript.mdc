@@ -1,0 +1,17 @@
+---
+description: TypeScript and Express coding standards
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript / Express
+
+- Use ESM and `@/*` path aliases; do not use deep relative imports across layers.
+- Prefer `type` imports for types (`import type { ... }`).
+- Strict TypeScript — no `any` unless unavoidable and localized.
+- Controllers stay thin: validate → call use case → map response.
+- Use shared Zod schemas under `src/shared/http/schemas/` when reusable.
+- Throw `AppError` subclasses for expected failures; let the error middleware format responses.
+- Validation failures: `422` with field errors via existing validation middleware.
+- Passwords: hash only via application ports (e.g. Argon2 adapter), never in domain entities as plaintext persistence.
+- Do not log secrets, tokens, or passwords (logger redaction paths already cover common keys).

@@ -1,0 +1,14 @@
+---
+description: Vitest testing conventions
+globs: tests/**/*.ts
+alwaysApply: false
+---
+
+# Testing
+
+- Framework: Vitest. Files: `tests/**/*.test.ts`. Alias: `@tests/*`.
+- Unit tests mock ports/repositories; do not hit real DB unless writing repository/integration DB tests.
+- HTTP integration tests use Supertest against the app factory with mocked infrastructure when appropriate.
+- Mirror module structure under `tests/unit/modules/<feature>/...`.
+- Cover use cases, validators, and mappers for new vertical slices.
+- Prefer clear arrange/act/assert; name tests by behavior, not implementation.

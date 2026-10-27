@@ -1,0 +1,20 @@
+---
+description: Core project conventions for this Express Clean Architecture starter
+alwaysApply: true
+---
+
+# Project conventions
+
+- Stack: Node 22+, pnpm, TypeScript ESM, Express 5, Drizzle/Postgres, Zod, Vitest, Biome.
+- Prefer small, focused changes. Match existing naming and folder patterns.
+- Do not invent DI frameworks, ORMs, or folder layouts that fight the starter.
+- Manual composition only — wire dependencies in `src/app/composition.ts` / module factories.
+- Secrets stay out of git; use `.env.example` for new env vars.
+- After any user-facing feature, enhancement, or bug fix, update `CHANGELOG.md` under `[Unreleased]` (see changelog rule).
+- Prefer absolute docs links in README; keep sample `users` module replaceable, not product-specific in docs.
+
+## Commands
+
+- `pnpm dev` / `pnpm build` / `pnpm test` / `pnpm lint` / `pnpm typecheck`
+- DB: `pnpm db:up`, `pnpm db:migrate`
+- Docker: `pnpm docker:up` (service name is `api`, not `app`)

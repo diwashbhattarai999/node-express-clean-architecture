@@ -1,0 +1,34 @@
+---
+description: Keep CHANGELOG.md updated after features, changes, and bug fixes
+alwaysApply: true
+---
+
+# Changelog updates (required)
+
+After completing a **feature**, **enhancement**, **bug fix**, or **breaking change**, update root `CHANGELOG.md` in the same change set.
+
+## Where to write
+
+- Add entries under `## [Unreleased]`.
+- Use Keep a Changelog sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
+- Write user/developer-facing bullets — concise, past tense or imperative, no PR numbers required unless asked.
+
+## Examples
+
+```markdown
+## [Unreleased]
+
+### Added
+- Redis cache port and adapter for session lookups
+
+### Fixed
+- Readiness probe returning 200 when Postgres is unreachable
+```
+
+## Skip only when
+
+- Pure docs/typo edits with no behavior change (optional entry).
+- Chore-only (formatting, dependency bump with no user impact) — optional; prefer `Changed` if it affects contributors.
+- The user explicitly says not to update the changelog.
+
+Do **not** invent a version bump or release date unless the user asks to cut a release.

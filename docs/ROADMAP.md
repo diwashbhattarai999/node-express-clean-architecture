@@ -46,7 +46,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 25 | Dependency management | Partial | 6/10 | Dependabot + pinned `packageManager` / engines |
 | 26 | Performance & reliability | Partial | 3/12 | Rate limiting; timeouts, load tests later |
 | 27 | Production operations | Partial | 7/14 | Health, ready, shutdown, logging; metrics later |
-| 28 | Documentation | Partial | 10/18 | README + architecture; ADRs / contrib guide later |
+| 28 | Documentation | Partial | 12/18 | README, architecture, CHANGELOG, AGENTS; ADRs / contrib later |
 | 29 | Architecture enforcement | Not started | 0/9 | dependency-cruiser / architecture tests |
 | 30 | Starter hardening | Partial | 14/26 | Core verify OK; Docker image + full checklist remaining |
 

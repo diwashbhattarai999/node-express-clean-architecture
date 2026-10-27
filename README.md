@@ -177,6 +177,8 @@ Example: `feat(users): add list users endpoint`
 
 | Doc | Contents |
 | --- | --- |
+| [CHANGELOG.md](CHANGELOG.md) | Notable changes (Keep a Changelog) |
+| [AGENTS.md](AGENTS.md) | Guide for AI coding agents |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Clean Architecture rules |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Master checklist |
 | [docs/TODO.md](docs/TODO.md) | Prioritized remaining work |
