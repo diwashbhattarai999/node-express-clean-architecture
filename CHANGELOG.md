@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-28
+
 ### Added
 
 - `POST /api/v1/auth/email/verification/resend` — anti-enumeration resend of email verification links
@@ -21,10 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/password/reset` — consume reset token, update password, revoke all sessions
 - `POST /api/v1/auth/logout-all` — bearer-authenticated revoke of all user sessions (CSRF if refresh cookie present)
 - `GET /api/v1/auth/sessions` — paginated session list with `includeRevoked` and `isCurrent` marker
-
-
 - Access-token `verify` on the JWT signer for bearer-authenticated auth routes
-
 - Session cookies (`refresh_token` + `csrf_token`) set on login, email/phone verify, and refresh
 
 ### Changed
