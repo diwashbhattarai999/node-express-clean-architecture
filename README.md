@@ -111,6 +111,8 @@ Copy `.env.example` to `.env`. Important variables:
 | `NODE_ENV` | `local` \| `development` \| `test` \| `staging` \| `production` |
 | `HOST` / `PORT` | Listen address (default `0.0.0.0:3000`) |
 | `BASE_URL` | Public API base URL |
+| `FRONTEND_BASE_URL` | Public web app origin (emails, redirects) |
+| `APP_NAME` | Display name in transactional emails (default `Your Brand`) |
 | `DATABASE_URL` | Postgres connection string |
 | `REDIS_URL` | Redis connection string |
 | `EMAIL_PROVIDER` | `resend` \| `noop` (default `noop`) |

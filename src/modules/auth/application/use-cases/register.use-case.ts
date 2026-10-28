@@ -4,8 +4,8 @@ import type { RegisterDto } from "@/modules/auth/application/dto/register.dto";
 import { buildEmailVerificationMessage } from "@/modules/auth/application/emails/email-verification.message";
 import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
 import type {
+  AuthUser,
   IAuthAccountRepository,
-  RegisteredAccount,
 } from "@/modules/auth/application/ports/auth-account.repository";
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
 import {
@@ -21,7 +21,8 @@ const PHONE_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PHONE_OTP_MAX_ATTEMPTS = 5;
 
 export type RegisterUseCaseOptions = {
-  appBaseUrl: string;
+  frontendBaseUrl: string;
+  brandName: string;
 };
 
 export class RegisterUseCase {
@@ -32,7 +33,7 @@ export class RegisterUseCase {
     private readonly options: RegisterUseCaseOptions,
   ) {}
 
-  public async execute(dto: RegisterDto): Promise<RegisteredAccount> {
+  public async execute(dto: RegisterDto): Promise<AuthUser> {
     const email = dto.email?.trim().toLowerCase();
     const phone = dto.phone?.trim();
     const displayName = dto.displayName?.trim() || null;
@@ -110,7 +111,8 @@ export class RegisterUseCase {
           buildEmailVerificationMessage({
             email,
             token: rawEmailToken,
-            appBaseUrl: this.options.appBaseUrl,
+            frontendBaseUrl: this.options.frontendBaseUrl,
+            brandName: this.options.brandName,
           }),
         );
       } catch (error) {

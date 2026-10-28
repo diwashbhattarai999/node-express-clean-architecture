@@ -10,7 +10,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P0 | Fix `drizzle.config.ts` schema path | 9 | Done (`drizzle/schema/`) |
 | P0 | Pin `packageManager` / Node engines in `package.json` | 25 | Done (`pnpm@11.22.0`, `node>=22`) |
 | P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Done — `pnpm docker:up` |
-| P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; `POST /auth/register` landed; verify/login/sessions still pending |
+| P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; register + email verify landed; resend/login/sessions still pending |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Users API is currently open |
 | P2 | Authorization / RBAC | 14 | `roles` / `user_roles` tables ready; design + middleware + use-case rules pending |
 | P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Done — shared 401/403/409 errors; email conflict is 409 |

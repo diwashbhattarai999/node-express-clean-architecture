@@ -1,4 +1,4 @@
-import type { RegisteredAccount } from "@/modules/auth/application/ports/auth-account.repository";
+import type { AuthUser } from "@/modules/auth/application/ports/auth-account.repository";
 
 export type UserPublicResponse = {
   id: string;
@@ -11,7 +11,7 @@ export type UserPublicResponse = {
   updatedAt: string;
 };
 
-export const toUserPublicResponse = (account: RegisteredAccount): UserPublicResponse => ({
+export const toUserPublicResponse = (account: AuthUser): UserPublicResponse => ({
   id: account.id,
   status: account.status,
   displayName: account.displayName,
