@@ -23,6 +23,7 @@ describe("RefreshUseCase", () => {
     rotateRefreshSession: vi.fn(),
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
+    findAuthenticatedPrincipal: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

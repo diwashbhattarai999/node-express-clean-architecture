@@ -4,6 +4,7 @@ import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
 import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
+import { GetMeUseCase } from "@/modules/auth/application/use-cases/get-me.use-case";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
 import { LogoutUseCase } from "@/modules/auth/application/use-cases/logout.use-case";
 import { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use-case";
@@ -14,6 +15,7 @@ import { VerifyEmailUseCase } from "@/modules/auth/application/use-cases/verify-
 import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-phone.use-case";
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
+import { GetMeController } from "@/modules/auth/presentation/http/controllers/get-me.controller";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
 import { LogoutController } from "@/modules/auth/presentation/http/controllers/logout.controller";
 import { RefreshController } from "@/modules/auth/presentation/http/controllers/refresh.controller";
@@ -43,6 +45,7 @@ export type AuthModule = {
   loginController: LoginController;
   refreshController: RefreshController;
   logoutController: LogoutController;
+  getMeController: GetMeController;
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
@@ -116,6 +119,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   );
 
   const logoutUseCase = new LogoutUseCase(authAccountRepository);
+  const getMeUseCase = new GetMeUseCase(authAccountRepository);
 
   return {
     registerController: new RegisterController(registerUseCase),
@@ -132,6 +136,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     logoutController: new LogoutController(logoutUseCase, {
       secureCookies: cookieOptions.secureCookies,
     }),
+    getMeController: new GetMeController(getMeUseCase),
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),

@@ -6,11 +6,14 @@ import { authTokens } from "@/infrastructure/database/drizzle/schema/auth/auth-t
 import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
 import { passwordCredentials } from "@/infrastructure/database/drizzle/schema/auth/password-credentials.schema";
 import { sessions } from "@/infrastructure/database/drizzle/schema/auth/sessions.schema";
+import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
+import { userRoles } from "@/infrastructure/database/drizzle/schema/authorization/user-roles.schema";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
 import type {
   AuthUser,
   CreateSessionInput,
+  FindAuthenticatedPrincipalResult,
   IAuthAccountRepository,
   PasswordLoginCandidate,
   RegisterAccountInput,
@@ -800,5 +803,86 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
       .returning({ id: sessions.id });
 
     return revoked.length > 0;
+  }
+
+  public async findAuthenticatedPrincipal(
+    userId: string,
+    sessionId: string,
+  ): Promise<FindAuthenticatedPrincipalResult> {
+    const [session] = await db
+      .select({
+        id: sessions.id,
+        userId: sessions.userId,
+        expiresAt: sessions.expiresAt,
+        revokedAt: sessions.revokedAt,
+      })
+      .from(sessions)
+      .where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)))
+      .limit(1);
+
+    if (!session) {
+      return { outcome: "invalid_session" };
+    }
+
+    if (session.revokedAt) {
+      return { outcome: "revoked_session" };
+    }
+
+    if (session.expiresAt.getTime() <= Date.now()) {
+      return { outcome: "expired_session" };
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return { outcome: "user_not_found" };
+    }
+
+    const identities = await db
+      .select({
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(eq(loginIdentities.userId, user.id));
+
+    const primaryEmail =
+      identities.find(
+        (identity) =>
+          identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+      )?.identifier ??
+      identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+        ?.identifier ??
+      null;
+
+    const username =
+      identities.find((identity) => identity.type === "username")?.identifier ?? null;
+
+    const roleRows = await db
+      .select({ key: roles.key })
+      .from(userRoles)
+      .innerJoin(roles, eq(roles.id, userRoles.roleId))
+      .where(eq(userRoles.userId, user.id));
+
+    return {
+      outcome: "ok",
+      roles: roleRows.map((row) => row.key),
+      user: {
+        id: user.id,
+        status: user.status,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+        email: primaryEmail,
+        username,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    };
   }
 }

@@ -1,7 +1,8 @@
-import { type IRouter, Router } from "express";
+import { type IRouter, type RequestHandler, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
+import { asBearerAuthenticatedRequest } from "@/modules/auth/presentation/http/middleware/auth-context";
 import { loginSchema } from "@/modules/auth/presentation/http/validators/login.validator";
 import { logoutSchema } from "@/modules/auth/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/presentation/http/validators/refresh.validator";
@@ -13,6 +14,12 @@ import { verifyPhoneSchema } from "@/modules/auth/presentation/http/validators/v
 
 export function createAuthRouter(authModule: AuthModule): IRouter {
   const router = Router();
+
+  const getMeHandler: RequestHandler = (req, res, next) => {
+    Promise.resolve(
+      authModule.getMeController.handle(asBearerAuthenticatedRequest(req), res),
+    ).catch(next);
+  };
 
   router.post("/register", validate(registerSchema), asHandler(authModule.registerController));
   router.post("/login", validate(loginSchema), asHandler(authModule.loginController));
@@ -28,6 +35,7 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     authModule.requireRefreshOrBearerAuth,
     asHandler(authModule.logoutController),
   );
+  router.get("/me", authModule.requireBearerAuth, getMeHandler);
   router.post(
     "/email/verify",
     validate(verifyEmailSchema),

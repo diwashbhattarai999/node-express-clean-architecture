@@ -141,7 +141,19 @@ export interface IAuthAccountRepository {
 
   /** Revokes an active session by id. Returns whether a row was updated. */
   revokeSessionById(sessionId: string): Promise<boolean>;
+
+  findAuthenticatedPrincipal(
+    userId: string,
+    sessionId: string,
+  ): Promise<FindAuthenticatedPrincipalResult>;
 }
+
+export type FindAuthenticatedPrincipalResult =
+  | { outcome: "invalid_session" }
+  | { outcome: "expired_session" }
+  | { outcome: "revoked_session" }
+  | { outcome: "user_not_found" }
+  | { outcome: "ok"; user: AuthUser; roles: string[] };
 
 /** New session row on refresh; `familyId` is taken from the current session. */
 export type RotateSessionInput = {
