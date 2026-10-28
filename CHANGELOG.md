@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/password/forgot` — anti-enumeration password-reset email with hashed single-use token
 - `POST /api/v1/auth/password/reset` — consume reset token, update password, revoke all sessions
 - `POST /api/v1/auth/logout-all` — bearer-authenticated revoke of all user sessions (CSRF if refresh cookie present)
+- `GET /api/v1/auth/sessions` — paginated session list with `includeRevoked` and `isCurrent` marker
+
 
 - Access-token `verify` on the JWT signer for bearer-authenticated auth routes
 

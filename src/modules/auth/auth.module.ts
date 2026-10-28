@@ -6,6 +6,7 @@ import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
 import { ForgotPasswordUseCase } from "@/modules/auth/application/use-cases/forgot-password.use-case";
 import { GetMeUseCase } from "@/modules/auth/application/use-cases/get-me.use-case";
+import { ListSessionsUseCase } from "@/modules/auth/application/use-cases/list-sessions.use-case";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
 import { LogoutUseCase } from "@/modules/auth/application/use-cases/logout.use-case";
 import { LogoutAllUseCase } from "@/modules/auth/application/use-cases/logout-all.use-case";
@@ -20,6 +21,7 @@ import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/rep
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
 import { ForgotPasswordController } from "@/modules/auth/presentation/http/controllers/forgot-password.controller";
 import { GetMeController } from "@/modules/auth/presentation/http/controllers/get-me.controller";
+import { ListSessionsController } from "@/modules/auth/presentation/http/controllers/list-sessions.controller";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
 import { LogoutController } from "@/modules/auth/presentation/http/controllers/logout.controller";
 import { LogoutAllController } from "@/modules/auth/presentation/http/controllers/logout-all.controller";
@@ -54,6 +56,7 @@ export type AuthModule = {
   logoutController: LogoutController;
   logoutAllController: LogoutAllController;
   getMeController: GetMeController;
+  listSessionsController: ListSessionsController;
   forgotPasswordController: ForgotPasswordController;
   resetPasswordController: ResetPasswordController;
   requireRefreshAuth: RequestHandler;
@@ -132,6 +135,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const logoutUseCase = new LogoutUseCase(authAccountRepository);
   const logoutAllUseCase = new LogoutAllUseCase(authAccountRepository);
   const getMeUseCase = new GetMeUseCase(authAccountRepository);
+  const listSessionsUseCase = new ListSessionsUseCase(authAccountRepository);
   const forgotPasswordUseCase = new ForgotPasswordUseCase(
     authAccountRepository,
     options.emailSender,
@@ -162,6 +166,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       secureCookies: cookieOptions.secureCookies,
     }),
     getMeController: new GetMeController(getMeUseCase),
+    listSessionsController: new ListSessionsController(listSessionsUseCase),
     forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
     resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
       secureCookies: cookieOptions.secureCookies,

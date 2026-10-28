@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, ne } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, isNull, ne, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -11,10 +11,12 @@ import { userRoles } from "@/infrastructure/database/drizzle/schema/authorizatio
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
 import type {
+  AuthSessionSummary,
   AuthUser,
   CreateSessionInput,
   FindAuthenticatedPrincipalResult,
   IAuthAccountRepository,
+  ListSessionsForUserInput,
   PasswordLoginCandidate,
   PasswordResetTarget,
   RegisterAccountInput,
@@ -30,6 +32,7 @@ import type {
   VerifyEmailByTokenHashResult,
   VerifyPhoneByCodeHashResult,
 } from "@/modules/auth/application/ports/auth-account.repository";
+import { getPaginationOffset } from "@/shared/http/pagination";
 
 export class PostgresAuthAccountRepository implements IAuthAccountRepository {
   public async findIdentityByNormalized(
@@ -1068,5 +1071,50 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
 
       return { outcome: "reset" as const };
     });
+  }
+
+  public async listSessionsForUser(
+    input: ListSessionsForUserInput,
+  ): Promise<{ items: AuthSessionSummary[]; total: number }> {
+    const conditions: SQL[] = [eq(sessions.userId, input.userId)];
+
+    if (!input.includeRevoked) {
+      conditions.push(isNull(sessions.revokedAt));
+    }
+
+    const whereClause = and(...conditions);
+    const offset = getPaginationOffset(input.page, input.limit);
+
+    const [totalResult] = await db.select({ value: count() }).from(sessions).where(whereClause);
+
+    const rows = await db
+      .select({
+        id: sessions.id,
+        createdAt: sessions.createdAt,
+        lastUsedAt: sessions.lastUsedAt,
+        expiresAt: sessions.expiresAt,
+        ipAddress: sessions.ipAddress,
+        userAgent: sessions.userAgent,
+        deviceName: sessions.deviceName,
+      })
+      .from(sessions)
+      .where(whereClause)
+      .orderBy(desc(sessions.lastUsedAt), desc(sessions.createdAt))
+      .limit(input.limit)
+      .offset(offset);
+
+    return {
+      total: totalResult?.value ?? 0,
+      items: rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt,
+        lastUsedAt: row.lastUsedAt,
+        expiresAt: row.expiresAt,
+        ipAddress: row.ipAddress ?? null,
+        userAgent: row.userAgent ?? null,
+        deviceName: row.deviceName ?? null,
+        isCurrent: row.id === input.currentSessionId,
+      })),
+    };
   }
 }

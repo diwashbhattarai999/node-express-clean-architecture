@@ -26,6 +26,7 @@ describe("VerifyEmailUseCase", () => {
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),
+    listSessionsForUser: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

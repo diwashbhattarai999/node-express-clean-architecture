@@ -158,7 +158,31 @@ export interface IAuthAccountRepository {
     tokenHash: string,
     passwordHash: string,
   ): Promise<ResetPasswordByTokenHashResult>;
+
+  listSessionsForUser(input: ListSessionsForUserInput): Promise<{
+    items: AuthSessionSummary[];
+    total: number;
+  }>;
 }
+
+export type ListSessionsForUserInput = {
+  userId: string;
+  currentSessionId: string;
+  includeRevoked: boolean;
+  page: number;
+  limit: number;
+};
+
+export type AuthSessionSummary = {
+  id: string;
+  createdAt: Date;
+  lastUsedAt: Date;
+  expiresAt: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceName: string | null;
+  isCurrent: boolean;
+};
 
 export type ResetPasswordByTokenHashResult =
   | { outcome: "invalid" }

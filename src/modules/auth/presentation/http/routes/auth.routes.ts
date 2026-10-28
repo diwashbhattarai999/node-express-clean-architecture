@@ -4,6 +4,7 @@ import { asHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
 import { asBearerAuthenticatedRequest } from "@/modules/auth/presentation/http/middleware/auth-context";
 import { forgotPasswordSchema } from "@/modules/auth/presentation/http/validators/forgot-password.validator";
+import { listSessionsSchema } from "@/modules/auth/presentation/http/validators/list-sessions.validator";
 import { loginSchema } from "@/modules/auth/presentation/http/validators/login.validator";
 import { logoutSchema } from "@/modules/auth/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/presentation/http/validators/refresh.validator";
@@ -50,6 +51,12 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     logoutAllHandler,
   );
   router.get("/me", authModule.requireBearerAuth, getMeHandler);
+  router.get(
+    "/sessions",
+    validate(listSessionsSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.listSessionsController),
+  );
   router.post(
     "/password/forgot",
     validate(forgotPasswordSchema),
