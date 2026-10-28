@@ -1,8 +1,8 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import type { LogoutAllUseCase } from "@/modules/auth/application/use-cases/logout-all.use-case";
 import { clearAuthSessionCookies } from "@/modules/auth/presentation/http/cookies/refresh-token.cookie";
-import type { RequestWithBearerAuth } from "@/modules/auth/presentation/http/middleware/auth-context";
+import { getBearerAuth } from "@/modules/auth/presentation/http/middleware/auth-context";
 import { HttpStatus } from "@/shared/http/http-status";
 import { sendSuccess } from "@/shared/http/send-response";
 
@@ -20,8 +20,9 @@ export class LogoutAllController {
     private readonly options: LogoutAllControllerOptions,
   ) {}
 
-  public async handle(req: RequestWithBearerAuth, res: Response): Promise<void> {
-    const result = await this.logoutAllUseCase.execute(req.auth.bearer.userId);
+  public async handle(req: Request, res: Response): Promise<void> {
+    const { userId } = getBearerAuth(req);
+    const result = await this.logoutAllUseCase.execute(userId);
 
     clearAuthSessionCookies(res, this.options.secureCookies);
 

@@ -6,7 +6,7 @@ import {
   type SessionSummaryResponse,
   toSessionSummaryResponseList,
 } from "@/modules/auth/presentation/http/mappers/session-summary.response";
-import type { RequestWithBearerAuth } from "@/modules/auth/presentation/http/middleware/auth-context";
+import { getBearerAuth } from "@/modules/auth/presentation/http/middleware/auth-context";
 import type { ListSessionsSchema } from "@/modules/auth/presentation/http/validators/list-sessions.validator";
 import type { IPagination } from "@/shared/http/api-response";
 import { HttpStatus } from "@/shared/http/http-status";
@@ -17,7 +17,7 @@ export class ListSessionsController {
   public constructor(private readonly listSessionsUseCase: ListSessionsUseCase) {}
 
   public async handle(req: ValidatedRequest<ListSessionsSchema>, res: Response): Promise<void> {
-    const { userId, sessionId } = (req as unknown as RequestWithBearerAuth).auth.bearer;
+    const { userId, sessionId } = getBearerAuth(req);
     const query = req.query;
 
     const result = await this.listSessionsUseCase.execute({

@@ -1,5 +1,7 @@
 import type { Request } from "express";
 
+import { TokenInvalidError } from "@/modules/auth/application/errors/token-invalid.error";
+
 export type AuthRefreshCredentials = {
   refreshToken: string;
   fromCookie: boolean;
@@ -16,23 +18,18 @@ export type AuthContext = {
   bearer?: AuthBearerCredentials;
 };
 
-export type RequestWithAuth = Request & {
-  auth: AuthContext;
-};
-
-/** Request after `requireBearerAuth` — `auth.bearer` is guaranteed. */
-export type RequestWithBearerAuth = Request & {
-  auth: AuthContext & { bearer: AuthBearerCredentials };
-};
-
-export const getAuthContext = (req: Request): AuthContext | undefined => {
-  return (req as Request & { auth?: AuthContext }).auth;
-};
+export const getAuthContext = (req: Request): AuthContext | undefined => req.auth;
 
 export const setAuthContext = (req: Request, auth: AuthContext): void => {
-  (req as Request & { auth?: AuthContext }).auth = auth;
+  req.auth = auth;
 };
 
-export const asBearerAuthenticatedRequest = (req: Request): RequestWithBearerAuth => {
-  return req as RequestWithBearerAuth;
+/** After `requireBearerAuth` — throws if bearer credentials are missing. */
+export const getBearerAuth = (req: { auth?: AuthContext }): AuthBearerCredentials => {
+  const bearer = req.auth?.bearer;
+  if (!bearer) {
+    throw new TokenInvalidError("Unauthorized. Please login to continue.");
+  }
+
+  return bearer;
 };

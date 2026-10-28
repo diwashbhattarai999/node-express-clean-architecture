@@ -63,6 +63,20 @@ export const asHandler =
   };
 
 /**
+ * Adapts a controller that takes a plain Express Request (no Zod schema).
+ * Use after auth middleware on routes without body/query/params validation.
+ */
+export interface PlainHttpController {
+  handle: (req: Request, res: Response) => Promise<void> | void;
+}
+
+export const asRequestHandler =
+  (controller: PlainHttpController): RequestHandler =>
+  (req, res, next) => {
+    Promise.resolve(controller.handle(req, res)).catch(next);
+  };
+
+/**
  * Replaces a request property with its validated value.
  *
  * Express 5 exposes req.query through a getter, so it needs

@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Session cookies (`refresh_token` + `csrf_token`) set on login, email/phone verify, and refresh
 
+### Changed
+
+- Auth HTTP typing: optional `Request.auth` via Express augmentation; bearer routes use `asHandler` / `asRequestHandler` with `getBearerAuth` (no request cast wrappers)
 
 ## [1.1.1] - 2026-10-28
 
