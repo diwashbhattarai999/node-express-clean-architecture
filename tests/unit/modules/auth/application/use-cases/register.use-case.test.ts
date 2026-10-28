@@ -24,6 +24,7 @@ describe("RegisterUseCase", () => {
     findAuthenticatedPrincipal: vi.fn(),
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
+    resetPasswordByTokenHash: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

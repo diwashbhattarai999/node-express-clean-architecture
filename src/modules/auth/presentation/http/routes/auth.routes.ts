@@ -10,6 +10,7 @@ import { refreshSchema } from "@/modules/auth/presentation/http/validators/refre
 import { registerSchema } from "@/modules/auth/presentation/http/validators/register.validator";
 import { resendEmailVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-email-verification.validator";
 import { resendPhoneVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-phone-verification.validator";
+import { resetPasswordSchema } from "@/modules/auth/presentation/http/validators/reset-password.validator";
 import { verifyEmailSchema } from "@/modules/auth/presentation/http/validators/verify-email.validator";
 import { verifyPhoneSchema } from "@/modules/auth/presentation/http/validators/verify-phone.validator";
 
@@ -41,6 +42,11 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     "/password/forgot",
     validate(forgotPasswordSchema),
     asHandler(authModule.forgotPasswordController),
+  );
+  router.post(
+    "/password/reset",
+    validate(resetPasswordSchema),
+    asHandler(authModule.resetPasswordController),
   );
   router.post(
     "/email/verify",

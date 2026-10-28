@@ -150,7 +150,18 @@ export interface IAuthAccountRepository {
   findPasswordResetTarget(normalizedEmail: string): Promise<PasswordResetTarget | null>;
 
   replacePasswordResetToken(input: ReplacePasswordResetTokenInput): Promise<void>;
+
+  resetPasswordByTokenHash(
+    tokenHash: string,
+    passwordHash: string,
+  ): Promise<ResetPasswordByTokenHashResult>;
 }
+
+export type ResetPasswordByTokenHashResult =
+  | { outcome: "invalid" }
+  | { outcome: "expired" }
+  | { outcome: "revoked" }
+  | { outcome: "reset" };
 
 export type PasswordResetTarget = {
   userId: string;

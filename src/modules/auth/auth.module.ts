@@ -12,6 +12,7 @@ import { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use
 import { RegisterUseCase } from "@/modules/auth/application/use-cases/register.use-case";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/application/use-cases/resend-email-verification.use-case";
 import { ResendPhoneVerificationUseCase } from "@/modules/auth/application/use-cases/resend-phone-verification.use-case";
+import { ResetPasswordUseCase } from "@/modules/auth/application/use-cases/reset-password.use-case";
 import { VerifyEmailUseCase } from "@/modules/auth/application/use-cases/verify-email.use-case";
 import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-phone.use-case";
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
@@ -24,6 +25,7 @@ import { RefreshController } from "@/modules/auth/presentation/http/controllers/
 import { RegisterController } from "@/modules/auth/presentation/http/controllers/register.controller";
 import { ResendEmailVerificationController } from "@/modules/auth/presentation/http/controllers/resend-email-verification.controller";
 import { ResendPhoneVerificationController } from "@/modules/auth/presentation/http/controllers/resend-phone-verification.controller";
+import { ResetPasswordController } from "@/modules/auth/presentation/http/controllers/reset-password.controller";
 import { VerifyEmailController } from "@/modules/auth/presentation/http/controllers/verify-email.controller";
 import { VerifyPhoneController } from "@/modules/auth/presentation/http/controllers/verify-phone.controller";
 import { createRequireBearerAuth } from "@/modules/auth/presentation/http/middleware/require-bearer-auth.middleware";
@@ -49,6 +51,7 @@ export type AuthModule = {
   logoutController: LogoutController;
   getMeController: GetMeController;
   forgotPasswordController: ForgotPasswordController;
+  resetPasswordController: ResetPasswordController;
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
@@ -129,6 +132,11 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     emailOptions,
   );
 
+  const resetPasswordUseCase = new ResetPasswordUseCase(
+    authAccountRepository,
+    options.passwordHasher,
+  );
+
   return {
     registerController: new RegisterController(registerUseCase),
     verifyEmailController: new VerifyEmailController(verifyEmailUseCase, cookieOptions),
@@ -146,6 +154,9 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     getMeController: new GetMeController(getMeUseCase),
     forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
+    resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
+      secureCookies: cookieOptions.secureCookies,
+    }),
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),

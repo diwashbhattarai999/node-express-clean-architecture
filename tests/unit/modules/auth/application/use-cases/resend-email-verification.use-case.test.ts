@@ -22,6 +22,7 @@ describe("ResendEmailVerificationUseCase", () => {
     findAuthenticatedPrincipal: vi.fn(),
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
+    resetPasswordByTokenHash: vi.fn(),
   };
 
   const emailSender: IEmailSender = {

@@ -25,6 +25,7 @@ describe("VerifyPhoneUseCase", () => {
     findAuthenticatedPrincipal: vi.fn(),
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
+    resetPasswordByTokenHash: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

@@ -21,6 +21,7 @@ import type {
   ReplaceEmailVerificationTokenInput,
   ReplacePasswordResetTokenInput,
   ReplacePhoneVerificationTokenInput,
+  ResetPasswordByTokenHashResult,
   RotateRefreshSessionResult,
   RotateSessionInput,
   TLoginIdentityType,
@@ -946,6 +947,112 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
         tokenHash: input.tokenHash,
         expiresAt: input.expiresAt,
       });
+    });
+  }
+
+  public async resetPasswordByTokenHash(
+    tokenHash: string,
+    passwordHash: string,
+  ): Promise<ResetPasswordByTokenHashResult> {
+    return db.transaction(async (tx) => {
+      const [token] = await tx
+        .select()
+        .from(authTokens)
+        .where(
+          and(
+            eq(authTokens.tokenHash, tokenHash),
+            eq(authTokens.type, "password_reset"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        )
+        .limit(1)
+        .for("update");
+
+      if (!token) {
+        const [anyToken] = await tx
+          .select({
+            revokedAt: authTokens.revokedAt,
+            consumedAt: authTokens.consumedAt,
+            expiresAt: authTokens.expiresAt,
+          })
+          .from(authTokens)
+          .where(and(eq(authTokens.tokenHash, tokenHash), eq(authTokens.type, "password_reset")))
+          .limit(1);
+
+        if (!anyToken) {
+          return { outcome: "invalid" as const };
+        }
+
+        if (anyToken.revokedAt || anyToken.consumedAt) {
+          return { outcome: "revoked" as const };
+        }
+
+        return { outcome: "expired" as const };
+      }
+
+      const now = new Date();
+
+      if (token.expiresAt.getTime() <= now.getTime()) {
+        await tx
+          .update(authTokens)
+          .set({ revokedAt: now })
+          .where(and(eq(authTokens.id, token.id), isNull(authTokens.consumedAt)));
+
+        return { outcome: "expired" as const };
+      }
+
+      const [user] = await tx
+        .select({ id: users.id, deletedAt: users.deletedAt })
+        .from(users)
+        .where(eq(users.id, token.userId))
+        .limit(1);
+
+      if (!user || user.deletedAt) {
+        return { outcome: "invalid" as const };
+      }
+
+      const [updatedCredential] = await tx
+        .update(passwordCredentials)
+        .set({
+          passwordHash,
+          passwordChangedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(passwordCredentials.userId, token.userId))
+        .returning({ id: passwordCredentials.id });
+
+      if (!updatedCredential) {
+        return { outcome: "invalid" as const };
+      }
+
+      await tx
+        .update(authTokens)
+        .set({ consumedAt: now })
+        .where(and(eq(authTokens.id, token.id), isNull(authTokens.consumedAt)));
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, token.userId),
+            eq(authTokens.type, "password_reset"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+            ne(authTokens.id, token.id),
+          ),
+        );
+
+      await tx
+        .update(sessions)
+        .set({
+          revokedAt: now,
+          revocationReason: "password_reset",
+        })
+        .where(and(eq(sessions.userId, token.userId), isNull(sessions.revokedAt)));
+
+      return { outcome: "reset" as const };
     });
   }
 }
