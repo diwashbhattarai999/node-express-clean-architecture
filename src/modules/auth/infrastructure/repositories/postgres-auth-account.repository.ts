@@ -12,6 +12,7 @@ import type {
   AuthUser,
   CreateSessionInput,
   IAuthAccountRepository,
+  PasswordLoginCandidate,
   RegisterAccountInput,
   ReplaceEmailVerificationTokenInput,
   ReplacePhoneVerificationTokenInput,
@@ -553,6 +554,90 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
         tokenHash: input.tokenHash,
         expiresAt: input.expiresAt,
       });
+    });
+  }
+
+  public async findPasswordLoginCandidate(
+    type: TLoginIdentityType,
+    normalizedIdentifier: string,
+  ): Promise<PasswordLoginCandidate | null> {
+    const [identity] = await db
+      .select({
+        userId: loginIdentities.userId,
+      })
+      .from(loginIdentities)
+      .where(
+        and(
+          eq(loginIdentities.type, type),
+          eq(loginIdentities.normalizedIdentifier, normalizedIdentifier),
+        ),
+      )
+      .limit(1);
+
+    if (!identity) {
+      return null;
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, identity.userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return null;
+    }
+
+    const [credential] = await db
+      .select({ passwordHash: passwordCredentials.passwordHash })
+      .from(passwordCredentials)
+      .where(eq(passwordCredentials.userId, user.id))
+      .limit(1);
+
+    if (!credential) {
+      return null;
+    }
+
+    const identities = await db
+      .select({
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(eq(loginIdentities.userId, user.id));
+
+    const primaryVerifiedEmail =
+      identities.find((row) => row.type === "email" && row.isPrimary && row.verifiedAt !== null)
+        ?.identifier ??
+      identities.find((row) => row.type === "email" && row.verifiedAt !== null)?.identifier ??
+      null;
+
+    const username = identities.find((row) => row.type === "username")?.identifier ?? null;
+
+    return {
+      userId: user.id,
+      status: user.status,
+      passwordHash: credential.passwordHash,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+      email: primaryVerifiedEmail,
+      username,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  public async createSession(userId: string, session: CreateSessionInput): Promise<void> {
+    await db.insert(sessions).values({
+      id: session.id,
+      userId,
+      familyId: session.familyId,
+      refreshTokenHash: session.refreshTokenHash,
+      expiresAt: session.expiresAt,
+      ipAddress: session.ipAddress ?? null,
+      userAgent: session.userAgent ?? null,
     });
   }
 }

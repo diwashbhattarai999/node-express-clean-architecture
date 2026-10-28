@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/email/verification/resend` — anti-enumeration resend of email verification links
 - `POST /api/v1/auth/phone/verify` — OTP verification with attempt limits, account activation, and session tokens
 - `POST /api/v1/auth/phone/verification/resend` — anti-enumeration phone OTP rotation (SMS delivery pending)
+- `POST /api/v1/auth/login` — password login with session tokens, refresh cookie, and account-state errors
 
 ## [1.1.1] - 2026-10-28
 

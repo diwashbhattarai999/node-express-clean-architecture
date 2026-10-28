@@ -2,6 +2,7 @@ import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
 import type { createAuthModule } from "@/modules/auth/auth.module";
+import { loginSchema } from "@/modules/auth/presentation/http/validators/login.validator";
 import { registerSchema } from "@/modules/auth/presentation/http/validators/register.validator";
 import { resendEmailVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-email-verification.validator";
 import { resendPhoneVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-phone-verification.validator";
@@ -12,6 +13,7 @@ export function createAuthRouter(authModule: ReturnType<typeof createAuthModule>
   const router = Router();
 
   router.post("/register", validate(registerSchema), asHandler(authModule.registerController));
+  router.post("/login", validate(loginSchema), asHandler(authModule.loginController));
   router.post(
     "/email/verify",
     validate(verifyEmailSchema),

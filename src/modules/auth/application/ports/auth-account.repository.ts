@@ -84,6 +84,18 @@ export type ReplacePhoneVerificationTokenInput = {
   expiresAt: Date;
 };
 
+export type PasswordLoginCandidate = {
+  userId: string;
+  status: TUserStatus;
+  passwordHash: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  email: string | null;
+  username: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export interface IAuthAccountRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -111,4 +123,11 @@ export interface IAuthAccountRepository {
   findUnverifiedPhoneIdentity(normalizedPhone: string): Promise<UnverifiedPhoneIdentity | null>;
 
   replacePhoneVerificationToken(input: ReplacePhoneVerificationTokenInput): Promise<void>;
+
+  findPasswordLoginCandidate(
+    type: TLoginIdentityType,
+    normalizedIdentifier: string,
+  ): Promise<PasswordLoginCandidate | null>;
+
+  createSession(userId: string, session: CreateSessionInput): Promise<void>;
 }

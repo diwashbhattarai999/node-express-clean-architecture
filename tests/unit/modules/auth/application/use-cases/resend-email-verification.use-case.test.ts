@@ -14,6 +14,8 @@ describe("ResendEmailVerificationUseCase", () => {
     verifyPhoneByCodeHash: vi.fn(),
     findUnverifiedPhoneIdentity: vi.fn(),
     replacePhoneVerificationToken: vi.fn(),
+    findPasswordLoginCandidate: vi.fn(),
+    createSession: vi.fn(),
   };
 
   const emailSender: IEmailSender = {
