@@ -64,7 +64,20 @@ export type UnverifiedEmailIdentity = {
   email: string;
 };
 
+export type UnverifiedPhoneIdentity = {
+  userId: string;
+  identityId: string;
+  phone: string;
+};
+
 export type ReplaceEmailVerificationTokenInput = {
+  userId: string;
+  identityId: string;
+  tokenHash: string;
+  expiresAt: Date;
+};
+
+export type ReplacePhoneVerificationTokenInput = {
   userId: string;
   identityId: string;
   tokenHash: string;
@@ -94,4 +107,8 @@ export interface IAuthAccountRepository {
     session: CreateSessionInput,
     maxAttempts: number,
   ): Promise<VerifyPhoneByCodeHashResult>;
+
+  findUnverifiedPhoneIdentity(normalizedPhone: string): Promise<UnverifiedPhoneIdentity | null>;
+
+  replacePhoneVerificationToken(input: ReplacePhoneVerificationTokenInput): Promise<void>;
 }

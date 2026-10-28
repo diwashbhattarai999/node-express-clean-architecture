@@ -14,8 +14,10 @@ import type {
   IAuthAccountRepository,
   RegisterAccountInput,
   ReplaceEmailVerificationTokenInput,
+  ReplacePhoneVerificationTokenInput,
   TLoginIdentityType,
   UnverifiedEmailIdentity,
+  UnverifiedPhoneIdentity,
   VerifyEmailByTokenHashResult,
   VerifyPhoneByCodeHashResult,
 } from "@/modules/auth/application/ports/auth-account.repository";
@@ -499,6 +501,58 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
           updatedAt,
         },
       };
+    });
+  }
+
+  public async findUnverifiedPhoneIdentity(
+    normalizedPhone: string,
+  ): Promise<UnverifiedPhoneIdentity | null> {
+    const [row] = await db
+      .select({
+        userId: loginIdentities.userId,
+        identityId: loginIdentities.id,
+        phone: loginIdentities.normalizedIdentifier,
+      })
+      .from(loginIdentities)
+      .innerJoin(users, eq(users.id, loginIdentities.userId))
+      .where(
+        and(
+          eq(loginIdentities.type, "phone"),
+          eq(loginIdentities.normalizedIdentifier, normalizedPhone),
+          isNull(loginIdentities.verifiedAt),
+          isNull(users.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  public async replacePhoneVerificationToken(
+    input: ReplacePhoneVerificationTokenInput,
+  ): Promise<void> {
+    await db.transaction(async (tx) => {
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, input.userId),
+            eq(authTokens.type, "phone_verification"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.insert(authTokens).values({
+        userId: input.userId,
+        identityId: input.identityId,
+        type: "phone_verification",
+        tokenHash: input.tokenHash,
+        expiresAt: input.expiresAt,
+      });
     });
   }
 }

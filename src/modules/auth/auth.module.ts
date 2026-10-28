@@ -3,12 +3,14 @@ import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
 import { RegisterUseCase } from "@/modules/auth/application/use-cases/register.use-case";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/application/use-cases/resend-email-verification.use-case";
+import { ResendPhoneVerificationUseCase } from "@/modules/auth/application/use-cases/resend-phone-verification.use-case";
 import { VerifyEmailUseCase } from "@/modules/auth/application/use-cases/verify-email.use-case";
 import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-phone.use-case";
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
 import { RegisterController } from "@/modules/auth/presentation/http/controllers/register.controller";
 import { ResendEmailVerificationController } from "@/modules/auth/presentation/http/controllers/resend-email-verification.controller";
+import { ResendPhoneVerificationController } from "@/modules/auth/presentation/http/controllers/resend-phone-verification.controller";
 import { VerifyEmailController } from "@/modules/auth/presentation/http/controllers/verify-email.controller";
 import { VerifyPhoneController } from "@/modules/auth/presentation/http/controllers/verify-phone.controller";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
@@ -65,6 +67,8 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
     sessionOptions,
   );
 
+  const resendPhoneVerificationUseCase = new ResendPhoneVerificationUseCase(authAccountRepository);
+
   return {
     registerController: new RegisterController(registerUseCase),
     verifyEmailController: new VerifyEmailController(verifyEmailUseCase),
@@ -72,5 +76,8 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
       resendEmailVerificationUseCase,
     ),
     verifyPhoneController: new VerifyPhoneController(verifyPhoneUseCase),
+    resendPhoneVerificationController: new ResendPhoneVerificationController(
+      resendPhoneVerificationUseCase,
+    ),
   };
 }

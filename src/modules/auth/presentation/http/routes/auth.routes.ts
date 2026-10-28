@@ -4,6 +4,7 @@ import { asHandler, validate } from "@/app/middleware/validation";
 import type { createAuthModule } from "@/modules/auth/auth.module";
 import { registerSchema } from "@/modules/auth/presentation/http/validators/register.validator";
 import { resendEmailVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-email-verification.validator";
+import { resendPhoneVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-phone-verification.validator";
 import { verifyEmailSchema } from "@/modules/auth/presentation/http/validators/verify-email.validator";
 import { verifyPhoneSchema } from "@/modules/auth/presentation/http/validators/verify-phone.validator";
 
@@ -25,6 +26,11 @@ export function createAuthRouter(authModule: ReturnType<typeof createAuthModule>
     "/phone/verify",
     validate(verifyPhoneSchema),
     asHandler(authModule.verifyPhoneController),
+  );
+  router.post(
+    "/phone/verification/resend",
+    validate(resendPhoneVerificationSchema),
+    asHandler(authModule.resendPhoneVerificationController),
   );
 
   return router;
