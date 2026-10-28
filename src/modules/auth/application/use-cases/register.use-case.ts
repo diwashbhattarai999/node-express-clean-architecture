@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { EMAIL_VERIFICATION_TTL_MS } from "@/modules/auth/application/constants/email-verification";
+import { PHONE_OTP_TTL_MS } from "@/modules/auth/application/constants/phone-verification";
 import type { RegisterDto } from "@/modules/auth/application/dto/register.dto";
 import { buildEmailVerificationMessage } from "@/modules/auth/application/emails/email-verification.message";
 import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
@@ -16,9 +17,6 @@ import {
 import { hashToken } from "@/modules/auth/application/utils/hash-token";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 import { logger } from "@/shared/logger/logger";
-
-const PHONE_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const PHONE_OTP_MAX_ATTEMPTS = 5;
 
 export type RegisterUseCaseOptions = {
   frontendBaseUrl: string;
@@ -78,7 +76,6 @@ export class RegisterUseCase {
             purpose: "phone_verification" as const,
             tokenHash: hashToken(rawPhoneOtp),
             expiresAt: new Date(now + PHONE_OTP_TTL_MS),
-            maxAttempts: PHONE_OTP_MAX_ATTEMPTS,
           };
         })();
 

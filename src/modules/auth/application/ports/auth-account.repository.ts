@@ -16,7 +16,6 @@ export type RegisterVerificationToken = {
   purpose: "email_verification" | "phone_verification";
   tokenHash: string;
   expiresAt: Date;
-  maxAttempts?: number;
 };
 
 export type RegisterAccountInput = {
@@ -53,6 +52,12 @@ export type VerifyEmailByTokenHashResult =
   | { outcome: "expired" }
   | { outcome: "verified"; user: AuthUser; sessionId: string };
 
+export type VerifyPhoneByCodeHashResult =
+  | { outcome: "invalid" }
+  | { outcome: "expired" }
+  | { outcome: "too_many_attempts" }
+  | { outcome: "verified"; user: AuthUser; sessionId: string };
+
 export type UnverifiedEmailIdentity = {
   userId: string;
   identityId: string;
@@ -82,4 +87,11 @@ export interface IAuthAccountRepository {
   findUnverifiedEmailIdentity(normalizedEmail: string): Promise<UnverifiedEmailIdentity | null>;
 
   replaceEmailVerificationToken(input: ReplaceEmailVerificationTokenInput): Promise<void>;
+
+  verifyPhoneByCodeHash(
+    normalizedPhone: string,
+    codeHash: string,
+    session: CreateSessionInput,
+    maxAttempts: number,
+  ): Promise<VerifyPhoneByCodeHashResult>;
 }

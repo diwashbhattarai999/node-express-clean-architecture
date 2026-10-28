@@ -5,6 +5,7 @@ import type { createAuthModule } from "@/modules/auth/auth.module";
 import { registerSchema } from "@/modules/auth/presentation/http/validators/register.validator";
 import { resendEmailVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-email-verification.validator";
 import { verifyEmailSchema } from "@/modules/auth/presentation/http/validators/verify-email.validator";
+import { verifyPhoneSchema } from "@/modules/auth/presentation/http/validators/verify-phone.validator";
 
 export function createAuthRouter(authModule: ReturnType<typeof createAuthModule>): IRouter {
   const router = Router();
@@ -19,6 +20,11 @@ export function createAuthRouter(authModule: ReturnType<typeof createAuthModule>
     "/email/verification/resend",
     validate(resendEmailVerificationSchema),
     asHandler(authModule.resendEmailVerificationController),
+  );
+  router.post(
+    "/phone/verify",
+    validate(verifyPhoneSchema),
+    asHandler(authModule.verifyPhoneController),
   );
 
   return router;

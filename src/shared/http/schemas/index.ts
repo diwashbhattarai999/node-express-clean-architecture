@@ -11,4 +11,5 @@ export {
   sortOrderSchema,
 } from "@/shared/http/schemas/pagination.schema";
 export { passwordSchema } from "@/shared/http/schemas/password.schema";
+export { phoneSchema } from "@/shared/http/schemas/phone.schema";
 export { optionalSearchSchema, searchSchema } from "@/shared/http/schemas/search.schema";

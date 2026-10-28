@@ -1,18 +1,12 @@
 import { z } from "zod";
 
-import { emailSchema, passwordSchema } from "@/shared/http/schemas";
-
-const E164_PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
+import { emailSchema, passwordSchema, phoneSchema } from "@/shared/http/schemas";
 
 export const registerSchema = z.object({
   body: z
     .object({
       email: emailSchema.optional(),
-      phone: z
-        .string()
-        .trim()
-        .regex(E164_PHONE_REGEX, "Phone must be a valid E.164 number (e.g. +9779812345678).")
-        .optional(),
+      phone: phoneSchema.optional(),
       password: passwordSchema,
       confirmPassword: z.string({ error: "Confirm password is required." }),
       displayName: z

@@ -13,6 +13,7 @@ describe("RegisterUseCase", () => {
     verifyEmailByTokenHash: vi.fn(),
     findUnverifiedEmailIdentity: vi.fn(),
     replaceEmailVerificationToken: vi.fn(),
+    verifyPhoneByCodeHash: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {
@@ -117,7 +118,8 @@ describe("RegisterUseCase", () => {
         },
         verificationToken: expect.objectContaining({
           purpose: "phone_verification",
-          maxAttempts: 5,
+          tokenHash: expect.any(String),
+          expiresAt: expect.any(Date),
         }),
       }),
     );
