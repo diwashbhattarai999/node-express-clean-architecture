@@ -142,6 +142,9 @@ export interface IAuthAccountRepository {
   /** Revokes an active session by id. Returns whether a row was updated. */
   revokeSessionById(sessionId: string): Promise<boolean>;
 
+  /** Revokes every active session for the user. Returns how many rows were updated. */
+  revokeAllSessionsForUser(userId: string): Promise<number>;
+
   findAuthenticatedPrincipal(
     userId: string,
     sessionId: string,

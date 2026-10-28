@@ -23,6 +23,7 @@ describe("RefreshUseCase", () => {
     rotateRefreshSession: vi.fn(),
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
+    revokeAllSessionsForUser: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),

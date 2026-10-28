@@ -808,6 +808,20 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
     return revoked.length > 0;
   }
 
+  public async revokeAllSessionsForUser(userId: string): Promise<number> {
+    const now = new Date();
+    const revoked = await db
+      .update(sessions)
+      .set({
+        revokedAt: now,
+        revocationReason: "logout_all",
+      })
+      .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)))
+      .returning({ id: sessions.id });
+
+    return revoked.length;
+  }
+
   public async findAuthenticatedPrincipal(
     userId: string,
     sessionId: string,

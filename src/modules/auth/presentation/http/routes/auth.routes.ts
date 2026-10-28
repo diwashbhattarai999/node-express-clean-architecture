@@ -23,6 +23,12 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     ).catch(next);
   };
 
+  const logoutAllHandler: RequestHandler = (req, res, next) => {
+    Promise.resolve(
+      authModule.logoutAllController.handle(asBearerAuthenticatedRequest(req), res),
+    ).catch(next);
+  };
+
   router.post("/register", validate(registerSchema), asHandler(authModule.registerController));
   router.post("/login", validate(loginSchema), asHandler(authModule.loginController));
   router.post(
@@ -36,6 +42,12 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     validate(logoutSchema),
     authModule.requireRefreshOrBearerAuth,
     asHandler(authModule.logoutController),
+  );
+  router.post(
+    "/logout-all",
+    authModule.requireBearerAuth,
+    authModule.assertCsrfWhenRefreshCookie,
+    logoutAllHandler,
   );
   router.get("/me", authModule.requireBearerAuth, getMeHandler);
   router.post(

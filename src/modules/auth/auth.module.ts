@@ -8,6 +8,7 @@ import { ForgotPasswordUseCase } from "@/modules/auth/application/use-cases/forg
 import { GetMeUseCase } from "@/modules/auth/application/use-cases/get-me.use-case";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
 import { LogoutUseCase } from "@/modules/auth/application/use-cases/logout.use-case";
+import { LogoutAllUseCase } from "@/modules/auth/application/use-cases/logout-all.use-case";
 import { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use-case";
 import { RegisterUseCase } from "@/modules/auth/application/use-cases/register.use-case";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/application/use-cases/resend-email-verification.use-case";
@@ -21,6 +22,7 @@ import { ForgotPasswordController } from "@/modules/auth/presentation/http/contr
 import { GetMeController } from "@/modules/auth/presentation/http/controllers/get-me.controller";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
 import { LogoutController } from "@/modules/auth/presentation/http/controllers/logout.controller";
+import { LogoutAllController } from "@/modules/auth/presentation/http/controllers/logout-all.controller";
 import { RefreshController } from "@/modules/auth/presentation/http/controllers/refresh.controller";
 import { RegisterController } from "@/modules/auth/presentation/http/controllers/register.controller";
 import { ResendEmailVerificationController } from "@/modules/auth/presentation/http/controllers/resend-email-verification.controller";
@@ -28,6 +30,7 @@ import { ResendPhoneVerificationController } from "@/modules/auth/presentation/h
 import { ResetPasswordController } from "@/modules/auth/presentation/http/controllers/reset-password.controller";
 import { VerifyEmailController } from "@/modules/auth/presentation/http/controllers/verify-email.controller";
 import { VerifyPhoneController } from "@/modules/auth/presentation/http/controllers/verify-phone.controller";
+import { assertCsrfWhenRefreshCookie } from "@/modules/auth/presentation/http/middleware/assert-csrf-when-refresh-cookie.middleware";
 import { createRequireBearerAuth } from "@/modules/auth/presentation/http/middleware/require-bearer-auth.middleware";
 import { requireRefreshAuth } from "@/modules/auth/presentation/http/middleware/require-refresh-auth.middleware";
 import { createRequireRefreshOrBearerAuth } from "@/modules/auth/presentation/http/middleware/require-refresh-or-bearer-auth.middleware";
@@ -49,12 +52,14 @@ export type AuthModule = {
   loginController: LoginController;
   refreshController: RefreshController;
   logoutController: LogoutController;
+  logoutAllController: LogoutAllController;
   getMeController: GetMeController;
   forgotPasswordController: ForgotPasswordController;
   resetPasswordController: ResetPasswordController;
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
+  assertCsrfWhenRefreshCookie: RequestHandler;
 };
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
@@ -125,6 +130,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   );
 
   const logoutUseCase = new LogoutUseCase(authAccountRepository);
+  const logoutAllUseCase = new LogoutAllUseCase(authAccountRepository);
   const getMeUseCase = new GetMeUseCase(authAccountRepository);
   const forgotPasswordUseCase = new ForgotPasswordUseCase(
     authAccountRepository,
@@ -152,6 +158,9 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     logoutController: new LogoutController(logoutUseCase, {
       secureCookies: cookieOptions.secureCookies,
     }),
+    logoutAllController: new LogoutAllController(logoutAllUseCase, {
+      secureCookies: cookieOptions.secureCookies,
+    }),
     getMeController: new GetMeController(getMeUseCase),
     forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
     resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
@@ -160,5 +169,6 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),
+    assertCsrfWhenRefreshCookie,
   };
 }
