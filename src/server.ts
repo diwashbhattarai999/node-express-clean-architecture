@@ -10,7 +10,9 @@ import { logger } from "@/shared/logger/logger";
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 const startServer = async (): Promise<void> => {
+  logger.info("Connecting to Redis");
   await connectRedis();
+  logger.info("Redis connected");
 
   const app = createApp();
   const server = configureHttpServer(createServer(app), {
