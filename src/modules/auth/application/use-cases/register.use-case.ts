@@ -121,6 +121,8 @@ export class RegisterUseCase {
     }
 
     if (phone && rawPhoneOtp) {
+      // Log the otp until SMS delivery is configured
+      console.log("Phone registration OTP created:", rawPhoneOtp);
       logger.info(
         { userId: account.id },
         "Phone registration OTP created; SMS delivery is not configured yet",
