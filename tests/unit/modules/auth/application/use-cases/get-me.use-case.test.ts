@@ -22,6 +22,8 @@ describe("GetMeUseCase", () => {
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    findPasswordResetTarget: vi.fn(),
+    replacePasswordResetToken: vi.fn(),
   };
 
   const useCase = new GetMeUseCase(authAccountRepository);

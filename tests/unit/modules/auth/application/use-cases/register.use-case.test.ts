@@ -22,6 +22,8 @@ describe("RegisterUseCase", () => {
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    findPasswordResetTarget: vi.fn(),
+    replacePasswordResetToken: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {
@@ -35,7 +37,7 @@ describe("RegisterUseCase", () => {
 
   const useCase = new RegisterUseCase(authAccountRepository, passwordHasher, emailSender, {
     frontendBaseUrl: "http://localhost:5173",
-    brandName: "Your Brand",
+    brandName: "Node Express Clean Architecture",
   });
 
   beforeEach(() => {

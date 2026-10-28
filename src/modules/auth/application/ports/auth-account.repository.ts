@@ -146,7 +146,24 @@ export interface IAuthAccountRepository {
     userId: string,
     sessionId: string,
   ): Promise<FindAuthenticatedPrincipalResult>;
+
+  findPasswordResetTarget(normalizedEmail: string): Promise<PasswordResetTarget | null>;
+
+  replacePasswordResetToken(input: ReplacePasswordResetTokenInput): Promise<void>;
 }
+
+export type PasswordResetTarget = {
+  userId: string;
+  identityId: string;
+  email: string;
+};
+
+export type ReplacePasswordResetTokenInput = {
+  userId: string;
+  identityId: string;
+  tokenHash: string;
+  expiresAt: Date;
+};
 
 export type FindAuthenticatedPrincipalResult =
   | { outcome: "invalid_session" }

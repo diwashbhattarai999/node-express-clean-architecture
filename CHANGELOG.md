@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/logout` — revoke current session via refresh and/or bearer, clear auth cookies (CSRF if cookie)
 - Auth HTTP middleware: `requireRefreshAuth`, `requireRefreshOrBearerAuth`, and `requireBearerAuth` (for future protected routes)
 - `GET /api/v1/auth/me` — bearer-authenticated current user with role keys (permissions empty until RBAC)
+- `POST /api/v1/auth/password/forgot` — anti-enumeration password-reset email with hashed single-use token
 - Access-token `verify` on the JWT signer for bearer-authenticated auth routes
 
 - Session cookies (`refresh_token` + `csrf_token`) set on login, email/phone verify, and refresh

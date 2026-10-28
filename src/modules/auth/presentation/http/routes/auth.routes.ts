@@ -3,6 +3,7 @@ import { type IRouter, type RequestHandler, Router } from "express";
 import { asHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
 import { asBearerAuthenticatedRequest } from "@/modules/auth/presentation/http/middleware/auth-context";
+import { forgotPasswordSchema } from "@/modules/auth/presentation/http/validators/forgot-password.validator";
 import { loginSchema } from "@/modules/auth/presentation/http/validators/login.validator";
 import { logoutSchema } from "@/modules/auth/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/presentation/http/validators/refresh.validator";
@@ -36,6 +37,11 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
     asHandler(authModule.logoutController),
   );
   router.get("/me", authModule.requireBearerAuth, getMeHandler);
+  router.post(
+    "/password/forgot",
+    validate(forgotPasswordSchema),
+    asHandler(authModule.forgotPasswordController),
+  );
   router.post(
     "/email/verify",
     validate(verifyEmailSchema),

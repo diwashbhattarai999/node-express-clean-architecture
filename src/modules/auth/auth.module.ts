@@ -4,6 +4,7 @@ import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
 import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
+import { ForgotPasswordUseCase } from "@/modules/auth/application/use-cases/forgot-password.use-case";
 import { GetMeUseCase } from "@/modules/auth/application/use-cases/get-me.use-case";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
 import { LogoutUseCase } from "@/modules/auth/application/use-cases/logout.use-case";
@@ -15,6 +16,7 @@ import { VerifyEmailUseCase } from "@/modules/auth/application/use-cases/verify-
 import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-phone.use-case";
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
+import { ForgotPasswordController } from "@/modules/auth/presentation/http/controllers/forgot-password.controller";
 import { GetMeController } from "@/modules/auth/presentation/http/controllers/get-me.controller";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
 import { LogoutController } from "@/modules/auth/presentation/http/controllers/logout.controller";
@@ -46,6 +48,7 @@ export type AuthModule = {
   refreshController: RefreshController;
   logoutController: LogoutController;
   getMeController: GetMeController;
+  forgotPasswordController: ForgotPasswordController;
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
@@ -62,7 +65,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       expiresInSeconds: options.env.AUTH_ACCESS_TOKEN_TTL_SECONDS,
     });
 
-  const emailVerificationOptions = {
+  const emailOptions = {
     frontendBaseUrl: options.env.FRONTEND_BASE_URL,
     brandName: options.env.APP_NAME,
   };
@@ -82,7 +85,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     authAccountRepository,
     options.passwordHasher,
     options.emailSender,
-    emailVerificationOptions,
+    emailOptions,
   );
 
   const verifyEmailUseCase = new VerifyEmailUseCase(
@@ -94,7 +97,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const resendEmailVerificationUseCase = new ResendEmailVerificationUseCase(
     authAccountRepository,
     options.emailSender,
-    emailVerificationOptions,
+    emailOptions,
   );
 
   const verifyPhoneUseCase = new VerifyPhoneUseCase(
@@ -120,6 +123,11 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
 
   const logoutUseCase = new LogoutUseCase(authAccountRepository);
   const getMeUseCase = new GetMeUseCase(authAccountRepository);
+  const forgotPasswordUseCase = new ForgotPasswordUseCase(
+    authAccountRepository,
+    options.emailSender,
+    emailOptions,
+  );
 
   return {
     registerController: new RegisterController(registerUseCase),
@@ -137,6 +145,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       secureCookies: cookieOptions.secureCookies,
     }),
     getMeController: new GetMeController(getMeUseCase),
+    forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),

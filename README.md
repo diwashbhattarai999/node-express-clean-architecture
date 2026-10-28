@@ -112,7 +112,7 @@ Copy `.env.example` to `.env`. Important variables:
 | `HOST` / `PORT` | Listen address (default `0.0.0.0:3000`) |
 | `BASE_URL` | Public API base URL |
 | `FRONTEND_BASE_URL` | Public web app origin (emails, redirects) |
-| `APP_NAME` | Display name in transactional emails (default `Your Brand`) |
+| `APP_NAME` | Display name in transactional emails (default `Node Express Clean Architecture`) |
 | `DATABASE_URL` | Postgres connection string |
 | `REDIS_URL` | Redis connection string |
 | `EMAIL_PROVIDER` | `resend` \| `noop` (default `noop`) |

@@ -34,7 +34,7 @@ export const envSchema = z
 
     FRONTEND_BASE_URL: z.url("Frontend base URL is required."),
 
-    APP_NAME: z.string("App name is required.").min(1).default("Your Brand"),
+    APP_NAME: z.string("App name is required.").min(1).default("Node Express Clean Architecture"),
 
     CORS_ORIGINS: z
       .string("CORS Origins is required.")

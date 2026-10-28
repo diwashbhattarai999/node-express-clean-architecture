@@ -4,6 +4,7 @@
  */
 export const FrontendRoutes = {
   verifyEmail: "/verify-email",
+  resetPassword: "/reset-password",
 } as const;
 
 export type TFrontendRoute = (typeof FrontendRoutes)[keyof typeof FrontendRoutes];

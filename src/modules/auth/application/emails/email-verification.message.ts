@@ -12,7 +12,7 @@ export type EmailVerificationMessageParams = {
 export const buildEmailVerificationMessage = (
   params: EmailVerificationMessageParams,
 ): EmailMessage => {
-  const brandName = params.brandName?.trim() || "Your Brand";
+  const brandName = params.brandName?.trim() || "Node Express Clean Architecture";
   const verificationUrl = buildFrontendUrl({
     baseUrl: params.frontendBaseUrl,
     path: FrontendRoutes.verifyEmail,

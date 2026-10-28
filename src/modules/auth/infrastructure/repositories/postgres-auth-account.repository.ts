@@ -1,4 +1,4 @@
-import { and, eq, isNull, ne } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -16,8 +16,10 @@ import type {
   FindAuthenticatedPrincipalResult,
   IAuthAccountRepository,
   PasswordLoginCandidate,
+  PasswordResetTarget,
   RegisterAccountInput,
   ReplaceEmailVerificationTokenInput,
+  ReplacePasswordResetTokenInput,
   ReplacePhoneVerificationTokenInput,
   RotateRefreshSessionResult,
   RotateSessionInput,
@@ -884,5 +886,66 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
         updatedAt: user.updatedAt,
       },
     };
+  }
+
+  public async findPasswordResetTarget(
+    normalizedEmail: string,
+  ): Promise<PasswordResetTarget | null> {
+    const [row] = await db
+      .select({
+        userId: loginIdentities.userId,
+        identityId: loginIdentities.id,
+        email: loginIdentities.normalizedIdentifier,
+        status: users.status,
+      })
+      .from(loginIdentities)
+      .innerJoin(users, eq(users.id, loginIdentities.userId))
+      .innerJoin(passwordCredentials, eq(passwordCredentials.userId, users.id))
+      .where(
+        and(
+          eq(loginIdentities.type, "email"),
+          eq(loginIdentities.normalizedIdentifier, normalizedEmail),
+          isNotNull(loginIdentities.verifiedAt),
+          isNull(users.deletedAt),
+          eq(users.status, "active"),
+        ),
+      )
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      userId: row.userId,
+      identityId: row.identityId,
+      email: row.email,
+    };
+  }
+
+  public async replacePasswordResetToken(input: ReplacePasswordResetTokenInput): Promise<void> {
+    await db.transaction(async (tx) => {
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, input.userId),
+            eq(authTokens.type, "password_reset"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.insert(authTokens).values({
+        userId: input.userId,
+        identityId: input.identityId,
+        type: "password_reset",
+        tokenHash: input.tokenHash,
+        expiresAt: input.expiresAt,
+      });
+    });
   }
 }

@@ -20,6 +20,8 @@ describe("ResendEmailVerificationUseCase", () => {
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    findPasswordResetTarget: vi.fn(),
+    replacePasswordResetToken: vi.fn(),
   };
 
   const emailSender: IEmailSender = {
@@ -28,7 +30,7 @@ describe("ResendEmailVerificationUseCase", () => {
 
   const useCase = new ResendEmailVerificationUseCase(authAccountRepository, emailSender, {
     frontendBaseUrl: "http://localhost:5173",
-    brandName: "Your Brand",
+    brandName: "Node Express Clean Architecture",
   });
 
   beforeEach(() => {
