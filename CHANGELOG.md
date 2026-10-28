@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Auth HTTP typing: optional `Request.auth` via Express augmentation; bearer routes use `asHandler` / `asRequestHandler` with `getBearerAuth` (no request cast wrappers)
+- Auth module split into `identity` / `credentials` / `verification` / `sessions` / `shared` (+ `authorization` scaffold); each area owns its repository port and Postgres implementation
 
 ## [1.1.1] - 2026-10-28
 

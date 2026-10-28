@@ -1,0 +1,50 @@
+import type {
+  AuthUser,
+  TLoginIdentityType,
+} from "@/modules/auth/shared/application/types/auth.types";
+
+export type RegisterEmailIdentity = {
+  identifier: string;
+  normalizedIdentifier: string;
+};
+
+export type RegisterPhoneIdentity = {
+  identifier: string;
+  normalizedIdentifier: string;
+};
+
+export type RegisterVerificationToken = {
+  purpose: "email_verification" | "phone_verification";
+  tokenHash: string;
+  expiresAt: Date;
+};
+
+export type RegisterAccountInput = {
+  id: string;
+  displayName: string | null;
+  passwordHash: string;
+  email?: RegisterEmailIdentity;
+  phone?: RegisterPhoneIdentity;
+  verificationToken: RegisterVerificationToken;
+};
+
+export type FindAuthenticatedPrincipalResult =
+  | { outcome: "invalid_session" }
+  | { outcome: "expired_session" }
+  | { outcome: "revoked_session" }
+  | { outcome: "user_not_found" }
+  | { outcome: "ok"; user: AuthUser; roles: string[] };
+
+export interface IIdentityRepository {
+  findIdentityByNormalized(
+    type: TLoginIdentityType,
+    normalizedIdentifier: string,
+  ): Promise<{ userId: string } | null>;
+
+  register(input: RegisterAccountInput): Promise<AuthUser>;
+
+  findAuthenticatedPrincipal(
+    userId: string,
+    sessionId: string,
+  ): Promise<FindAuthenticatedPrincipalResult>;
+}

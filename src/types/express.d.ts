@@ -1,6 +1,6 @@
 import "node:http";
 
-import type { AuthContext } from "@/modules/auth/presentation/http/middleware/auth-context";
+import type { AuthContext } from "@/modules/auth/shared/presentation/http/middleware/auth-context";
 
 declare module "http" {
   interface IncomingMessage {

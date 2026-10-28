@@ -3,7 +3,7 @@ import { createEmailSender } from "@/infrastructure/email";
 import { createHttpClient } from "@/infrastructure/http-client";
 import { createObjectStorage } from "@/infrastructure/storage";
 import { createAuthModule } from "@/modules/auth/auth.module";
-import { Argon2PasswordHasher } from "@/modules/auth/infrastructure/security/argon2-password-hasher";
+import { Argon2PasswordHasher } from "@/modules/auth/shared/infrastructure/security/argon2-password-hasher";
 import { createUploadsModule } from "@/modules/uploads/uploads.module";
 import { createUsersModule } from "@/modules/users/users.module";
 

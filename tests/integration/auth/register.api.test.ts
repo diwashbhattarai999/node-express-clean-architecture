@@ -32,13 +32,31 @@ const mockEmailSender = {
   send: vi.fn(),
 };
 
-vi.mock("@/modules/auth/infrastructure/repositories/postgres-auth-account.repository", () => ({
-  PostgresAuthAccountRepository: vi.fn(function PostgresAuthAccountRepository() {
+vi.mock("@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository", () => ({
+  PostgresIdentityRepository: vi.fn(function PostgresIdentityRepository() {
     return mockAuthAccountRepository;
   }),
 }));
 
-vi.mock("@/modules/auth/infrastructure/security/argon2-password-hasher", () => ({
+vi.mock("@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository", () => ({
+  PostgresCredentialsRepository: vi.fn(function PostgresCredentialsRepository() {
+    return mockAuthAccountRepository;
+  }),
+}));
+
+vi.mock("@/modules/auth/verification/infrastructure/repositories/postgres-verification.repository", () => ({
+  PostgresVerificationRepository: vi.fn(function PostgresVerificationRepository() {
+    return mockAuthAccountRepository;
+  }),
+}));
+
+vi.mock("@/modules/auth/sessions/infrastructure/repositories/postgres-session.repository", () => ({
+  PostgresSessionRepository: vi.fn(function PostgresSessionRepository() {
+    return mockAuthAccountRepository;
+  }),
+}));
+
+vi.mock("@/modules/auth/shared/infrastructure/security/argon2-password-hasher", () => ({
   Argon2PasswordHasher: vi.fn(function Argon2PasswordHasher() {
     return mockPasswordHasher;
   }),

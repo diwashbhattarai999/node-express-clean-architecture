@@ -1,79 +1,18 @@
 import { type IRouter, Router } from "express";
 
-import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
-import { forgotPasswordSchema } from "@/modules/auth/presentation/http/validators/forgot-password.validator";
-import { listSessionsSchema } from "@/modules/auth/presentation/http/validators/list-sessions.validator";
-import { loginSchema } from "@/modules/auth/presentation/http/validators/login.validator";
-import { logoutSchema } from "@/modules/auth/presentation/http/validators/logout.validator";
-import { refreshSchema } from "@/modules/auth/presentation/http/validators/refresh.validator";
-import { registerSchema } from "@/modules/auth/presentation/http/validators/register.validator";
-import { resendEmailVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-email-verification.validator";
-import { resendPhoneVerificationSchema } from "@/modules/auth/presentation/http/validators/resend-phone-verification.validator";
-import { resetPasswordSchema } from "@/modules/auth/presentation/http/validators/reset-password.validator";
-import { verifyEmailSchema } from "@/modules/auth/presentation/http/validators/verify-email.validator";
-import { verifyPhoneSchema } from "@/modules/auth/presentation/http/validators/verify-phone.validator";
+import { createCredentialsRouter } from "@/modules/auth/credentials/presentation/http/routes/credentials.routes";
+import { createIdentityRouter } from "@/modules/auth/identity/presentation/http/routes/identity.routes";
+import { createSessionsRouter } from "@/modules/auth/sessions/presentation/http/routes/sessions.routes";
+import { createVerificationRouter } from "@/modules/auth/verification/presentation/http/routes/verification.routes";
 
 export function createAuthRouter(authModule: AuthModule): IRouter {
   const router = Router();
 
-  router.post("/register", validate(registerSchema), asHandler(authModule.registerController));
-  router.post("/login", validate(loginSchema), asHandler(authModule.loginController));
-  router.post(
-    "/refresh",
-    validate(refreshSchema),
-    authModule.requireRefreshAuth,
-    asHandler(authModule.refreshController),
-  );
-  router.post(
-    "/logout",
-    validate(logoutSchema),
-    authModule.requireRefreshOrBearerAuth,
-    asHandler(authModule.logoutController),
-  );
-  router.post(
-    "/logout-all",
-    authModule.requireBearerAuth,
-    authModule.assertCsrfWhenRefreshCookie,
-    asRequestHandler(authModule.logoutAllController),
-  );
-  router.get("/me", authModule.requireBearerAuth, asRequestHandler(authModule.getMeController));
-  router.get(
-    "/sessions",
-    validate(listSessionsSchema),
-    authModule.requireBearerAuth,
-    asHandler(authModule.listSessionsController),
-  );
-  router.post(
-    "/password/forgot",
-    validate(forgotPasswordSchema),
-    asHandler(authModule.forgotPasswordController),
-  );
-  router.post(
-    "/password/reset",
-    validate(resetPasswordSchema),
-    asHandler(authModule.resetPasswordController),
-  );
-  router.post(
-    "/email/verify",
-    validate(verifyEmailSchema),
-    asHandler(authModule.verifyEmailController),
-  );
-  router.post(
-    "/email/verification/resend",
-    validate(resendEmailVerificationSchema),
-    asHandler(authModule.resendEmailVerificationController),
-  );
-  router.post(
-    "/phone/verify",
-    validate(verifyPhoneSchema),
-    asHandler(authModule.verifyPhoneController),
-  );
-  router.post(
-    "/phone/verification/resend",
-    validate(resendPhoneVerificationSchema),
-    asHandler(authModule.resendPhoneVerificationController),
-  );
+  router.use(createIdentityRouter(authModule));
+  router.use(createCredentialsRouter(authModule));
+  router.use(createVerificationRouter(authModule));
+  router.use(createSessionsRouter(authModule));
 
   return router;
 }

@@ -27,6 +27,8 @@ Each business module owns its own:
 - infrastructure
 - presentation
 
+Large modules may use **internal submodules** (same clean-architecture layers per area) with a single composition root. The auth module is organized as `identity`, `credentials`, `verification`, `sessions`, `authorization` (scaffold), and `shared`, wired in `src/modules/auth/auth.module.ts`. Submodules depend on `auth/shared` and receive sibling ports only via composition — not via presentation imports.
+
 ## Shared Code
 
 The `shared` directory contains only genuinely cross-cutting abstractions and utilities.
