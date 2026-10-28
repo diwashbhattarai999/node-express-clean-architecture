@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockAuthAccountRepository = {
   findIdentityByNormalized: vi.fn(),
   register: vi.fn(),
+  verifyEmailByTokenHash: vi.fn(),
 };
 
 const mockPasswordHasher = {

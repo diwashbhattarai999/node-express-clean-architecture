@@ -32,6 +32,10 @@ export const envSchema = z
 
     BASE_URL: z.url("Base URL is required."),
 
+    FRONTEND_BASE_URL: z.url("Frontend base URL is required."),
+
+    APP_NAME: z.string("App name is required.").min(1).default("Your Brand"),
+
     CORS_ORIGINS: z
       .string("CORS Origins is required.")
       .default("http://localhost:3000")
@@ -198,6 +202,26 @@ export const envSchema = z
       .int("HTTP server keep-alive timeout must be an integer")
       .positive("HTTP server keep-alive timeout must be a positive number")
       .default(65_000),
+
+    AUTH_JWT_SECRET: z
+      .string("Auth JWT secret is required.")
+      .min(32, "Auth JWT secret must be at least 32 characters long"),
+
+    AUTH_JWT_ISSUER: z.string("Auth JWT issuer is required.").min(1).default("api"),
+
+    AUTH_JWT_AUDIENCE: z.string("Auth JWT audience is required.").min(1).default("api"),
+
+    AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce
+      .number("Auth access token TTL is required.")
+      .int("Auth access token TTL must be an integer")
+      .positive("Auth access token TTL must be a positive number")
+      .default(600),
+
+    AUTH_REFRESH_TOKEN_TTL_SECONDS: z.coerce
+      .number("Auth refresh token TTL is required.")
+      .int("Auth refresh token TTL must be an integer")
+      .positive("Auth refresh token TTL must be a positive number")
+      .default(2_592_000),
   })
   .superRefine((env, context) => {
     if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {

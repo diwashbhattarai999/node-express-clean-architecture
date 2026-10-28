@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `POST /api/v1/auth/email/verify` — consume verification token, activate account, issue access/refresh session
+- Auth JWT signing (`jose` HS256) via `AUTH_JWT_*` env and `TOKEN_INVALID` / `TOKEN_EXPIRED` error codes
+- `FRONTEND_BASE_URL` / `APP_NAME` env and shared `buildFrontendUrl` + `FrontendRoutes` for product links in emails
+
+### Changed
+
+- Email verification message uses a frontend `/verify-email?token=` link template (HTML + text) instead of an API POST URL
+
 ### Fixed
 
 - CI workflow now relies on `package.json` for pnpm version selection to avoid pnpm/action-setup version conflicts.

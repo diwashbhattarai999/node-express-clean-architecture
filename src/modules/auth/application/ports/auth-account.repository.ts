@@ -1,5 +1,7 @@
 export type TLoginIdentityType = "email" | "phone" | "username";
 
+export type TUserStatus = "pending_verification" | "active" | "suspended" | "disabled";
+
 export type RegisterEmailIdentity = {
   identifier: string;
   normalizedIdentifier: string;
@@ -26,9 +28,9 @@ export type RegisterAccountInput = {
   verificationToken: RegisterVerificationToken;
 };
 
-export type RegisteredAccount = {
+export type AuthUser = {
   id: string;
-  status: "pending_verification";
+  status: TUserStatus;
   displayName: string | null;
   avatarUrl: string | null;
   email: string | null;
@@ -37,11 +39,30 @@ export type RegisteredAccount = {
   updatedAt: Date;
 };
 
+export type CreateSessionInput = {
+  id: string;
+  familyId: string;
+  refreshTokenHash: string;
+  expiresAt: Date;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+};
+
+export type VerifyEmailByTokenHashResult =
+  | { outcome: "invalid" }
+  | { outcome: "expired" }
+  | { outcome: "verified"; user: AuthUser; sessionId: string };
+
 export interface IAuthAccountRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
     normalizedIdentifier: string,
   ): Promise<{ userId: string } | null>;
 
-  register(input: RegisterAccountInput): Promise<RegisteredAccount>;
+  register(input: RegisterAccountInput): Promise<AuthUser>;
+
+  verifyEmailByTokenHash(
+    tokenHash: string,
+    session: CreateSessionInput,
+  ): Promise<VerifyEmailByTokenHashResult>;
 }

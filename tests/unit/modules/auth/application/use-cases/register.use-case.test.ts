@@ -10,6 +10,7 @@ describe("RegisterUseCase", () => {
   const authAccountRepository: IAuthAccountRepository = {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
+    verifyEmailByTokenHash: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {
@@ -22,7 +23,8 @@ describe("RegisterUseCase", () => {
   };
 
   const useCase = new RegisterUseCase(authAccountRepository, passwordHasher, emailSender, {
-    appBaseUrl: "http://localhost:3000",
+    frontendBaseUrl: "http://localhost:5173",
+    brandName: "Your Brand",
   });
 
   beforeEach(() => {
