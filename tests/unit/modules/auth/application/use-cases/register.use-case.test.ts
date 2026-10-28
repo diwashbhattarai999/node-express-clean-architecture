@@ -11,6 +11,8 @@ describe("RegisterUseCase", () => {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
     verifyEmailByTokenHash: vi.fn(),
+    findUnverifiedEmailIdentity: vi.fn(),
+    replaceEmailVerificationToken: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

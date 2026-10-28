@@ -53,6 +53,19 @@ export type VerifyEmailByTokenHashResult =
   | { outcome: "expired" }
   | { outcome: "verified"; user: AuthUser; sessionId: string };
 
+export type UnverifiedEmailIdentity = {
+  userId: string;
+  identityId: string;
+  email: string;
+};
+
+export type ReplaceEmailVerificationTokenInput = {
+  userId: string;
+  identityId: string;
+  tokenHash: string;
+  expiresAt: Date;
+};
+
 export interface IAuthAccountRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -65,4 +78,8 @@ export interface IAuthAccountRepository {
     tokenHash: string,
     session: CreateSessionInput,
   ): Promise<VerifyEmailByTokenHashResult>;
+
+  findUnverifiedEmailIdentity(normalizedEmail: string): Promise<UnverifiedEmailIdentity | null>;
+
+  replaceEmailVerificationToken(input: ReplaceEmailVerificationTokenInput): Promise<void>;
 }

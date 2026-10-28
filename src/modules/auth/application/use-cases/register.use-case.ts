@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { EMAIL_VERIFICATION_TTL_MS } from "@/modules/auth/application/constants/email-verification";
 import type { RegisterDto } from "@/modules/auth/application/dto/register.dto";
 import { buildEmailVerificationMessage } from "@/modules/auth/application/emails/email-verification.message";
 import { IdentityAlreadyExistsError } from "@/modules/auth/application/errors/identity-already-exists.error";
@@ -16,7 +17,6 @@ import { hashToken } from "@/modules/auth/application/utils/hash-token";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 import { logger } from "@/shared/logger/logger";
 
-const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const PHONE_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PHONE_OTP_MAX_ATTEMPTS = 5;
 

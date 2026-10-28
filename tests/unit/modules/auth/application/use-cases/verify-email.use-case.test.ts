@@ -11,6 +11,8 @@ describe("VerifyEmailUseCase", () => {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
     verifyEmailByTokenHash: vi.fn(),
+    findUnverifiedEmailIdentity: vi.fn(),
+    replaceEmailVerificationToken: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

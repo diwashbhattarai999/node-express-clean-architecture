@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `POST /api/v1/auth/email/verification/resend` — anti-enumeration resend of email verification links
+
 ## [1.1.1] - 2026-10-28
 
 ### Added

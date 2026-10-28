@@ -13,7 +13,9 @@ import type {
   CreateSessionInput,
   IAuthAccountRepository,
   RegisterAccountInput,
+  ReplaceEmailVerificationTokenInput,
   TLoginIdentityType,
+  UnverifiedEmailIdentity,
   VerifyEmailByTokenHashResult,
 } from "@/modules/auth/application/ports/auth-account.repository";
 
@@ -260,6 +262,67 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
           updatedAt,
         },
       };
+    });
+  }
+
+  public async findUnverifiedEmailIdentity(
+    normalizedEmail: string,
+  ): Promise<UnverifiedEmailIdentity | null> {
+    const [row] = await db
+      .select({
+        userId: loginIdentities.userId,
+        identityId: loginIdentities.id,
+        email: loginIdentities.normalizedIdentifier,
+        deletedAt: users.deletedAt,
+      })
+      .from(loginIdentities)
+      .innerJoin(users, eq(users.id, loginIdentities.userId))
+      .where(
+        and(
+          eq(loginIdentities.type, "email"),
+          eq(loginIdentities.normalizedIdentifier, normalizedEmail),
+          isNull(loginIdentities.verifiedAt),
+          isNull(users.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      userId: row.userId,
+      identityId: row.identityId,
+      email: row.email,
+    };
+  }
+
+  public async replaceEmailVerificationToken(
+    input: ReplaceEmailVerificationTokenInput,
+  ): Promise<void> {
+    await db.transaction(async (tx) => {
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, input.userId),
+            eq(authTokens.type, "email_verification"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.insert(authTokens).values({
+        userId: input.userId,
+        identityId: input.identityId,
+        type: "email_verification",
+        tokenHash: input.tokenHash,
+        expiresAt: input.expiresAt,
+      });
     });
   }
 }
