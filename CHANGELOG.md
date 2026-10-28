@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-28
+
 ### Added
 
 - `POST /api/v1/auth/email/verify` — consume verification token, activate account, issue access/refresh session
