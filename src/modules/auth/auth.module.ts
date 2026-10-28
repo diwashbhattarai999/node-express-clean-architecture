@@ -3,6 +3,7 @@ import { Environment } from "@/config/environment";
 import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
+import { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use-case";
 import { RegisterUseCase } from "@/modules/auth/application/use-cases/register.use-case";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/application/use-cases/resend-email-verification.use-case";
 import { ResendPhoneVerificationUseCase } from "@/modules/auth/application/use-cases/resend-phone-verification.use-case";
@@ -11,6 +12,7 @@ import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
+import { RefreshController } from "@/modules/auth/presentation/http/controllers/refresh.controller";
 import { RegisterController } from "@/modules/auth/presentation/http/controllers/register.controller";
 import { ResendEmailVerificationController } from "@/modules/auth/presentation/http/controllers/resend-email-verification.controller";
 import { ResendPhoneVerificationController } from "@/modules/auth/presentation/http/controllers/resend-phone-verification.controller";
@@ -45,8 +47,12 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
     refreshTokenTtlSeconds: options.env.AUTH_REFRESH_TOKEN_TTL_SECONDS,
   };
 
-  const secureCookies =
-    options.env.NODE_ENV === Environment.PRODUCTION || options.env.NODE_ENV === Environment.STAGING;
+  const cookieOptions = {
+    refreshTokenTtlSeconds: options.env.AUTH_REFRESH_TOKEN_TTL_SECONDS,
+    secureCookies:
+      options.env.NODE_ENV === Environment.PRODUCTION ||
+      options.env.NODE_ENV === Environment.STAGING,
+  };
 
   const registerUseCase = new RegisterUseCase(
     authAccountRepository,
@@ -82,19 +88,23 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
     sessionOptions,
   );
 
+  const refreshUseCase = new RefreshUseCase(
+    authAccountRepository,
+    accessTokenSigner,
+    sessionOptions,
+  );
+
   return {
     registerController: new RegisterController(registerUseCase),
-    verifyEmailController: new VerifyEmailController(verifyEmailUseCase),
+    verifyEmailController: new VerifyEmailController(verifyEmailUseCase, cookieOptions),
     resendEmailVerificationController: new ResendEmailVerificationController(
       resendEmailVerificationUseCase,
     ),
-    verifyPhoneController: new VerifyPhoneController(verifyPhoneUseCase),
+    verifyPhoneController: new VerifyPhoneController(verifyPhoneUseCase, cookieOptions),
     resendPhoneVerificationController: new ResendPhoneVerificationController(
       resendPhoneVerificationUseCase,
     ),
-    loginController: new LoginController(loginUseCase, {
-      refreshTokenTtlSeconds: options.env.AUTH_REFRESH_TOKEN_TTL_SECONDS,
-      secureCookies,
-    }),
+    loginController: new LoginController(loginUseCase, cookieOptions),
+    refreshController: new RefreshController(refreshUseCase, cookieOptions),
   };
 }

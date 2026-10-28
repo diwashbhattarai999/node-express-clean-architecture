@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/phone/verify` — OTP verification with attempt limits, account activation, and session tokens
 - `POST /api/v1/auth/phone/verification/resend` — anti-enumeration phone OTP rotation (SMS delivery pending)
 - `POST /api/v1/auth/login` — password login with session tokens, refresh cookie, and account-state errors
+- `POST /api/v1/auth/refresh` — refresh-token rotation with reuse detection, cookie/body input, and CSRF for cookie clients
+- Session cookies (`refresh_token` + `csrf_token`) set on login, email/phone verify, and refresh
 
 ## [1.1.1] - 2026-10-28
 

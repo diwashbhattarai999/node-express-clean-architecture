@@ -2,7 +2,7 @@ import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
 import type { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
-import { setRefreshTokenCookie } from "@/modules/auth/presentation/http/cookies/refresh-token.cookie";
+import { setAuthSessionCookies } from "@/modules/auth/presentation/http/cookies/refresh-token.cookie";
 import {
   toUserPublicResponse,
   type UserPublicResponse,
@@ -36,7 +36,7 @@ export class LoginController {
       userAgent: req.get("user-agent") ?? null,
     });
 
-    setRefreshTokenCookie(res, result.refreshToken, {
+    setAuthSessionCookies(res, result.refreshToken, {
       maxAgeSeconds: this.options.refreshTokenTtlSeconds,
       secure: this.options.secureCookies,
     });

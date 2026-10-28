@@ -18,6 +18,7 @@ describe("RegisterUseCase", () => {
     replacePhoneVerificationToken: vi.fn(),
     findPasswordLoginCandidate: vi.fn(),
     createSession: vi.fn(),
+    rotateRefreshSession: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

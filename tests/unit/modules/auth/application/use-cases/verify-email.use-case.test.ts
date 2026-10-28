@@ -18,6 +18,7 @@ describe("VerifyEmailUseCase", () => {
     replacePhoneVerificationToken: vi.fn(),
     findPasswordLoginCandidate: vi.fn(),
     createSession: vi.fn(),
+    rotateRefreshSession: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

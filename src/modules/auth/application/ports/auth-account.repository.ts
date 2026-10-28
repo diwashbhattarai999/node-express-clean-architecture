@@ -130,4 +130,25 @@ export interface IAuthAccountRepository {
   ): Promise<PasswordLoginCandidate | null>;
 
   createSession(userId: string, session: CreateSessionInput): Promise<void>;
+
+  rotateRefreshSession(
+    currentRefreshTokenHash: string,
+    newSession: RotateSessionInput,
+  ): Promise<RotateRefreshSessionResult>;
 }
+
+/** New session row on refresh; `familyId` is taken from the current session. */
+export type RotateSessionInput = {
+  id: string;
+  refreshTokenHash: string;
+  expiresAt: Date;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+};
+
+export type RotateRefreshSessionResult =
+  | { outcome: "invalid" }
+  | { outcome: "expired" }
+  | { outcome: "revoked" }
+  | { outcome: "reused" }
+  | { outcome: "rotated"; user: AuthUser; sessionId: string };

@@ -16,6 +16,8 @@ import type {
   RegisterAccountInput,
   ReplaceEmailVerificationTokenInput,
   ReplacePhoneVerificationTokenInput,
+  RotateRefreshSessionResult,
+  RotateSessionInput,
   TLoginIdentityType,
   UnverifiedEmailIdentity,
   UnverifiedPhoneIdentity,
@@ -638,6 +640,137 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
       expiresAt: session.expiresAt,
       ipAddress: session.ipAddress ?? null,
       userAgent: session.userAgent ?? null,
+    });
+  }
+
+  public async rotateRefreshSession(
+    currentRefreshTokenHash: string,
+    newSession: RotateSessionInput,
+  ): Promise<RotateRefreshSessionResult> {
+    return db.transaction(async (tx) => {
+      const [current] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.refreshTokenHash, currentRefreshTokenHash))
+        .limit(1)
+        .for("update");
+
+      if (!current) {
+        return { outcome: "invalid" as const };
+      }
+
+      const now = new Date();
+
+      if (current.revokedAt) {
+        const isRotated =
+          current.replacedBySessionId !== null || current.revocationReason === "rotation_reuse";
+
+        if (isRotated) {
+          await tx
+            .update(sessions)
+            .set({
+              revokedAt: now,
+              revocationReason: "rotation_reuse",
+            })
+            .where(and(eq(sessions.familyId, current.familyId), isNull(sessions.revokedAt)));
+
+          return { outcome: "reused" as const };
+        }
+
+        return { outcome: "revoked" as const };
+      }
+
+      if (current.expiresAt.getTime() <= now.getTime()) {
+        await tx
+          .update(sessions)
+          .set({
+            revokedAt: now,
+            revocationReason: "expired",
+          })
+          .where(and(eq(sessions.id, current.id), isNull(sessions.revokedAt)));
+
+        return { outcome: "expired" as const };
+      }
+
+      const [user] = await tx
+        .select()
+        .from(users)
+        .where(and(eq(users.id, current.userId), isNull(users.deletedAt)))
+        .limit(1);
+
+      if (!user) {
+        return { outcome: "invalid" as const };
+      }
+
+      await tx.insert(sessions).values({
+        id: newSession.id,
+        userId: current.userId,
+        familyId: current.familyId,
+        refreshTokenHash: newSession.refreshTokenHash,
+        expiresAt: newSession.expiresAt,
+        ipAddress: newSession.ipAddress ?? null,
+        userAgent: newSession.userAgent ?? null,
+      });
+
+      const [revoked] = await tx
+        .update(sessions)
+        .set({
+          revokedAt: now,
+          replacedBySessionId: newSession.id,
+          lastUsedAt: now,
+        })
+        .where(and(eq(sessions.id, current.id), isNull(sessions.revokedAt)))
+        .returning({ id: sessions.id });
+
+      if (!revoked) {
+        // Concurrent rotation won; treat the presented token as reused.
+        await tx
+          .update(sessions)
+          .set({
+            revokedAt: now,
+            revocationReason: "rotation_reuse",
+          })
+          .where(and(eq(sessions.familyId, current.familyId), isNull(sessions.revokedAt)));
+
+        return { outcome: "reused" as const };
+      }
+
+      const identities = await tx
+        .select({
+          type: loginIdentities.type,
+          identifier: loginIdentities.normalizedIdentifier,
+          isPrimary: loginIdentities.isPrimary,
+          verifiedAt: loginIdentities.verifiedAt,
+        })
+        .from(loginIdentities)
+        .where(eq(loginIdentities.userId, user.id));
+
+      const primaryEmail =
+        identities.find(
+          (identity) =>
+            identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+        )?.identifier ??
+        identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+          ?.identifier ??
+        null;
+
+      const username =
+        identities.find((identity) => identity.type === "username")?.identifier ?? null;
+
+      return {
+        outcome: "rotated" as const,
+        sessionId: newSession.id,
+        user: {
+          id: user.id,
+          status: user.status,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          email: primaryEmail,
+          username,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      };
     });
   }
 }
