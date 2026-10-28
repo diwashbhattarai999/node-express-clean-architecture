@@ -4,10 +4,7 @@ import type { ValidatedRequest } from "@/app/middleware/validation";
 import { TokenInvalidError } from "@/modules/auth/application/errors/token-invalid.error";
 import type { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use-case";
 import { setAuthSessionCookies } from "@/modules/auth/presentation/http/cookies/refresh-token.cookie";
-import {
-  assertCsrfForCookieRefresh,
-  extractRefreshToken,
-} from "@/modules/auth/presentation/http/extract-refresh-token";
+import { getAuthContext } from "@/modules/auth/presentation/http/middleware/auth-context";
 import type { RefreshSchema } from "@/modules/auth/presentation/http/validators/refresh.validator";
 import { HttpStatus } from "@/shared/http/http-status";
 import { sendSuccess } from "@/shared/http/send-response";
@@ -31,14 +28,12 @@ export class RefreshController {
   ) {}
 
   public async handle(req: ValidatedRequest<RefreshSchema>, res: Response): Promise<void> {
-    const extracted = extractRefreshToken(req);
-    if (!extracted) {
+    const refreshToken = getAuthContext(req)?.refresh?.refreshToken;
+    if (!refreshToken) {
       throw new TokenInvalidError("The refresh token is invalid.");
     }
 
-    assertCsrfForCookieRefresh(req, extracted.fromCookie);
-
-    const result = await this.refreshUseCase.execute(extracted.refreshToken, {
+    const result = await this.refreshUseCase.execute(refreshToken, {
       ipAddress: req.ip ?? null,
       userAgent: req.get("user-agent") ?? null,
     });

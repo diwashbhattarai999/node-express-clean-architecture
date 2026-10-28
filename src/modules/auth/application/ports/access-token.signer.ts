@@ -8,6 +8,11 @@ export type SignedAccessToken = {
   expiresIn: number;
 };
 
+export type VerifiedAccessToken = AccessTokenClaims & {
+  jti: string;
+};
+
 export interface IAccessTokenSigner {
   sign(claims: AccessTokenClaims): Promise<SignedAccessToken>;
+  verify(accessToken: string): Promise<VerifiedAccessToken>;
 }

@@ -773,4 +773,32 @@ export class PostgresAuthAccountRepository implements IAuthAccountRepository {
       };
     });
   }
+
+  public async revokeSessionByRefreshTokenHash(refreshTokenHash: string): Promise<boolean> {
+    const now = new Date();
+    const revoked = await db
+      .update(sessions)
+      .set({
+        revokedAt: now,
+        revocationReason: "logout",
+      })
+      .where(and(eq(sessions.refreshTokenHash, refreshTokenHash), isNull(sessions.revokedAt)))
+      .returning({ id: sessions.id });
+
+    return revoked.length > 0;
+  }
+
+  public async revokeSessionById(sessionId: string): Promise<boolean> {
+    const now = new Date();
+    const revoked = await db
+      .update(sessions)
+      .set({
+        revokedAt: now,
+        revocationReason: "logout",
+      })
+      .where(and(eq(sessions.id, sessionId), isNull(sessions.revokedAt)))
+      .returning({ id: sessions.id });
+
+    return revoked.length > 0;
+  }
 }

@@ -16,6 +16,8 @@ describe("ResendPhoneVerificationUseCase", () => {
     findPasswordLoginCandidate: vi.fn(),
     createSession: vi.fn(),
     rotateRefreshSession: vi.fn(),
+    revokeSessionByRefreshTokenHash: vi.fn(),
+    revokeSessionById: vi.fn(),
   };
 
   const useCase = new ResendPhoneVerificationUseCase(authAccountRepository);

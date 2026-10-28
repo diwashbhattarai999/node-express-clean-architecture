@@ -1,8 +1,11 @@
+import type { RequestHandler } from "express";
+
 import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
 import type { IAccessTokenSigner } from "@/modules/auth/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/application/ports/password-hasher.port";
 import { LoginUseCase } from "@/modules/auth/application/use-cases/login.use-case";
+import { LogoutUseCase } from "@/modules/auth/application/use-cases/logout.use-case";
 import { RefreshUseCase } from "@/modules/auth/application/use-cases/refresh.use-case";
 import { RegisterUseCase } from "@/modules/auth/application/use-cases/register.use-case";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/application/use-cases/resend-email-verification.use-case";
@@ -12,12 +15,16 @@ import { VerifyPhoneUseCase } from "@/modules/auth/application/use-cases/verify-
 import { PostgresAuthAccountRepository } from "@/modules/auth/infrastructure/repositories/postgres-auth-account.repository";
 import { JoseAccessTokenSigner } from "@/modules/auth/infrastructure/security/jose-access-token.signer";
 import { LoginController } from "@/modules/auth/presentation/http/controllers/login.controller";
+import { LogoutController } from "@/modules/auth/presentation/http/controllers/logout.controller";
 import { RefreshController } from "@/modules/auth/presentation/http/controllers/refresh.controller";
 import { RegisterController } from "@/modules/auth/presentation/http/controllers/register.controller";
 import { ResendEmailVerificationController } from "@/modules/auth/presentation/http/controllers/resend-email-verification.controller";
 import { ResendPhoneVerificationController } from "@/modules/auth/presentation/http/controllers/resend-phone-verification.controller";
 import { VerifyEmailController } from "@/modules/auth/presentation/http/controllers/verify-email.controller";
 import { VerifyPhoneController } from "@/modules/auth/presentation/http/controllers/verify-phone.controller";
+import { createRequireBearerAuth } from "@/modules/auth/presentation/http/middleware/require-bearer-auth.middleware";
+import { requireRefreshAuth } from "@/modules/auth/presentation/http/middleware/require-refresh-auth.middleware";
+import { createRequireRefreshOrBearerAuth } from "@/modules/auth/presentation/http/middleware/require-refresh-or-bearer-auth.middleware";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 
 export type CreateAuthModuleOptions = {
@@ -27,7 +34,21 @@ export type CreateAuthModuleOptions = {
   env: TEnv;
 };
 
-export function createAuthModule(options: CreateAuthModuleOptions) {
+export type AuthModule = {
+  registerController: RegisterController;
+  verifyEmailController: VerifyEmailController;
+  resendEmailVerificationController: ResendEmailVerificationController;
+  verifyPhoneController: VerifyPhoneController;
+  resendPhoneVerificationController: ResendPhoneVerificationController;
+  loginController: LoginController;
+  refreshController: RefreshController;
+  logoutController: LogoutController;
+  requireRefreshAuth: RequestHandler;
+  requireRefreshOrBearerAuth: RequestHandler;
+  requireBearerAuth: RequestHandler;
+};
+
+export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const authAccountRepository = new PostgresAuthAccountRepository();
   const accessTokenSigner =
     options.accessTokenSigner ??
@@ -94,6 +115,8 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
     sessionOptions,
   );
 
+  const logoutUseCase = new LogoutUseCase(authAccountRepository);
+
   return {
     registerController: new RegisterController(registerUseCase),
     verifyEmailController: new VerifyEmailController(verifyEmailUseCase, cookieOptions),
@@ -106,5 +129,11 @@ export function createAuthModule(options: CreateAuthModuleOptions) {
     ),
     loginController: new LoginController(loginUseCase, cookieOptions),
     refreshController: new RefreshController(refreshUseCase, cookieOptions),
+    logoutController: new LogoutController(logoutUseCase, {
+      secureCookies: cookieOptions.secureCookies,
+    }),
+    requireRefreshAuth,
+    requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
+    requireBearerAuth: createRequireBearerAuth(accessTokenSigner),
   };
 }

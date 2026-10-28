@@ -14,7 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/phone/verification/resend` — anti-enumeration phone OTP rotation (SMS delivery pending)
 - `POST /api/v1/auth/login` — password login with session tokens, refresh cookie, and account-state errors
 - `POST /api/v1/auth/refresh` — refresh-token rotation with reuse detection, cookie/body input, and CSRF for cookie clients
+- `POST /api/v1/auth/logout` — revoke current session via refresh and/or bearer, clear auth cookies (CSRF if cookie)
+- Auth HTTP middleware: `requireRefreshAuth`, `requireRefreshOrBearerAuth`, and `requireBearerAuth` (for future protected routes)
+- Access-token `verify` on the JWT signer for bearer-authenticated auth routes
+
 - Session cookies (`refresh_token` + `csrf_token`) set on login, email/phone verify, and refresh
+
 
 ## [1.1.1] - 2026-10-28
 

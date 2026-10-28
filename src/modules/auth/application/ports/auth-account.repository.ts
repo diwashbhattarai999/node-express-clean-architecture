@@ -135,6 +135,12 @@ export interface IAuthAccountRepository {
     currentRefreshTokenHash: string,
     newSession: RotateSessionInput,
   ): Promise<RotateRefreshSessionResult>;
+
+  /** Revokes an active session by refresh-token hash. Returns whether a row was updated. */
+  revokeSessionByRefreshTokenHash(refreshTokenHash: string): Promise<boolean>;
+
+  /** Revokes an active session by id. Returns whether a row was updated. */
+  revokeSessionById(sessionId: string): Promise<boolean>;
 }
 
 /** New session row on refresh; `familyId` is taken from the current session. */

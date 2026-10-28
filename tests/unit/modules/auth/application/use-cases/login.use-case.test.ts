@@ -20,6 +20,8 @@ describe("LoginUseCase", () => {
     findPasswordLoginCandidate: vi.fn(),
     createSession: vi.fn(),
     rotateRefreshSession: vi.fn(),
+    revokeSessionByRefreshTokenHash: vi.fn(),
+    revokeSessionById: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {
@@ -29,6 +31,7 @@ describe("LoginUseCase", () => {
 
   const accessTokenSigner: IAccessTokenSigner = {
     sign: vi.fn(),
+  verify: vi.fn(),
   };
 
   const useCase = new LoginUseCase(

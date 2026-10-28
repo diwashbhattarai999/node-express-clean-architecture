@@ -21,10 +21,13 @@ describe("RefreshUseCase", () => {
     findPasswordLoginCandidate: vi.fn(),
     createSession: vi.fn(),
     rotateRefreshSession: vi.fn(),
+    revokeSessionByRefreshTokenHash: vi.fn(),
+    revokeSessionById: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {
     sign: vi.fn(),
+  verify: vi.fn(),
   };
 
   const useCase = new RefreshUseCase(authAccountRepository, accessTokenSigner, {
