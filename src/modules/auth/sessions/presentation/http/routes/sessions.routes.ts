@@ -35,6 +35,11 @@ export function createSessionsRouter(authModule: AuthModule): IRouter {
     authModule.requireBearerAuth,
     asHandler(authModule.listSessionsController),
   );
+  router.post(
+    "/sessions/revoke-others",
+    authModule.requireBearerAuth,
+    asRequestHandler(authModule.revokeOtherSessionsController),
+  );
   router.get(
     "/sessions/:sessionId",
     validate(getSessionSchema),

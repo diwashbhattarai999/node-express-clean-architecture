@@ -93,6 +93,7 @@ Frontend deep links from emails:
 | `GET` | `/sessions` | bearer |
 | `GET` | `/sessions/{sessionId}` | bearer |
 | `DELETE` | `/sessions/{sessionId}` | bearer |
+| `POST` | `/sessions/revoke-others` | bearer |
 
 ---
 
@@ -460,12 +461,31 @@ If you revoke the **current** session, auth cookies are cleared (same as logout)
 
 ---
 
+### Revoke other sessions
+
+`POST /api/v1/auth/sessions/revoke-others`
+
+**Auth:** bearer. Keeps the current session; no body; cookies are **not** cleared.
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Other sessions revoked.",
+  "data": { "revokedCount": 2 }
+}
+```
+
+---
+
 ## Suggested frontend flows
 
 1. **Register** → open verify email/phone → **verify** → store access (+ refresh for native) → app.
 2. **Login** → store tokens → call **`/me`** as needed.
 3. On `401 TOKEN_EXPIRED` / `TOKEN_INVALID` for API calls → **refresh** once → retry; if refresh fails → login screen.
 4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
-5. Forgot password → email link → **reset** → login.
+5. **Revoke others** from a sessions UI → other devices signed out; current session stays.
+6. Forgot password → email link → **reset** → login.
 
 Use an HTTP client with `credentials: "include"` for all `/api/v1/auth/*` calls from the browser, and attach `Authorization` + `X-CSRF-Token` where noted above.

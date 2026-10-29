@@ -11,6 +11,7 @@ describe("GetSessionUseCase", () => {
     revokeSessionByRefreshTokenHash: vi.fn(),
     revokeSessionById: vi.fn(),
     revokeAllSessionsForUser: vi.fn(),
+    revokeOtherSessionsForUser: vi.fn(),
     listSessionsForUser: vi.fn(),
     findSessionForUser: vi.fn(),
     revokeSessionForUser: vi.fn(),

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, isNull, ne, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
@@ -195,6 +195,29 @@ export class PostgresSessionRepository implements ISessionRepository {
         revocationReason: "logout_all",
       })
       .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)))
+      .returning({ id: sessions.id });
+
+    return revoked.length;
+  }
+
+  public async revokeOtherSessionsForUser(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<number> {
+    const now = new Date();
+    const revoked = await db
+      .update(sessions)
+      .set({
+        revokedAt: now,
+        revocationReason: "logout",
+      })
+      .where(
+        and(
+          eq(sessions.userId, userId),
+          ne(sessions.id, currentSessionId),
+          isNull(sessions.revokedAt),
+        ),
+      )
       .returning({ id: sessions.id });
 
     return revoked.length;

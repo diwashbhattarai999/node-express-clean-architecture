@@ -55,6 +55,9 @@ export interface ISessionRepository {
   /** Revokes every active session for the user. Returns how many rows were updated. */
   revokeAllSessionsForUser(userId: string): Promise<number>;
 
+  /** Revokes every active session except `currentSessionId`. Returns how many rows were updated. */
+  revokeOtherSessionsForUser(userId: string, currentSessionId: string): Promise<number>;
+
   listSessionsForUser(input: ListSessionsForUserInput): Promise<{
     items: AuthSessionSummary[];
     total: number;
