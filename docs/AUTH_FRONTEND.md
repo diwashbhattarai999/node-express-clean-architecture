@@ -89,6 +89,7 @@ Frontend deep links from emails:
 | `POST` | `/logout-all` | bearer (+ CSRF if cookie) |
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
+| `POST` | `/password/reset/validate` | public |
 | `POST` | `/password/reset` | public |
 | `POST` | `/password/change` | bearer |
 | `GET` | `/sessions` | bearer |
@@ -348,6 +349,41 @@ Cookies cleared.
 
 ---
 
+### Validate password-reset token
+
+`POST /api/v1/auth/password/reset/validate`
+
+**Auth:** public. Soft check for the reset form — always `200` (except validation errors).
+
+```json
+{ "token": "token-from-email-link" }
+```
+
+**Response** `200` when valid:
+
+```json
+{
+  "success": true,
+  "message": "Password reset token is valid.",
+  "data": {
+    "valid": true,
+    "expiresAt": "2026-11-01T12:00:00.000Z"
+  }
+}
+```
+
+**Response** `200` when invalid/expired/used:
+
+```json
+{
+  "success": true,
+  "message": "Password reset token is invalid.",
+  "data": { "valid": false }
+}
+```
+
+---
+
 ### Reset password
 
 `POST /api/v1/auth/password/reset`
@@ -516,6 +552,6 @@ If you revoke the **current** session, auth cookies are cleared (same as logout)
 4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
 5. **Revoke others** from a sessions UI → other devices signed out; current session stays.
 6. **Change password** (settings) → other sessions die; stay signed in on this device.
-7. Forgot password → email link → **reset** → login.
+7. Forgot password → email link → **validate** token → **reset** → login.
 
 Use an HTTP client with `credentials: "include"` for all `/api/v1/auth/*` calls from the browser, and attach `Authorization` + `X-CSRF-Token` where noted above.

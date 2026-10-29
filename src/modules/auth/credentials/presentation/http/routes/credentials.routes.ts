@@ -6,6 +6,7 @@ import { changePasswordSchema } from "@/modules/auth/credentials/presentation/ht
 import { forgotPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/forgot-password.validator";
 import { loginSchema } from "@/modules/auth/credentials/presentation/http/validators/login.validator";
 import { resetPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/reset-password.validator";
+import { validatePasswordResetSchema } from "@/modules/auth/credentials/presentation/http/validators/validate-password-reset.validator";
 
 export function createCredentialsRouter(authModule: AuthModule): IRouter {
   const router = Router();
@@ -15,6 +16,11 @@ export function createCredentialsRouter(authModule: AuthModule): IRouter {
     "/password/forgot",
     validate(forgotPasswordSchema),
     asHandler(authModule.forgotPasswordController),
+  );
+  router.post(
+    "/password/reset/validate",
+    validate(validatePasswordResetSchema),
+    asHandler(authModule.validatePasswordResetController),
   );
   router.post(
     "/password/reset",

@@ -13,6 +13,7 @@ describe("LoginUseCase", () => {
     findPasswordLoginCandidate: vi.fn(),
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
+    validatePasswordResetTokenHash: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),
     findPasswordHashForUser: vi.fn(),
     changePasswordForUser: vi.fn(),

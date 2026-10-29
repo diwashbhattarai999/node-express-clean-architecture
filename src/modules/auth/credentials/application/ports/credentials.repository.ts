@@ -35,6 +35,8 @@ export type ResetPasswordByTokenHashResult =
   | { outcome: "revoked" }
   | { outcome: "reset" };
 
+export type ValidatePasswordResetTokenResult = { valid: true; expiresAt: Date } | { valid: false };
+
 export interface ICredentialsRepository {
   findPasswordLoginCandidate(
     type: TLoginIdentityType,
@@ -44,6 +46,8 @@ export interface ICredentialsRepository {
   findPasswordResetTarget(normalizedEmail: string): Promise<PasswordResetTarget | null>;
 
   replacePasswordResetToken(input: ReplacePasswordResetTokenInput): Promise<void>;
+
+  validatePasswordResetTokenHash(tokenHash: string): Promise<ValidatePasswordResetTokenResult>;
 
   resetPasswordByTokenHash(
     tokenHash: string,

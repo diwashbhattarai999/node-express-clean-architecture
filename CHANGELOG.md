@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DELETE /api/v1/auth/sessions/{sessionId}` — revoke own session; clears cookies when current session is revoked
 - `POST /api/v1/auth/sessions/revoke-others` — revoke all active sessions except the current bearer session
 - `POST /api/v1/auth/password/change` — bearer-authenticated password update; revokes other sessions and pending reset tokens
+- `POST /api/v1/auth/password/reset/validate` — public soft check for reset-token validity (`valid` + optional `expiresAt`)
 
 ## [1.1.2] - 2026-10-28
 

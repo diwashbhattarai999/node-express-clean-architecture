@@ -12,6 +12,7 @@ import type {
   PasswordResetTarget,
   ReplacePasswordResetTokenInput,
   ResetPasswordByTokenHashResult,
+  ValidatePasswordResetTokenResult,
 } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import type { TLoginIdentityType } from "@/modules/auth/shared/application/types/auth.types";
 
@@ -147,6 +148,42 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
         expiresAt: input.expiresAt,
       });
     });
+  }
+
+  public async validatePasswordResetTokenHash(
+    tokenHash: string,
+  ): Promise<ValidatePasswordResetTokenResult> {
+    const [token] = await db
+      .select({
+        userId: authTokens.userId,
+        expiresAt: authTokens.expiresAt,
+      })
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.tokenHash, tokenHash),
+          eq(authTokens.type, "password_reset"),
+          isNull(authTokens.consumedAt),
+          isNull(authTokens.revokedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!token || token.expiresAt.getTime() <= Date.now()) {
+      return { valid: false };
+    }
+
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.id, token.userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return { valid: false };
+    }
+
+    return { valid: true, expiresAt: token.expiresAt };
   }
 
   public async resetPasswordByTokenHash(

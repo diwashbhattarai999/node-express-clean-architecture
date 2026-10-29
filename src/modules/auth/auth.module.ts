@@ -6,11 +6,13 @@ import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/us
 import { ForgotPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/forgot-password.use-case";
 import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
 import { ResetPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/reset-password.use-case";
+import { ValidatePasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/validate-password-reset.use-case";
 import { PostgresCredentialsRepository } from "@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository";
 import { ChangePasswordController } from "@/modules/auth/credentials/presentation/http/controllers/change-password.controller";
 import { ForgotPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/forgot-password.controller";
 import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
+import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
 import { GetMeUseCase } from "@/modules/auth/identity/application/use-cases/get-me.use-case";
 import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
@@ -72,6 +74,7 @@ export type AuthModule = {
   revokeSessionController: RevokeSessionController;
   revokeOtherSessionsController: RevokeOtherSessionsController;
   forgotPasswordController: ForgotPasswordController;
+  validatePasswordResetController: ValidatePasswordResetController;
   resetPasswordController: ResetPasswordController;
   changePasswordController: ChangePasswordController;
   requireRefreshAuth: RequestHandler;
@@ -161,6 +164,8 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     emailOptions,
   );
 
+  const validatePasswordResetUseCase = new ValidatePasswordResetUseCase(credentialsRepository);
+
   const resetPasswordUseCase = new ResetPasswordUseCase(
     credentialsRepository,
     options.passwordHasher,
@@ -197,6 +202,9 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     revokeOtherSessionsController: new RevokeOtherSessionsController(revokeOtherSessionsUseCase),
     forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
+    validatePasswordResetController: new ValidatePasswordResetController(
+      validatePasswordResetUseCase,
+    ),
     resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
       secureCookies: cookieOptions.secureCookies,
     }),
