@@ -10,6 +10,8 @@ describe("ForgotPasswordUseCase", () => {
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),
+    findPasswordHashForUser: vi.fn(),
+    changePasswordForUser: vi.fn(),
   };
 
   const emailSender: IEmailSender = {

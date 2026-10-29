@@ -21,6 +21,8 @@ const mockAuthAccountRepository = {
   findPasswordResetTarget: vi.fn(),
   replacePasswordResetToken: vi.fn(),
   resetPasswordByTokenHash: vi.fn(),
+  findPasswordHashForUser: vi.fn(),
+  changePasswordForUser: vi.fn(),
   listSessionsForUser: vi.fn(),
   findSessionForUser: vi.fn(),
   revokeSessionForUser: vi.fn(),

@@ -13,6 +13,8 @@ describe("ResetPasswordUseCase", () => {
     findPasswordResetTarget: vi.fn(),
     replacePasswordResetToken: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),
+    findPasswordHashForUser: vi.fn(),
+    changePasswordForUser: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

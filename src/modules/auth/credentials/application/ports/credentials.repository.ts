@@ -49,6 +49,15 @@ export interface ICredentialsRepository {
     tokenHash: string,
     passwordHash: string,
   ): Promise<ResetPasswordByTokenHashResult>;
+
+  findPasswordHashForUser(userId: string): Promise<string | null>;
+
+  /** Updates password and revokes all other active sessions for the user. */
+  changePasswordForUser(
+    userId: string,
+    passwordHash: string,
+    currentSessionId: string,
+  ): Promise<boolean>;
 }
 
 export type { AuthUser };

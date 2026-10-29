@@ -2,10 +2,12 @@ import type { RequestHandler } from "express";
 
 import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
+import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/use-cases/change-password.use-case";
 import { ForgotPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/forgot-password.use-case";
 import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
 import { ResetPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/reset-password.use-case";
 import { PostgresCredentialsRepository } from "@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository";
+import { ChangePasswordController } from "@/modules/auth/credentials/presentation/http/controllers/change-password.controller";
 import { ForgotPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/forgot-password.controller";
 import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
@@ -71,6 +73,7 @@ export type AuthModule = {
   revokeOtherSessionsController: RevokeOtherSessionsController;
   forgotPasswordController: ForgotPasswordController;
   resetPasswordController: ResetPasswordController;
+  changePasswordController: ChangePasswordController;
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
@@ -163,6 +166,11 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     options.passwordHasher,
   );
 
+  const changePasswordUseCase = new ChangePasswordUseCase(
+    credentialsRepository,
+    options.passwordHasher,
+  );
+
   return {
     registerController: new RegisterController(registerUseCase),
     verifyEmailController: new VerifyEmailController(verifyEmailUseCase, cookieOptions),
@@ -192,6 +200,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
       secureCookies: cookieOptions.secureCookies,
     }),
+    changePasswordController: new ChangePasswordController(changePasswordUseCase),
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),

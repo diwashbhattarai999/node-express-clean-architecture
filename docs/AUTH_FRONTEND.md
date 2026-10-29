@@ -90,6 +90,7 @@ Frontend deep links from emails:
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
 | `POST` | `/password/reset` | public |
+| `POST` | `/password/change` | bearer |
 | `GET` | `/sessions` | bearer |
 | `GET` | `/sessions/{sessionId}` | bearer |
 | `DELETE` | `/sessions/{sessionId}` | bearer |
@@ -363,6 +364,34 @@ Cookies cleared.
 
 ---
 
+### Change password
+
+`POST /api/v1/auth/password/change`
+
+**Auth:** bearer. Keeps the current session; cookies are **not** cleared. Other active sessions are revoked.
+
+```json
+{
+  "currentPassword": "OldTest@1234",
+  "password": "NewTest@1234",
+  "confirmPassword": "NewTest@1234"
+}
+```
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Password has been changed.",
+  "data": null
+}
+```
+
+**Errors:** `401 INVALID_CREDENTIALS` (wrong current password), `401 TOKEN_*`, `422`.
+
+---
+
 ### List sessions
 
 `GET /api/v1/auth/sessions?page=1&limit=10&includeRevoked=false`
@@ -486,6 +515,7 @@ If you revoke the **current** session, auth cookies are cleared (same as logout)
 3. On `401 TOKEN_EXPIRED` / `TOKEN_INVALID` for API calls → **refresh** once → retry; if refresh fails → login screen.
 4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
 5. **Revoke others** from a sessions UI → other devices signed out; current session stays.
-6. Forgot password → email link → **reset** → login.
+6. **Change password** (settings) → other sessions die; stay signed in on this device.
+7. Forgot password → email link → **reset** → login.
 
 Use an HTTP client with `credentials: "include"` for all `/api/v1/auth/*` calls from the browser, and attach `Authorization` + `X-CSRF-Token` where noted above.

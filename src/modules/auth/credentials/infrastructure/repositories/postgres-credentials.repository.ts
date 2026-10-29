@@ -254,4 +254,66 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
       return { outcome: "reset" as const };
     });
   }
+
+  public async findPasswordHashForUser(userId: string): Promise<string | null> {
+    const [credential] = await db
+      .select({ passwordHash: passwordCredentials.passwordHash })
+      .from(passwordCredentials)
+      .where(eq(passwordCredentials.userId, userId))
+      .limit(1);
+
+    return credential?.passwordHash ?? null;
+  }
+
+  public async changePasswordForUser(
+    userId: string,
+    passwordHash: string,
+    currentSessionId: string,
+  ): Promise<boolean> {
+    return db.transaction(async (tx) => {
+      const now = new Date();
+
+      const [updatedCredential] = await tx
+        .update(passwordCredentials)
+        .set({
+          passwordHash,
+          passwordChangedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(passwordCredentials.userId, userId))
+        .returning({ id: passwordCredentials.id });
+
+      if (!updatedCredential) {
+        return false;
+      }
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, userId),
+            eq(authTokens.type, "password_reset"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx
+        .update(sessions)
+        .set({
+          revokedAt: now,
+          revocationReason: "password_reset",
+        })
+        .where(
+          and(
+            eq(sessions.userId, userId),
+            ne(sessions.id, currentSessionId),
+            isNull(sessions.revokedAt),
+          ),
+        );
+
+      return true;
+    });
+  }
 }

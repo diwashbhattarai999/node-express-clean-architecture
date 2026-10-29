@@ -2,6 +2,7 @@ import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
+import { changePasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/change-password.validator";
 import { forgotPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/forgot-password.validator";
 import { loginSchema } from "@/modules/auth/credentials/presentation/http/validators/login.validator";
 import { resetPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/reset-password.validator";
@@ -19,6 +20,12 @@ export function createCredentialsRouter(authModule: AuthModule): IRouter {
     "/password/reset",
     validate(resetPasswordSchema),
     asHandler(authModule.resetPasswordController),
+  );
+  router.post(
+    "/password/change",
+    validate(changePasswordSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.changePasswordController),
   );
 
   return router;
