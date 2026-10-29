@@ -100,7 +100,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and compos
 - Validation failures return `422` with field-level errors
 - Shared `AppError` conventions: `401` (`UnauthorizedError`), `403` (`ForbiddenError`), `409` (`ConflictError`); duplicate resources (e.g. email already exists) return `409`
 
-The `users` module is a sample vertical slice to prove the architecture—not a fixed product API. Replace or extend modules as needed. Auth design: [docs/AUTH.md](docs/AUTH.md). HTTP contracts: [docs/AUTH_API.md](docs/AUTH_API.md). Tables: [docs/DATABASE.md](docs/DATABASE.md) (auth routes not implemented yet; sample CRUD still open).
+The `users` module is a sample vertical slice to prove the architecture—not a fixed product API. Replace or extend modules as needed. Auth for frontend: [docs/AUTH_FRONTEND.md](docs/AUTH_FRONTEND.md). Design: [docs/AUTH.md](docs/AUTH.md). Full contracts: [docs/AUTH_API.md](docs/AUTH_API.md). Tables: [docs/DATABASE.md](docs/DATABASE.md).
 
 ## Environment
 
@@ -231,7 +231,8 @@ Example: `feat(users): add list users endpoint`
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Clean Architecture rules |
 | [docs/DATABASE.md](docs/DATABASE.md) | Postgres / Drizzle schema reference |
 | [docs/AUTH.md](docs/AUTH.md) | Auth module design |
-| [docs/AUTH_API.md](docs/AUTH_API.md) | Auth/authz HTTP API contracts (92 endpoints) |
+| [docs/AUTH_FRONTEND.md](docs/AUTH_FRONTEND.md) | Implemented auth APIs for frontend (payloads & examples) |
+| [docs/AUTH_API.md](docs/AUTH_API.md) | Auth/authz HTTP API contracts (planned + implemented) |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Master checklist |
 | [docs/TODO.md](docs/TODO.md) | Prioritized remaining work |
 

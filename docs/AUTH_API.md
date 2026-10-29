@@ -2,8 +2,8 @@
 
 Normative HTTP contracts for auth, account management, RBAC, admin, audit, and future MFA/passkeys.
 
-**Related:** [AUTH.md](AUTH.md) (design), [DATABASE.md](DATABASE.md) (DDL).  
-**Status:** Contract only — routes/use cases are not implemented yet (except root health/ready).  
+**Related:** [AUTH.md](AUTH.md) (design), [DATABASE.md](DATABASE.md) (DDL), [AUTH_FRONTEND.md](AUTH_FRONTEND.md) (implemented endpoints for frontend).  
+**Status:** Full planned contract; see AUTH_FRONTEND.md for what is live today.  
 **Prefix:** `/api/v1` unless noted. Priorities: **P0** core · **P1** important · **P2** future.
 
 ---

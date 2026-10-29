@@ -59,4 +59,11 @@ export interface ISessionRepository {
     items: AuthSessionSummary[];
     total: number;
   }>;
+
+  /** Own session only (userId scoped). Returns null when missing. */
+  findSessionForUser(input: {
+    userId: string;
+    sessionId: string;
+    currentSessionId: string;
+  }): Promise<AuthSessionSummary | null>;
 }

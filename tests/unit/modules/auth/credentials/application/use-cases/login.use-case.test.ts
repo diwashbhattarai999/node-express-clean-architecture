@@ -23,6 +23,7 @@ describe("LoginUseCase", () => {
     revokeSessionById: vi.fn(),
     revokeAllSessionsForUser: vi.fn(),
     listSessionsForUser: vi.fn(),
+    findSessionForUser: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

@@ -1,0 +1,448 @@
+# Auth API — frontend guide
+
+Implemented auth endpoints only. Base path: `/api/v1/auth`.
+
+For the full planned contract (unimplemented routes), see [AUTH_API.md](AUTH_API.md).
+
+---
+
+## Conventions
+
+### Success
+
+```json
+{
+  "success": true,
+  "message": "…",
+  "data": {}
+}
+```
+
+`data` may be `null`. List endpoints also include `meta` (pagination).
+
+### Error
+
+```json
+{
+  "success": false,
+  "message": "…",
+  "code": "ERROR_CODE",
+  "requestId": "uuid",
+  "details": null
+}
+```
+
+| HTTP | Code | When |
+| --- | --- | --- |
+| 401 | `TOKEN_INVALID` / `TOKEN_EXPIRED` / `TOKEN_REVOKED` / `TOKEN_REUSED` | Bad/missing/expired JWT or refresh |
+| 401 | `INVALID_CREDENTIALS` | Wrong login password/identifier |
+| 403 | `EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` | Account not allowed to sign in |
+| 409 | `CONFLICT` | Identity already registered |
+| 422 | `VALIDATION_ERROR` | Bad body/query (`details` has field errors) |
+
+### Password rules
+
+8–128 characters; at least one lowercase, uppercase, digit, and special character.
+
+### Phone
+
+E.164 only (e.g. `+9779812345678`).
+
+---
+
+## Tokens & cookies (web vs native)
+
+| | Browser (SPA) | Native / non-cookie |
+| --- | --- | --- |
+| Access | `Authorization: Bearer <accessToken>` | same |
+| Refresh | HttpOnly cookie `refresh_token` (path `/api/v1/auth`) | JSON `refreshToken` in body |
+| CSRF | Cookie `csrf_token` (readable) → send header `X-CSRF-Token` | not required |
+
+Access JWT TTL is short (~10 minutes; `expiresIn` is seconds). Refresh TTL is longer (~30 days).
+
+**Always send cookies** on auth calls from the browser: `credentials: "include"`.
+
+Endpoints that **set** cookies: login, email/phone verify, refresh.  
+Endpoints that **clear** cookies: logout, logout-all, password reset.
+
+**CSRF required** when the refresh cookie is present: refresh, logout, logout-all.
+
+Frontend deep links from emails:
+
+- Verify email: `{FRONTEND_BASE_URL}/verify-email?token=…`
+- Reset password: `{FRONTEND_BASE_URL}/reset-password?token=…`
+
+---
+
+## Quick map
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| `POST` | `/register` | public |
+| `POST` | `/email/verify` | public |
+| `POST` | `/email/verification/resend` | public |
+| `POST` | `/phone/verify` | public |
+| `POST` | `/phone/verification/resend` | public |
+| `POST` | `/login` | public |
+| `POST` | `/refresh` | refresh (+ CSRF if cookie) |
+| `POST` | `/logout` | refresh and/or bearer (+ CSRF if cookie) |
+| `POST` | `/logout-all` | bearer (+ CSRF if cookie) |
+| `GET` | `/me` | bearer |
+| `POST` | `/password/forgot` | public |
+| `POST` | `/password/reset` | public |
+| `GET` | `/sessions` | bearer |
+| `GET` | `/sessions/{sessionId}` | bearer |
+
+---
+
+## Shared shapes
+
+### `UserPublic`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "active",
+  "displayName": "Ada Lovelace",
+  "avatarUrl": null,
+  "email": "ada@example.com",
+  "username": null,
+  "createdAt": "2026-10-28T00:00:00.000Z",
+  "updatedAt": "2026-10-28T00:00:00.000Z"
+}
+```
+
+`status`: `pending_verification` | `active` | `suspended` | `disabled`
+
+### Session tokens (`data` after login / verify)
+
+```json
+{
+  "user": { "...": "UserPublic" },
+  "accessToken": "eyJ…",
+  "tokenType": "Bearer",
+  "expiresIn": 600,
+  "refreshToken": "opaque-refresh-token"
+}
+```
+
+Refresh returns the same fields **without** `user`.
+
+---
+
+## Endpoints
+
+### Register
+
+`POST /api/v1/auth/register`
+
+**Body** — at least one of `email` / `phone`:
+
+```json
+{
+  "email": "ada@example.com",
+  "password": "Test@1234",
+  "confirmPassword": "Test@1234",
+  "displayName": "Ada Lovelace"
+}
+```
+
+**Response** `201` — no session yet; user is `pending_verification`.
+
+```json
+{
+  "success": true,
+  "message": "Account registered. Please verify your identity to activate the account.",
+  "data": { "user": { "...": "UserPublic" } }
+}
+```
+
+---
+
+### Verify email
+
+`POST /api/v1/auth/email/verify`
+
+```json
+{ "token": "token-from-email-link" }
+```
+
+**Response** `200` — session tokens + cookies. Activates account when verification requirements are met.
+
+---
+
+### Resend email verification
+
+`POST /api/v1/auth/email/verification/resend`
+
+```json
+{ "email": "ada@example.com" }
+```
+
+**Response** `200` — always the same message (anti-enumeration):
+
+```json
+{
+  "success": true,
+  "message": "If an account needs verification, a new email has been sent.",
+  "data": null
+}
+```
+
+---
+
+### Verify phone
+
+`POST /api/v1/auth/phone/verify`
+
+```json
+{
+  "phone": "+9779812345678",
+  "code": "123456"
+}
+```
+
+**Response** `200` — session tokens + cookies (same shape as login).
+
+---
+
+### Resend phone verification
+
+`POST /api/v1/auth/phone/verification/resend`
+
+```json
+{ "phone": "+9779812345678" }
+```
+
+**Response** `200` — anti-enumeration (`data: null`); SMS delivery may still be pending on the backend.
+
+---
+
+### Login
+
+`POST /api/v1/auth/login`
+
+`identifier` may be email, phone, or username.
+
+```json
+{
+  "identifier": "ada@example.com",
+  "password": "Test@1234"
+}
+```
+
+**Response** `200` — session tokens + cookies.
+
+**Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`.
+
+---
+
+### Refresh
+
+`POST /api/v1/auth/refresh`
+
+**Browser:** cookies only + `X-CSRF-Token` (body can be `{}`).
+
+**Native:**
+
+```json
+{ "refreshToken": "opaque-refresh-token" }
+```
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Token refreshed.",
+  "data": {
+    "accessToken": "eyJ…",
+    "tokenType": "Bearer",
+    "expiresIn": 600,
+    "refreshToken": "new-opaque-refresh-token"
+  }
+}
+```
+
+Store the new refresh token (cookie is rotated automatically for browsers).
+
+---
+
+### Logout (current session)
+
+`POST /api/v1/auth/logout`
+
+Send refresh cookie and/or bearer. Optional body for native:
+
+```json
+{ "refreshToken": "opaque-refresh-token" }
+```
+
+**Response** `200` — `data: null`; cookies cleared.
+
+---
+
+### Logout all sessions
+
+`POST /api/v1/auth/logout-all`
+
+**Auth:** `Authorization: Bearer …`  
+**CSRF:** if refresh cookie is present.
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Signed out of all sessions.",
+  "data": { "revokedCount": 3 }
+}
+```
+
+Cookies cleared.
+
+---
+
+### Current user
+
+`GET /api/v1/auth/me`
+
+**Auth:** bearer.
+
+```json
+{
+  "success": true,
+  "message": "Authenticated user.",
+  "data": {
+    "user": { "...": "UserPublic" },
+    "roles": ["member"],
+    "permissions": []
+  }
+}
+```
+
+`permissions` is empty until RBAC lands.
+
+---
+
+### Forgot password
+
+`POST /api/v1/auth/password/forgot`
+
+```json
+{ "email": "ada@example.com" }
+```
+
+**Response** `200` — always:
+
+```json
+{
+  "success": true,
+  "message": "If an account exists for that email, a password reset link has been sent.",
+  "data": null
+}
+```
+
+---
+
+### Reset password
+
+`POST /api/v1/auth/password/reset`
+
+```json
+{
+  "token": "token-from-email-link",
+  "password": "NewTest@1234",
+  "confirmPassword": "NewTest@1234"
+}
+```
+
+**Response** `200` — `data: null`; all sessions revoked; cookies cleared. User must log in again.
+
+---
+
+### List sessions
+
+`GET /api/v1/auth/sessions?page=1&limit=10&includeRevoked=false`
+
+**Auth:** bearer.
+
+| Query | Default | Notes |
+| --- | --- | --- |
+| `page` | `1` | ≥ 1 |
+| `limit` | `10` | 1–100 |
+| `includeRevoked` | `false` | `"true"` \| `"false"` |
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Sessions retrieved.",
+  "data": [
+    {
+      "id": "session-uuid",
+      "createdAt": "2026-10-28T00:00:00.000Z",
+      "lastUsedAt": "2026-10-28T01:00:00.000Z",
+      "expiresAt": "2026-11-27T00:00:00.000Z",
+      "ipAddress": "127.0.0.1",
+      "userAgent": "Mozilla/5.0…",
+      "deviceName": null,
+      "isCurrent": true
+    }
+  ],
+  "meta": {
+    "totalRecords": 1,
+    "perPage": 10,
+    "currentPage": 1,
+    "totalPages": 1,
+    "pagingCounter": 1,
+    "hasPrevious": false,
+    "hasNext": false,
+    "prev": null,
+    "next": null,
+    "recordShown": 1
+  }
+}
+```
+
+---
+
+### Get session
+
+`GET /api/v1/auth/sessions/{sessionId}`
+
+**Auth:** bearer (own sessions only).
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Session retrieved.",
+  "data": {
+    "id": "session-uuid",
+    "createdAt": "2026-10-28T00:00:00.000Z",
+    "lastUsedAt": "2026-10-28T01:00:00.000Z",
+    "expiresAt": "2026-11-27T00:00:00.000Z",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "Mozilla/5.0…",
+    "deviceName": null,
+    "isCurrent": true
+  }
+}
+```
+
+**Errors:** `404 NOT_FOUND` (missing or not owned), `401 TOKEN_*`, `422` (invalid UUID).
+
+---
+
+## Suggested frontend flows
+
+1. **Register** → open verify email/phone → **verify** → store access (+ refresh for native) → app.
+2. **Login** → store tokens → call **`/me`** as needed.
+3. On `401 TOKEN_EXPIRED` / `TOKEN_INVALID` for API calls → **refresh** once → retry; if refresh fails → login screen.
+4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
+5. Forgot password → email link → **reset** → login.
+
+Use an HTTP client with `credentials: "include"` for all `/api/v1/auth/*` calls from the browser, and attach `Authorization` + `X-CSRF-Token` where noted above.

@@ -11,6 +11,7 @@ describe("LogoutAllUseCase", () => {
     revokeSessionById: vi.fn(),
     revokeAllSessionsForUser: vi.fn(),
     listSessionsForUser: vi.fn(),
+    findSessionForUser: vi.fn(),
   };
 
   const useCase = new LogoutAllUseCase(sessionRepository);

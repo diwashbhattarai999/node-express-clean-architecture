@@ -244,4 +244,39 @@ export class PostgresSessionRepository implements ISessionRepository {
       })),
     };
   }
+
+  public async findSessionForUser(input: {
+    userId: string;
+    sessionId: string;
+    currentSessionId: string;
+  }): Promise<AuthSessionSummary | null> {
+    const [row] = await db
+      .select({
+        id: sessions.id,
+        createdAt: sessions.createdAt,
+        lastUsedAt: sessions.lastUsedAt,
+        expiresAt: sessions.expiresAt,
+        ipAddress: sessions.ipAddress,
+        userAgent: sessions.userAgent,
+        deviceName: sessions.deviceName,
+      })
+      .from(sessions)
+      .where(and(eq(sessions.userId, input.userId), eq(sessions.id, input.sessionId)))
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id: row.id,
+      createdAt: row.createdAt,
+      lastUsedAt: row.lastUsedAt,
+      expiresAt: row.expiresAt,
+      ipAddress: row.ipAddress ?? null,
+      userAgent: row.userAgent ?? null,
+      deviceName: row.deviceName ?? null,
+      isCurrent: row.id === input.currentSessionId,
+    };
+  }
 }

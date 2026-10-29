@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Frontend auth API guide ([`docs/AUTH_FRONTEND.md`](docs/AUTH_FRONTEND.md)) for implemented endpoints
+- `GET /api/v1/auth/sessions/{sessionId}` — bearer-authenticated own-session lookup (`404 NOT_FOUND`)
+
 ## [1.1.2] - 2026-10-28
 
 ### Added
