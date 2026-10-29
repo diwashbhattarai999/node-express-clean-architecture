@@ -17,6 +17,7 @@ describe("RefreshUseCase", () => {
     revokeAllSessionsForUser: vi.fn(),
     listSessionsForUser: vi.fn(),
     findSessionForUser: vi.fn(),
+    revokeSessionForUser: vi.fn(),
   };
 
   const accessTokenSigner: IAccessTokenSigner = {

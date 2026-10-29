@@ -92,6 +92,7 @@ Frontend deep links from emails:
 | `POST` | `/password/reset` | public |
 | `GET` | `/sessions` | bearer |
 | `GET` | `/sessions/{sessionId}` | bearer |
+| `DELETE` | `/sessions/{sessionId}` | bearer |
 
 ---
 
@@ -432,6 +433,28 @@ Cookies cleared.
   }
 }
 ```
+
+**Errors:** `404 NOT_FOUND` (missing or not owned), `401 TOKEN_*`, `422` (invalid UUID).
+
+---
+
+### Revoke session
+
+`DELETE /api/v1/auth/sessions/{sessionId}`
+
+**Auth:** bearer (own sessions only). Idempotent if already revoked.
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Session revoked.",
+  "data": null
+}
+```
+
+If you revoke the **current** session, auth cookies are cleared (same as logout). Clear the local access token too.
 
 **Errors:** `404 NOT_FOUND` (missing or not owned), `401 TOKEN_*`, `422` (invalid UUID).
 

@@ -66,4 +66,13 @@ export interface ISessionRepository {
     sessionId: string;
     currentSessionId: string;
   }): Promise<AuthSessionSummary | null>;
+
+  /**
+   * Revokes an active session owned by the user.
+   * `already_revoked` is idempotent success; `not_found` includes other users' sessions.
+   */
+  revokeSessionForUser(input: {
+    userId: string;
+    sessionId: string;
+  }): Promise<"revoked" | "already_revoked" | "not_found">;
 }

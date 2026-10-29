@@ -6,6 +6,7 @@ import { getSessionSchema } from "@/modules/auth/sessions/presentation/http/vali
 import { listSessionsSchema } from "@/modules/auth/sessions/presentation/http/validators/list-sessions.validator";
 import { logoutSchema } from "@/modules/auth/sessions/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/sessions/presentation/http/validators/refresh.validator";
+import { revokeSessionSchema } from "@/modules/auth/sessions/presentation/http/validators/revoke-session.validator";
 
 export function createSessionsRouter(authModule: AuthModule): IRouter {
   const router = Router();
@@ -39,6 +40,12 @@ export function createSessionsRouter(authModule: AuthModule): IRouter {
     validate(getSessionSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.getSessionController),
+  );
+  router.delete(
+    "/sessions/:sessionId",
+    validate(revokeSessionSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.revokeSessionController),
   );
 
   return router;

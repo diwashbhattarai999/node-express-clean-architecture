@@ -279,4 +279,37 @@ export class PostgresSessionRepository implements ISessionRepository {
       isCurrent: row.id === input.currentSessionId,
     };
   }
+
+  public async revokeSessionForUser(input: {
+    userId: string;
+    sessionId: string;
+  }): Promise<"revoked" | "already_revoked" | "not_found"> {
+    const [existing] = await db
+      .select({
+        id: sessions.id,
+        revokedAt: sessions.revokedAt,
+      })
+      .from(sessions)
+      .where(and(eq(sessions.userId, input.userId), eq(sessions.id, input.sessionId)))
+      .limit(1);
+
+    if (!existing) {
+      return "not_found";
+    }
+
+    if (existing.revokedAt) {
+      return "already_revoked";
+    }
+
+    const now = new Date();
+    await db
+      .update(sessions)
+      .set({
+        revokedAt: now,
+        revocationReason: "logout",
+      })
+      .where(and(eq(sessions.id, input.sessionId), isNull(sessions.revokedAt)));
+
+    return "revoked";
+  }
 }
