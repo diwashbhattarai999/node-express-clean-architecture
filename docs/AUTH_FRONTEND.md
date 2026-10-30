@@ -97,6 +97,12 @@ Frontend deep links from emails:
 | `DELETE` | `/sessions/{sessionId}` | bearer |
 | `POST` | `/sessions/revoke-others` | bearer |
 
+Also under `/api/v1/users/me` (same bearer):
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| `PATCH` | `/username` | bearer |
+
 ---
 
 ## Shared shapes
@@ -329,6 +335,34 @@ Cookies cleared.
 
 ---
 
+### Change or set username
+
+`PATCH /api/v1/users/me/username`
+
+**Auth:** bearer. Creates or replaces the username login identity (case-insensitive unique).
+
+```json
+{ "username": "Ada" }
+```
+
+Rules: 3–30 chars; starts with a letter; letters, digits, `.`, `_`, `-` only; reserved names rejected.
+
+**Response** `200`:
+
+```json
+{
+  "success": true,
+  "message": "Username updated.",
+  "data": {
+    "user": { "...": "UserPublic", "username": "ada" }
+  }
+}
+```
+
+**Errors:** `409 CONFLICT` (taken), `422` (format / reserved), `401 TOKEN_*`.
+
+---
+
 ### Forgot password
 
 `POST /api/v1/auth/password/forgot`
@@ -552,6 +586,7 @@ If you revoke the **current** session, auth cookies are cleared (same as logout)
 4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
 5. **Revoke others** from a sessions UI → other devices signed out; current session stays.
 6. **Change password** (settings) → other sessions die; stay signed in on this device.
-7. Forgot password → email link → **validate** token → **reset** → login.
+7. **Set username** (optional) via `PATCH /users/me/username` — then usable at login.
+8. Forgot password → email link → **validate** token → **reset** → login.
 
 Use an HTTP client with `credentials: "include"` for all `/api/v1/auth/*` calls from the browser, and attach `Authorization` + `X-CSRF-Token` where noted above.

@@ -35,6 +35,12 @@ export type FindAuthenticatedPrincipalResult =
   | { outcome: "user_not_found" }
   | { outcome: "ok"; user: AuthUser; roles: string[] };
 
+export type UpsertUsernameInput = {
+  userId: string;
+  identifier: string;
+  normalizedIdentifier: string;
+};
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -47,4 +53,7 @@ export interface IIdentityRepository {
     userId: string,
     sessionId: string,
   ): Promise<FindAuthenticatedPrincipalResult>;
+
+  /** Creates or replaces the user's username login identity. */
+  upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;
 }

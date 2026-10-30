@@ -11,6 +11,7 @@ describe("GetMeUseCase", () => {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    upsertUsername: vi.fn(),
   };
 
   const useCase = new GetMeUseCase(identityRepository);

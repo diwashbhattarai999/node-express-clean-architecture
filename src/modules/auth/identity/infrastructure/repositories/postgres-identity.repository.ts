@@ -14,6 +14,7 @@ import type {
   FindAuthenticatedPrincipalResult,
   IIdentityRepository,
   RegisterAccountInput,
+  UpsertUsernameInput,
 } from "@/modules/auth/identity/application/ports/identity.repository";
 import type {
   AuthUser,
@@ -209,5 +210,89 @@ export class PostgresIdentityRepository implements IIdentityRepository {
         updatedAt: user.updatedAt,
       },
     };
+  }
+
+  public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {
+    try {
+      return await db.transaction(async (tx) => {
+        const [user] = await tx
+          .select()
+          .from(users)
+          .where(and(eq(users.id, input.userId), isNull(users.deletedAt)))
+          .limit(1);
+
+        if (!user) {
+          throw new Error("User not found.");
+        }
+
+        const [existingUsername] = await tx
+          .select({ id: loginIdentities.id })
+          .from(loginIdentities)
+          .where(and(eq(loginIdentities.userId, user.id), eq(loginIdentities.type, "username")))
+          .limit(1);
+
+        const now = new Date();
+
+        if (existingUsername) {
+          await tx
+            .update(loginIdentities)
+            .set({
+              identifier: input.identifier,
+              normalizedIdentifier: input.normalizedIdentifier,
+              verifiedAt: now,
+              updatedAt: now,
+            })
+            .where(eq(loginIdentities.id, existingUsername.id));
+        } else {
+          await tx.insert(loginIdentities).values({
+            userId: user.id,
+            type: "username",
+            identifier: input.identifier,
+            normalizedIdentifier: input.normalizedIdentifier,
+            isPrimary: true,
+            verifiedAt: now,
+          });
+        }
+
+        const identities = await tx
+          .select({
+            type: loginIdentities.type,
+            identifier: loginIdentities.normalizedIdentifier,
+            isPrimary: loginIdentities.isPrimary,
+            verifiedAt: loginIdentities.verifiedAt,
+          })
+          .from(loginIdentities)
+          .where(eq(loginIdentities.userId, user.id));
+
+        const primaryEmail =
+          identities.find(
+            (identity) =>
+              identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+          )?.identifier ??
+          identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+            ?.identifier ??
+          null;
+
+        const username =
+          identities.find((identity) => identity.type === "username")?.identifier ?? null;
+
+        return {
+          id: user.id,
+          status: user.status,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          email: primaryEmail,
+          username,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        };
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new IdentityAlreadyExistsError();
+      }
+
+      throw error;
+    }
   }
 }

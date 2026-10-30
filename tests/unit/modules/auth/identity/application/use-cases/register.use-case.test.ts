@@ -11,6 +11,7 @@ describe("RegisterUseCase", () => {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    upsertUsername: vi.fn(),
   };
 
   const passwordHasher: IPasswordHasher = {

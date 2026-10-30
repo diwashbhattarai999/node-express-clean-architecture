@@ -2,7 +2,7 @@
 
 Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
-**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + users/uploads integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), users CRUD vertical slice, uploads module (multipart + MIME/size), Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), outbound `IHttpClient` (Axios), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
+**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + auth/uploads integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), auth module (+ `/users/me` self-service routes), uploads module (multipart + MIME/size), Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), outbound `IHttpClient` (Axios), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
 
 | Priority | Item | Phase | Notes |
 | --- | --- | --- | --- |
@@ -10,7 +10,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P0 | Fix `drizzle.config.ts` schema path | 9 | Done (`drizzle/schema/`) |
 | P0 | Pin `packageManager` / Node engines in `package.json` | 25 | Done (`pnpm@11.22.0`, `node>=22`) |
 | P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Done — `pnpm docker:up` |
-| P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; core auth + sessions + password flows landed; username, session label, profile identities still pending |
+| P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; core auth + sessions + password + username landed; session label, profile identities still pending |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Auth middleware exists (`requireBearerAuth`); users API still open |
 | P2 | Authorization / RBAC | 14 | `roles` / `user_roles` tables ready; design + middleware + use-case rules pending |
 | P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Done — shared 401/403/409 errors; email conflict is 409 |

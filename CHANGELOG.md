@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/sessions/revoke-others` — revoke all active sessions except the current bearer session
 - `POST /api/v1/auth/password/change` — bearer-authenticated password update; revokes other sessions and pending reset tokens
 - `POST /api/v1/auth/password/reset/validate` — public soft check for reset-token validity (`valid` + optional `expiresAt`)
+- `PATCH /api/v1/users/me/username` — bearer-authenticated create/replace username login identity (normalized uniqueness)
+
+### Changed
+
+- Mount `/api/v1/users` as a module root; nest `/me/*` under it (auth/identity owns the handlers for now)
+
+### Removed
+
+- Sample `users` CRUD module (replace with AUTH_API `/users/me` + admin user APIs as they land)
 
 ## [1.1.2] - 2026-10-28
 

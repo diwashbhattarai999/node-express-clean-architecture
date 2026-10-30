@@ -18,6 +18,7 @@ const mockAuthAccountRepository = {
   revokeAllSessionsForUser: vi.fn(),
   revokeOtherSessionsForUser: vi.fn(),
   findAuthenticatedPrincipal: vi.fn(),
+  upsertUsername: vi.fn(),
   findPasswordResetTarget: vi.fn(),
   replacePasswordResetToken: vi.fn(),
   validatePasswordResetTokenHash: vi.fn(),
@@ -87,19 +88,6 @@ vi.mock("@/modules/auth/shared/infrastructure/security/jose-access-token.signer"
 
 vi.mock("@/infrastructure/email", () => ({
   createEmailSender: vi.fn(() => mockEmailSender),
-}));
-
-vi.mock("@/modules/users/infrastructure/repositories/postgres-user.repository", () => ({
-  PostgresUserRepository: vi.fn(function PostgresUserRepository() {
-    return {
-      findById: vi.fn(),
-      findByEmail: vi.fn(),
-      findMany: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-  }),
 }));
 
 const { createApp } = await import("@/app/create-app");

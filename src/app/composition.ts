@@ -5,7 +5,6 @@ import { createObjectStorage } from "@/infrastructure/storage";
 import { createAuthModule } from "@/modules/auth/auth.module";
 import { Argon2PasswordHasher } from "@/modules/auth/shared/infrastructure/security/argon2-password-hasher";
 import { createUploadsModule } from "@/modules/uploads/uploads.module";
-import { createUsersModule } from "@/modules/users/users.module";
 
 export function createApplicationModules() {
   const emailSender = createEmailSender(env);
@@ -16,7 +15,6 @@ export function createApplicationModules() {
     emailSender,
     objectStorage,
     httpClient,
-    users: createUsersModule(),
     auth: createAuthModule({
       emailSender,
       passwordHasher: new Argon2PasswordHasher(),

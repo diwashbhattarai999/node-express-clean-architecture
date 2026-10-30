@@ -14,28 +14,6 @@ vi.mock("@/infrastructure/storage", () => ({
   createObjectStorage: vi.fn(() => mockObjectStorage),
 }));
 
-vi.mock("@/modules/users/infrastructure/repositories/postgres-user.repository", () => ({
-  PostgresUserRepository: vi.fn(function PostgresUserRepository() {
-    return {
-      findById: vi.fn(),
-      findByEmail: vi.fn(),
-      findMany: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-  }),
-}));
-
-vi.mock("@/modules/users/infrastructure/security/argon2-password-hasher", () => ({
-  Argon2PasswordHasher: vi.fn(function Argon2PasswordHasher() {
-    return {
-      hash: vi.fn(),
-      compare: vi.fn(),
-    };
-  }),
-}));
-
 const { createApp } = await import("@/app/create-app");
 
 describe("Uploads API", () => {

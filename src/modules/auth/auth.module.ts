@@ -13,9 +13,11 @@ import { ForgotPasswordController } from "@/modules/auth/credentials/presentatio
 import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
 import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
+import { ChangeUsernameUseCase } from "@/modules/auth/identity/application/use-cases/change-username.use-case";
 import { GetMeUseCase } from "@/modules/auth/identity/application/use-cases/get-me.use-case";
 import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
+import { ChangeUsernameController } from "@/modules/auth/identity/presentation/http/controllers/change-username.controller";
 import { GetMeController } from "@/modules/auth/identity/presentation/http/controllers/get-me.controller";
 import { RegisterController } from "@/modules/auth/identity/presentation/http/controllers/register.controller";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
@@ -69,6 +71,7 @@ export type AuthModule = {
   logoutController: LogoutController;
   logoutAllController: LogoutAllController;
   getMeController: GetMeController;
+  changeUsernameController: ChangeUsernameController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
   revokeSessionController: RevokeSessionController;
@@ -154,6 +157,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const logoutUseCase = new LogoutUseCase(sessionRepository);
   const logoutAllUseCase = new LogoutAllUseCase(sessionRepository);
   const getMeUseCase = new GetMeUseCase(identityRepository);
+  const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
   const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
   const getSessionUseCase = new GetSessionUseCase(sessionRepository);
   const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
@@ -195,6 +199,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       secureCookies: cookieOptions.secureCookies,
     }),
     getMeController: new GetMeController(getMeUseCase),
+    changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
     listSessionsController: new ListSessionsController(listSessionsUseCase),
     getSessionController: new GetSessionController(getSessionUseCase),
     revokeSessionController: new RevokeSessionController(revokeSessionUseCase, {
