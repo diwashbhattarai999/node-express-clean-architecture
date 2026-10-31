@@ -1,14 +1,15 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
-import type { AuthModule } from "@/modules/auth/auth.module";
 import { getSessionSchema } from "@/modules/auth/sessions/presentation/http/validators/get-session.validator";
 import { listSessionsSchema } from "@/modules/auth/sessions/presentation/http/validators/list-sessions.validator";
 import { logoutSchema } from "@/modules/auth/sessions/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/sessions/presentation/http/validators/refresh.validator";
 import { revokeSessionSchema } from "@/modules/auth/sessions/presentation/http/validators/revoke-session.validator";
+import type { SessionsModule } from "@/modules/auth/sessions/sessions.module";
+import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
-export function createSessionsRouter(authModule: AuthModule): IRouter {
+export function createSessionsRouter(authModule: SessionsModule & AuthHttpGuards): IRouter {
   const router = Router();
 
   router.post(

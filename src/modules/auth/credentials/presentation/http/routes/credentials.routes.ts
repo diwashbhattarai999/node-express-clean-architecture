@@ -1,14 +1,17 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
-import type { AuthModule } from "@/modules/auth/auth.module";
+import type { CredentialsModule } from "@/modules/auth/credentials/credentials.module";
 import { changePasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/change-password.validator";
 import { forgotPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/forgot-password.validator";
 import { loginSchema } from "@/modules/auth/credentials/presentation/http/validators/login.validator";
 import { resetPasswordSchema } from "@/modules/auth/credentials/presentation/http/validators/reset-password.validator";
 import { validatePasswordResetSchema } from "@/modules/auth/credentials/presentation/http/validators/validate-password-reset.validator";
+import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
-export function createCredentialsRouter(authModule: AuthModule): IRouter {
+export function createCredentialsRouter(
+  authModule: CredentialsModule & Pick<AuthHttpGuards, "requireBearerAuth">,
+): IRouter {
   const router = Router();
 
   router.post("/login", validate(loginSchema), asHandler(authModule.loginController));

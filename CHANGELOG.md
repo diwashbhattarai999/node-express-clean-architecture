@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/users/me/deletion-request/cancel` — clear pending deletion markers and remove the delayed job (`404` if nothing is pending)
 - `GET /api/v1/auth/oauth/{provider}/authorize` — start Google/GitHub/Apple/Microsoft/OIDC login (`302` or `?response=json`)
 
+### Changed
+
+- Split auth composition into submodule factories (`identity`, `credentials`, `verification`, `sessions`, `oauth`); root `auth.module.ts` only wires shared ports
+
 ### Fixed
 
 - Account deletion enqueue no longer 500s: BullMQ custom job ids cannot contain `:`

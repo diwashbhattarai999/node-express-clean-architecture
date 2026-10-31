@@ -1,13 +1,13 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
-import type { AuthModule } from "@/modules/auth/auth.module";
 import { resendEmailVerificationSchema } from "@/modules/auth/verification/presentation/http/validators/resend-email-verification.validator";
 import { resendPhoneVerificationSchema } from "@/modules/auth/verification/presentation/http/validators/resend-phone-verification.validator";
 import { verifyEmailSchema } from "@/modules/auth/verification/presentation/http/validators/verify-email.validator";
 import { verifyPhoneSchema } from "@/modules/auth/verification/presentation/http/validators/verify-phone.validator";
+import type { VerificationModule } from "@/modules/auth/verification/verification.module";
 
-export function createVerificationRouter(authModule: AuthModule): IRouter {
+export function createVerificationRouter(authModule: VerificationModule): IRouter {
   const router = Router();
 
   router.post(

@@ -1,79 +1,25 @@
-import type { RequestHandler } from "express";
-
 import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
-import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/use-cases/change-password.use-case";
-import { ForgotPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/forgot-password.use-case";
-import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
-import { ResetPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/reset-password.use-case";
-import { ValidatePasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/validate-password-reset.use-case";
+import {
+  type CredentialsModule,
+  createCredentialsModule,
+} from "@/modules/auth/credentials/credentials.module";
 import { PostgresCredentialsRepository } from "@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository";
-import { ChangePasswordController } from "@/modules/auth/credentials/presentation/http/controllers/change-password.controller";
-import { ForgotPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/forgot-password.controller";
-import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
-import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
-import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
-import { AddEmailUseCase } from "@/modules/auth/identity/application/use-cases/add-email.use-case";
-import { CancelAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/cancel-account-deletion.use-case";
-import { ChangeUsernameUseCase } from "@/modules/auth/identity/application/use-cases/change-username.use-case";
-import { GetMeUseCase } from "@/modules/auth/identity/application/use-cases/get-me.use-case";
-import { GetOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/get-own-profile.use-case";
-import { ListOwnIdentitiesUseCase } from "@/modules/auth/identity/application/use-cases/list-own-identities.use-case";
-import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
-import { RemoveEmailUseCase } from "@/modules/auth/identity/application/use-cases/remove-email.use-case";
-import { RequestAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/request-account-deletion.use-case";
-import { UpdateOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/update-own-profile.use-case";
-import { VerifyAddedEmailUseCase } from "@/modules/auth/identity/application/use-cases/verify-added-email.use-case";
-import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
-import { AddEmailController } from "@/modules/auth/identity/presentation/http/controllers/add-email.controller";
-import { CancelAccountDeletionController } from "@/modules/auth/identity/presentation/http/controllers/cancel-account-deletion.controller";
-import { ChangeUsernameController } from "@/modules/auth/identity/presentation/http/controllers/change-username.controller";
-import { GetMeController } from "@/modules/auth/identity/presentation/http/controllers/get-me.controller";
-import { GetOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/get-own-profile.controller";
-import { ListOwnIdentitiesController } from "@/modules/auth/identity/presentation/http/controllers/list-own-identities.controller";
-import { RegisterController } from "@/modules/auth/identity/presentation/http/controllers/register.controller";
-import { RemoveEmailController } from "@/modules/auth/identity/presentation/http/controllers/remove-email.controller";
-import { RequestAccountDeletionController } from "@/modules/auth/identity/presentation/http/controllers/request-account-deletion.controller";
-import { UpdateOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/update-own-profile.controller";
-import { VerifyAddedEmailController } from "@/modules/auth/identity/presentation/http/controllers/verify-added-email.controller";
-import { StartOAuthAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-authorization.use-case";
-import { createOAuthProviderCatalog } from "@/modules/auth/oauth/infrastructure/create-oauth-provider-catalog";
-import { PostgresOAuthAuthorizationStateRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-authorization-state.repository";
-import { StartOAuthAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-authorization.controller";
-import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
-import { ListSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/list-sessions.use-case";
-import { LogoutUseCase } from "@/modules/auth/sessions/application/use-cases/logout.use-case";
-import { LogoutAllUseCase } from "@/modules/auth/sessions/application/use-cases/logout-all.use-case";
-import { RefreshUseCase } from "@/modules/auth/sessions/application/use-cases/refresh.use-case";
-import { RevokeOtherSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-other-sessions.use-case";
-import { RevokeSessionUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-session.use-case";
+import { createIdentityModule, type IdentityModule } from "@/modules/auth/identity/identity.module";
+import { createOAuthModule, type OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { PostgresSessionRepository } from "@/modules/auth/sessions/infrastructure/repositories/postgres-session.repository";
-import { GetSessionController } from "@/modules/auth/sessions/presentation/http/controllers/get-session.controller";
-import { ListSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/list-sessions.controller";
-import { LogoutController } from "@/modules/auth/sessions/presentation/http/controllers/logout.controller";
-import { LogoutAllController } from "@/modules/auth/sessions/presentation/http/controllers/logout-all.controller";
-import { RefreshController } from "@/modules/auth/sessions/presentation/http/controllers/refresh.controller";
-import { RevokeOtherSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-other-sessions.controller";
-import { RevokeSessionController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-session.controller";
+import { createSessionsModule, type SessionsModule } from "@/modules/auth/sessions/sessions.module";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
 import { JoseAccessTokenSigner } from "@/modules/auth/shared/infrastructure/security/jose-access-token.signer";
-import { assertCsrfWhenRefreshCookie } from "@/modules/auth/shared/presentation/http/middleware/assert-csrf-when-refresh-cookie.middleware";
 import {
-  createOptionalBearerAuth,
-  createRequireBearerAuth,
-} from "@/modules/auth/shared/presentation/http/middleware/require-bearer-auth.middleware";
-import { requireRefreshAuth } from "@/modules/auth/shared/presentation/http/middleware/require-refresh-auth.middleware";
-import { createRequireRefreshOrBearerAuth } from "@/modules/auth/shared/presentation/http/middleware/require-refresh-or-bearer-auth.middleware";
-import { ResendEmailVerificationUseCase } from "@/modules/auth/verification/application/use-cases/resend-email-verification.use-case";
-import { ResendPhoneVerificationUseCase } from "@/modules/auth/verification/application/use-cases/resend-phone-verification.use-case";
-import { VerifyEmailUseCase } from "@/modules/auth/verification/application/use-cases/verify-email.use-case";
-import { VerifyPhoneUseCase } from "@/modules/auth/verification/application/use-cases/verify-phone.use-case";
-import { PostgresVerificationRepository } from "@/modules/auth/verification/infrastructure/repositories/postgres-verification.repository";
-import { ResendEmailVerificationController } from "@/modules/auth/verification/presentation/http/controllers/resend-email-verification.controller";
-import { ResendPhoneVerificationController } from "@/modules/auth/verification/presentation/http/controllers/resend-phone-verification.controller";
-import { VerifyEmailController } from "@/modules/auth/verification/presentation/http/controllers/verify-email.controller";
-import { VerifyPhoneController } from "@/modules/auth/verification/presentation/http/controllers/verify-phone.controller";
+  type AuthHttpGuards,
+  createAuthHttpGuards,
+} from "@/modules/auth/shared/presentation/http/auth-http-guards";
+import {
+  createVerificationModule,
+  type VerificationModule,
+} from "@/modules/auth/verification/verification.module";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
@@ -85,49 +31,16 @@ export type CreateAuthModuleOptions = {
   env: TEnv;
 };
 
-export type AuthModule = {
-  registerController: RegisterController;
-  verifyEmailController: VerifyEmailController;
-  resendEmailVerificationController: ResendEmailVerificationController;
-  verifyPhoneController: VerifyPhoneController;
-  resendPhoneVerificationController: ResendPhoneVerificationController;
-  loginController: LoginController;
-  refreshController: RefreshController;
-  logoutController: LogoutController;
-  logoutAllController: LogoutAllController;
-  getMeController: GetMeController;
-  getOwnProfileController: GetOwnProfileController;
-  updateOwnProfileController: UpdateOwnProfileController;
-  listOwnIdentitiesController: ListOwnIdentitiesController;
-  addEmailController: AddEmailController;
-  verifyAddedEmailController: VerifyAddedEmailController;
-  removeEmailController: RemoveEmailController;
-  requestAccountDeletionController: RequestAccountDeletionController;
-  cancelAccountDeletionController: CancelAccountDeletionController;
-  startOAuthAuthorizationController: StartOAuthAuthorizationController;
-  changeUsernameController: ChangeUsernameController;
-  listSessionsController: ListSessionsController;
-  getSessionController: GetSessionController;
-  revokeSessionController: RevokeSessionController;
-  revokeOtherSessionsController: RevokeOtherSessionsController;
-  forgotPasswordController: ForgotPasswordController;
-  validatePasswordResetController: ValidatePasswordResetController;
-  resetPasswordController: ResetPasswordController;
-  changePasswordController: ChangePasswordController;
-  requireRefreshAuth: RequestHandler;
-  requireRefreshOrBearerAuth: RequestHandler;
-  requireBearerAuth: RequestHandler;
-  optionalBearerAuth: RequestHandler;
-  assertCsrfWhenRefreshCookie: RequestHandler;
-};
+export type AuthModule = IdentityModule &
+  CredentialsModule &
+  VerificationModule &
+  SessionsModule &
+  OAuthModule &
+  AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
-  const identityRepository = new PostgresIdentityRepository();
   const credentialsRepository = new PostgresCredentialsRepository();
-  const verificationRepository = new PostgresVerificationRepository();
   const sessionRepository = new PostgresSessionRepository();
-  const oauthAuthorizationStateRepository = new PostgresOAuthAuthorizationStateRepository();
-  const oauthProviderCatalog = createOAuthProviderCatalog(options.env);
 
   const accessTokenSigner =
     options.accessTokenSigner ??
@@ -154,157 +67,42 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       options.env.NODE_ENV === Environment.STAGING,
   };
 
-  const registerUseCase = new RegisterUseCase(
-    identityRepository,
-    options.passwordHasher,
-    options.emailSender,
-    emailOptions,
-  );
-
-  const verifyEmailUseCase = new VerifyEmailUseCase(
-    verificationRepository,
-    accessTokenSigner,
-    sessionOptions,
-  );
-
-  const resendEmailVerificationUseCase = new ResendEmailVerificationUseCase(
-    verificationRepository,
-    options.emailSender,
-    emailOptions,
-  );
-
-  const verifyPhoneUseCase = new VerifyPhoneUseCase(
-    verificationRepository,
-    accessTokenSigner,
-    sessionOptions,
-  );
-
-  const resendPhoneVerificationUseCase = new ResendPhoneVerificationUseCase(verificationRepository);
-
-  const loginUseCase = new LoginUseCase(
-    credentialsRepository,
-    sessionRepository,
-    options.passwordHasher,
-    accessTokenSigner,
-    sessionOptions,
-  );
-
-  const refreshUseCase = new RefreshUseCase(sessionRepository, accessTokenSigner, sessionOptions);
-
-  const logoutUseCase = new LogoutUseCase(sessionRepository);
-  const logoutAllUseCase = new LogoutAllUseCase(sessionRepository);
-  const getMeUseCase = new GetMeUseCase(identityRepository);
-  const getOwnProfileUseCase = new GetOwnProfileUseCase(identityRepository);
-  const updateOwnProfileUseCase = new UpdateOwnProfileUseCase(identityRepository);
-  const listOwnIdentitiesUseCase = new ListOwnIdentitiesUseCase(identityRepository);
-  const addEmailUseCase = new AddEmailUseCase(
-    identityRepository,
-    options.emailSender,
-    emailOptions,
-  );
-  const verifyAddedEmailUseCase = new VerifyAddedEmailUseCase(identityRepository);
-  const removeEmailUseCase = new RemoveEmailUseCase(identityRepository);
-  const requestAccountDeletionUseCase = new RequestAccountDeletionUseCase(
-    identityRepository,
-    credentialsRepository,
-    options.passwordHasher,
-    options.jobQueue,
-    { graceDays: options.env.AUTH_ACCOUNT_DELETION_GRACE_DAYS },
-  );
-  const cancelAccountDeletionUseCase = new CancelAccountDeletionUseCase(
-    identityRepository,
-    options.jobQueue,
-  );
-  const startOAuthAuthorizationUseCase = new StartOAuthAuthorizationUseCase(
-    oauthProviderCatalog,
-    oauthAuthorizationStateRepository,
-    {
-      apiBaseUrl: options.env.BASE_URL,
-      frontendBaseUrl: options.env.FRONTEND_BASE_URL,
-      allowedRedirectUris: options.env.OAUTH_REDIRECT_URIS,
-      stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
-    },
-  );
-  const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
-  const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
-  const getSessionUseCase = new GetSessionUseCase(sessionRepository);
-  const revokeSessionUseCase = new RevokeSessionUseCase(sessionRepository);
-  const revokeOtherSessionsUseCase = new RevokeOtherSessionsUseCase(sessionRepository);
-  const forgotPasswordUseCase = new ForgotPasswordUseCase(
-    credentialsRepository,
-    options.emailSender,
-    emailOptions,
-  );
-
-  const validatePasswordResetUseCase = new ValidatePasswordResetUseCase(credentialsRepository);
-
-  const resetPasswordUseCase = new ResetPasswordUseCase(
-    credentialsRepository,
-    options.passwordHasher,
-  );
-
-  const changePasswordUseCase = new ChangePasswordUseCase(
-    credentialsRepository,
-    options.passwordHasher,
-  );
-
   return {
-    registerController: new RegisterController(registerUseCase),
-    verifyEmailController: new VerifyEmailController(verifyEmailUseCase, cookieOptions),
-    resendEmailVerificationController: new ResendEmailVerificationController(
-      resendEmailVerificationUseCase,
-    ),
-    verifyPhoneController: new VerifyPhoneController(verifyPhoneUseCase, cookieOptions),
-    resendPhoneVerificationController: new ResendPhoneVerificationController(
-      resendPhoneVerificationUseCase,
-    ),
-    loginController: new LoginController(loginUseCase, cookieOptions),
-    refreshController: new RefreshController(refreshUseCase, cookieOptions),
-    logoutController: new LogoutController(logoutUseCase, {
+    ...createIdentityModule({
+      credentialsRepository,
+      passwordHasher: options.passwordHasher,
+      emailSender: options.emailSender,
+      jobQueue: options.jobQueue,
+      emailOptions,
+      accountDeletionGraceDays: options.env.AUTH_ACCOUNT_DELETION_GRACE_DAYS,
+    }),
+    ...createCredentialsModule({
+      credentialsRepository,
+      sessionRepository,
+      passwordHasher: options.passwordHasher,
+      accessTokenSigner,
+      emailSender: options.emailSender,
+      emailOptions,
+      sessionOptions,
+      cookieOptions,
+    }),
+    ...createVerificationModule({
+      accessTokenSigner,
+      emailSender: options.emailSender,
+      emailOptions,
+      sessionOptions,
+      cookieOptions,
+    }),
+    ...createSessionsModule({
+      sessionRepository,
+      accessTokenSigner,
+      sessionOptions,
+      cookieOptions,
+    }),
+    ...createOAuthModule({
+      env: options.env,
       secureCookies: cookieOptions.secureCookies,
     }),
-    logoutAllController: new LogoutAllController(logoutAllUseCase, {
-      secureCookies: cookieOptions.secureCookies,
-    }),
-    getMeController: new GetMeController(getMeUseCase),
-    getOwnProfileController: new GetOwnProfileController(getOwnProfileUseCase),
-    updateOwnProfileController: new UpdateOwnProfileController(updateOwnProfileUseCase),
-    listOwnIdentitiesController: new ListOwnIdentitiesController(listOwnIdentitiesUseCase),
-    addEmailController: new AddEmailController(addEmailUseCase),
-    verifyAddedEmailController: new VerifyAddedEmailController(verifyAddedEmailUseCase),
-    removeEmailController: new RemoveEmailController(removeEmailUseCase),
-    requestAccountDeletionController: new RequestAccountDeletionController(
-      requestAccountDeletionUseCase,
-    ),
-    cancelAccountDeletionController: new CancelAccountDeletionController(
-      cancelAccountDeletionUseCase,
-    ),
-    startOAuthAuthorizationController: new StartOAuthAuthorizationController(
-      startOAuthAuthorizationUseCase,
-      {
-        secureCookies: cookieOptions.secureCookies,
-        stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
-      },
-    ),
-    changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
-    listSessionsController: new ListSessionsController(listSessionsUseCase),
-    getSessionController: new GetSessionController(getSessionUseCase),
-    revokeSessionController: new RevokeSessionController(revokeSessionUseCase, {
-      secureCookies: cookieOptions.secureCookies,
-    }),
-    revokeOtherSessionsController: new RevokeOtherSessionsController(revokeOtherSessionsUseCase),
-    forgotPasswordController: new ForgotPasswordController(forgotPasswordUseCase),
-    validatePasswordResetController: new ValidatePasswordResetController(
-      validatePasswordResetUseCase,
-    ),
-    resetPasswordController: new ResetPasswordController(resetPasswordUseCase, {
-      secureCookies: cookieOptions.secureCookies,
-    }),
-    changePasswordController: new ChangePasswordController(changePasswordUseCase),
-    requireRefreshAuth,
-    requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
-    requireBearerAuth: createRequireBearerAuth(accessTokenSigner),
-    optionalBearerAuth: createOptionalBearerAuth(accessTokenSigner),
-    assertCsrfWhenRefreshCookie,
+    ...createAuthHttpGuards(accessTokenSigner),
   };
 }
