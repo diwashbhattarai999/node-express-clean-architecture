@@ -66,6 +66,14 @@ export type UpdateOwnProfileResult = {
   profile: AuthUserProfile;
 };
 
+export type AddEmailIdentityInput = {
+  userId: string;
+  identifier: string;
+  normalizedIdentifier: string;
+  tokenHash: string;
+  expiresAt: Date;
+};
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -84,6 +92,8 @@ export interface IIdentityRepository {
   updateOwnProfile(input: UpdateOwnProfileInput): Promise<UpdateOwnProfileResult>;
 
   listIdentitiesForUser(userId: string): Promise<AuthLoginIdentity[]>;
+
+  addEmailIdentity(input: AddEmailIdentityInput): Promise<AuthLoginIdentity>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

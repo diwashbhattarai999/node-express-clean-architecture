@@ -14,6 +14,7 @@ describe("ListOwnIdentitiesUseCase", () => {
     findOwnProfile: vi.fn(),
     updateOwnProfile: vi.fn(),
     listIdentitiesForUser: vi.fn(),
+    addEmailIdentity: vi.fn(),
     upsertUsername: vi.fn(),
   };
 

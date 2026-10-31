@@ -2,6 +2,7 @@ import { type IRouter, Router } from "express";
 
 import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
+import { addEmailSchema } from "@/modules/auth/identity/presentation/http/validators/add-email.validator";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 
@@ -17,6 +18,13 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
     "/me/identities",
     authModule.requireBearerAuth,
     asRequestHandler(authModule.listOwnIdentitiesController),
+  );
+
+  router.post(
+    "/me/emails",
+    validate(addEmailSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.addEmailController),
   );
 
   router.get(

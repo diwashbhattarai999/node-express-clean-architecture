@@ -412,7 +412,7 @@ Admin permission APIs require future tables `permissions` and `role_permissions`
 
 **Response** `200` `data`: `null` — revokes **all** sessions.
 
-**Errors:** `401 TOKEN_*`, `422`.
+**Errors:** `401 TOKEN_`*, `422`.
 
 ---
 
@@ -874,7 +874,7 @@ All require bearer + listed permission. Mutating actions should write `security_
 
 `GET /api/v1/admin/users` · **Auth:** bearer + `users.read`
 
-**Query:** pagination; `search?`; `status?`; `sortBy` = `createdAt` \| `displayName` \| `status`; `sortOrder`
+**Query:** pagination; `search?`; `status?`; `sortBy` = `createdAt`  `displayName`  `status`; `sortOrder`
 
 **Response** `200` `data`: `UserPublic[]` + `meta`
 

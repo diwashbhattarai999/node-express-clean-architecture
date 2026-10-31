@@ -104,6 +104,7 @@ Also under `/api/v1/users` (same bearer):
 | `GET` | `/me` | bearer |
 | `PATCH` | `/me` | bearer |
 | `GET` | `/me/identities` | bearer |
+| `POST` | `/me/emails` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -413,6 +414,22 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 **Auth:** bearer.
 
 **Response** `200` `data`: `LoginIdentity[]` (primary first).
+
+---
+
+### Add email
+
+`POST /api/v1/users/me/emails`
+
+**Auth:** bearer. Adds an unverified email identity and sends a verification link. Primary only if the user has no other primary email.
+
+```json
+{ "email": "second@example.com" }
+```
+
+**Response** `201` `data`: `LoginIdentity` (`verifiedAt: null`).
+
+**Errors:** `409 CONFLICT` (email already used), `422`, `401 TOKEN_*`.
 
 ---
 

@@ -12,6 +12,7 @@ import { userProfiles } from "@/infrastructure/database/drizzle/schema/user-prof
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/errors/identity-already-exists.error";
 import type {
+  AddEmailIdentityInput,
   FindAuthenticatedPrincipalResult,
   FindOwnProfileResult,
   IIdentityRepository,
@@ -400,6 +401,63 @@ export class PostgresIdentityRepository implements IIdentityRepository {
       .orderBy(desc(loginIdentities.isPrimary), asc(loginIdentities.createdAt));
 
     return rows;
+  }
+
+  public async addEmailIdentity(input: AddEmailIdentityInput): Promise<AuthLoginIdentity> {
+    try {
+      return await db.transaction(async (tx) => {
+        const [primaryEmail] = await tx
+          .select({ id: loginIdentities.id })
+          .from(loginIdentities)
+          .where(
+            and(
+              eq(loginIdentities.userId, input.userId),
+              eq(loginIdentities.type, "email"),
+              eq(loginIdentities.isPrimary, true),
+            ),
+          )
+          .limit(1);
+
+        const [created] = await tx
+          .insert(loginIdentities)
+          .values({
+            userId: input.userId,
+            type: "email",
+            identifier: input.identifier,
+            normalizedIdentifier: input.normalizedIdentifier,
+            isPrimary: !primaryEmail,
+            verifiedAt: null,
+          })
+          .returning();
+
+        if (!created) {
+          throw new Error("Failed to add email identity.");
+        }
+
+        await tx.insert(authTokens).values({
+          userId: input.userId,
+          identityId: created.id,
+          type: "email_verification",
+          tokenHash: input.tokenHash,
+          expiresAt: input.expiresAt,
+        });
+
+        return {
+          id: created.id,
+          type: created.type,
+          identifier: created.identifier,
+          verifiedAt: created.verifiedAt,
+          isPrimary: created.isPrimary,
+          createdAt: created.createdAt,
+        };
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new IdentityAlreadyExistsError();
+      }
+
+      throw error;
+    }
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {
