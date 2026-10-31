@@ -74,6 +74,11 @@ export type AddEmailIdentityInput = {
   expiresAt: Date;
 };
 
+export type VerifyAddedEmailByTokenHashResult =
+  | { outcome: "invalid" }
+  | { outcome: "expired" }
+  | { outcome: "verified"; userId: string; identity: AuthLoginIdentity };
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -94,6 +99,8 @@ export interface IIdentityRepository {
   listIdentitiesForUser(userId: string): Promise<AuthLoginIdentity[]>;
 
   addEmailIdentity(input: AddEmailIdentityInput): Promise<AuthLoginIdentity>;
+
+  verifyAddedEmailByTokenHash(tokenHash: string): Promise<VerifyAddedEmailByTokenHashResult>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -20,6 +20,7 @@ import type {
   UpdateOwnProfileInput,
   UpdateOwnProfileResult,
   UpsertUsernameInput,
+  VerifyAddedEmailByTokenHashResult,
 } from "@/modules/auth/identity/application/ports/identity.repository";
 import {
   type AuthLoginIdentity,
@@ -458,6 +459,99 @@ export class PostgresIdentityRepository implements IIdentityRepository {
 
       throw error;
     }
+  }
+
+  public async verifyAddedEmailByTokenHash(
+    tokenHash: string,
+  ): Promise<VerifyAddedEmailByTokenHashResult> {
+    const [token] = await db
+      .select()
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.tokenHash, tokenHash),
+          eq(authTokens.type, "email_verification"),
+          isNull(authTokens.consumedAt),
+          isNull(authTokens.revokedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!token?.identityId) {
+      return { outcome: "invalid" };
+    }
+
+    if (token.expiresAt.getTime() <= Date.now()) {
+      return { outcome: "expired" };
+    }
+
+    const identityId = token.identityId;
+
+    return db.transaction(async (tx) => {
+      const now = new Date();
+
+      const [consumed] = await tx
+        .update(authTokens)
+        .set({ consumedAt: now })
+        .where(
+          and(
+            eq(authTokens.id, token.id),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        )
+        .returning({ id: authTokens.id });
+
+      if (!consumed) {
+        return { outcome: "invalid" as const };
+      }
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.identityId, identityId),
+            eq(authTokens.type, "email_verification"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+            ne(authTokens.id, token.id),
+          ),
+        );
+
+      const [identity] = await tx
+        .update(loginIdentities)
+        .set({ verifiedAt: now, updatedAt: now })
+        .where(and(eq(loginIdentities.id, identityId), eq(loginIdentities.type, "email")))
+        .returning();
+
+      if (!identity) {
+        return { outcome: "invalid" as const };
+      }
+
+      const [user] = await tx
+        .select({ id: users.id, deletedAt: users.deletedAt })
+        .from(users)
+        .where(eq(users.id, token.userId))
+        .limit(1);
+
+      if (!user || user.deletedAt) {
+        return { outcome: "invalid" as const };
+      }
+
+      return {
+        outcome: "verified" as const,
+        userId: token.userId,
+        identity: {
+          id: identity.id,
+          type: identity.type,
+          identifier: identity.identifier,
+          verifiedAt: identity.verifiedAt,
+          isPrimary: identity.isPrimary,
+          createdAt: identity.createdAt,
+        },
+      };
+    });
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {

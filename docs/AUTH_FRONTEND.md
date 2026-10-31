@@ -105,6 +105,7 @@ Also under `/api/v1/users` (same bearer):
 | `PATCH` | `/me` | bearer |
 | `GET` | `/me/identities` | bearer |
 | `POST` | `/me/emails` | bearer |
+| `POST` | `/me/emails/verify` | public (or matching bearer) |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -430,6 +431,22 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 **Response** `201` `data`: `LoginIdentity` (`verifiedAt: null`).
 
 **Errors:** `409 CONFLICT` (email already used), `422`, `401 TOKEN_*`.
+
+---
+
+### Verify added email
+
+`POST /api/v1/users/me/emails/verify`
+
+**Auth:** public with `{ "token" }` from the verification email. Optional bearer is allowed only if it belongs to the same user. Does **not** issue a session (unlike `POST /auth/email/verify`).
+
+```json
+{ "token": "token-from-email-link" }
+```
+
+**Response** `200` `data`: `LoginIdentity` (`verifiedAt` set).
+
+**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `422`.
 
 ---
 

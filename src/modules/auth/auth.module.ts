@@ -20,6 +20,7 @@ import { GetOwnProfileUseCase } from "@/modules/auth/identity/application/use-ca
 import { ListOwnIdentitiesUseCase } from "@/modules/auth/identity/application/use-cases/list-own-identities.use-case";
 import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
 import { UpdateOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/update-own-profile.use-case";
+import { VerifyAddedEmailUseCase } from "@/modules/auth/identity/application/use-cases/verify-added-email.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
 import { AddEmailController } from "@/modules/auth/identity/presentation/http/controllers/add-email.controller";
 import { ChangeUsernameController } from "@/modules/auth/identity/presentation/http/controllers/change-username.controller";
@@ -28,6 +29,7 @@ import { GetOwnProfileController } from "@/modules/auth/identity/presentation/ht
 import { ListOwnIdentitiesController } from "@/modules/auth/identity/presentation/http/controllers/list-own-identities.controller";
 import { RegisterController } from "@/modules/auth/identity/presentation/http/controllers/register.controller";
 import { UpdateOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/update-own-profile.controller";
+import { VerifyAddedEmailController } from "@/modules/auth/identity/presentation/http/controllers/verify-added-email.controller";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
 import { ListSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/list-sessions.use-case";
 import { LogoutUseCase } from "@/modules/auth/sessions/application/use-cases/logout.use-case";
@@ -47,7 +49,10 @@ import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
 import { JoseAccessTokenSigner } from "@/modules/auth/shared/infrastructure/security/jose-access-token.signer";
 import { assertCsrfWhenRefreshCookie } from "@/modules/auth/shared/presentation/http/middleware/assert-csrf-when-refresh-cookie.middleware";
-import { createRequireBearerAuth } from "@/modules/auth/shared/presentation/http/middleware/require-bearer-auth.middleware";
+import {
+  createOptionalBearerAuth,
+  createRequireBearerAuth,
+} from "@/modules/auth/shared/presentation/http/middleware/require-bearer-auth.middleware";
 import { requireRefreshAuth } from "@/modules/auth/shared/presentation/http/middleware/require-refresh-auth.middleware";
 import { createRequireRefreshOrBearerAuth } from "@/modules/auth/shared/presentation/http/middleware/require-refresh-or-bearer-auth.middleware";
 import { ResendEmailVerificationUseCase } from "@/modules/auth/verification/application/use-cases/resend-email-verification.use-case";
@@ -83,6 +88,7 @@ export type AuthModule = {
   updateOwnProfileController: UpdateOwnProfileController;
   listOwnIdentitiesController: ListOwnIdentitiesController;
   addEmailController: AddEmailController;
+  verifyAddedEmailController: VerifyAddedEmailController;
   changeUsernameController: ChangeUsernameController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
@@ -95,6 +101,7 @@ export type AuthModule = {
   requireRefreshAuth: RequestHandler;
   requireRefreshOrBearerAuth: RequestHandler;
   requireBearerAuth: RequestHandler;
+  optionalBearerAuth: RequestHandler;
   assertCsrfWhenRefreshCookie: RequestHandler;
 };
 
@@ -177,6 +184,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     options.emailSender,
     emailOptions,
   );
+  const verifyAddedEmailUseCase = new VerifyAddedEmailUseCase(identityRepository);
   const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
   const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
   const getSessionUseCase = new GetSessionUseCase(sessionRepository);
@@ -223,6 +231,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     updateOwnProfileController: new UpdateOwnProfileController(updateOwnProfileUseCase),
     listOwnIdentitiesController: new ListOwnIdentitiesController(listOwnIdentitiesUseCase),
     addEmailController: new AddEmailController(addEmailUseCase),
+    verifyAddedEmailController: new VerifyAddedEmailController(verifyAddedEmailUseCase),
     changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
     listSessionsController: new ListSessionsController(listSessionsUseCase),
     getSessionController: new GetSessionController(getSessionUseCase),
@@ -241,6 +250,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     requireRefreshAuth,
     requireRefreshOrBearerAuth: createRequireRefreshOrBearerAuth(accessTokenSigner),
     requireBearerAuth: createRequireBearerAuth(accessTokenSigner),
+    optionalBearerAuth: createOptionalBearerAuth(accessTokenSigner),
     assertCsrfWhenRefreshCookie,
   };
 }

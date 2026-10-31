@@ -14,6 +14,7 @@ describe("ChangeUsernameUseCase", () => {
     updateOwnProfile: vi.fn(),
     listIdentitiesForUser: vi.fn(),
     addEmailIdentity: vi.fn(),
+    verifyAddedEmailByTokenHash: vi.fn(),
     upsertUsername: vi.fn(),
   };
 

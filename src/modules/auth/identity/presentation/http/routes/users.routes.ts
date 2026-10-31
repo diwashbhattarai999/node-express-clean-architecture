@@ -5,6 +5,7 @@ import type { AuthModule } from "@/modules/auth/auth.module";
 import { addEmailSchema } from "@/modules/auth/identity/presentation/http/validators/add-email.validator";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
+import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
 
 /**
  * HTTP mount for `/api/v1/users`.
@@ -18,6 +19,13 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
     "/me/identities",
     authModule.requireBearerAuth,
     asRequestHandler(authModule.listOwnIdentitiesController),
+  );
+
+  router.post(
+    "/me/emails/verify",
+    validate(verifyAddedEmailSchema),
+    authModule.optionalBearerAuth,
+    asHandler(authModule.verifyAddedEmailController),
   );
 
   router.post(

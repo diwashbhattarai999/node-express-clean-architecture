@@ -27,3 +27,23 @@ export const createRequireBearerAuth = (accessTokenSigner: IAccessTokenSigner): 
     });
     next();
   });
+
+/** AUTH_API `bearer or public with token`: attach bearer when present; invalid bearer still fails. */
+export const createOptionalBearerAuth = (accessTokenSigner: IAccessTokenSigner): RequestHandler =>
+  asyncMiddleware(async (req, _res, next) => {
+    const accessToken = extractBearerToken(req);
+    if (!accessToken) {
+      next();
+      return;
+    }
+
+    const claims = await accessTokenSigner.verify(accessToken);
+    setAuthContext(req, {
+      bearer: {
+        accessToken,
+        userId: claims.userId,
+        sessionId: claims.sessionId,
+      },
+    });
+    next();
+  });
