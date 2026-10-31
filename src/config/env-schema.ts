@@ -260,6 +260,14 @@ export const envSchema = z
       .string("Account deletion sweep cron is required.")
       .min(1)
       .default("*/15 * * * *"),
+
+    JOBS_DASHBOARD_HOST: z.string("Jobs dashboard host is required.").min(1).default("127.0.0.1"),
+
+    JOBS_DASHBOARD_PORT: z.coerce
+      .number("Jobs dashboard port is required.")
+      .int("Jobs dashboard port must be an integer")
+      .positive("Jobs dashboard port must be a positive number")
+      .default(3010),
   })
   .superRefine((env, context) => {
     if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {

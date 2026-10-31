@@ -15,6 +15,7 @@ Run both in development:
 pnpm db:up          # Postgres + you already have Redis if using docker compose redis
 pnpm dev            # API
 pnpm worker         # Worker (separate terminal)
+pnpm jobs:ui        # Bull Board on http://127.0.0.1:3010 (optional)
 ```
 
 Compose starts both:
@@ -62,4 +63,4 @@ Until the worker (or sweep) runs, the account stays usable. Cancel (next API) ca
 - Workers reconnect indefinitely (`maxRetriesPerRequest: null`). API enqueue fails fast if Redis is down.
 - Graceful shutdown waits for the active job (`src/worker.ts`), then closes the queue and Postgres.
 
-Inspect queues with [Bull Board](https://github.com/felixmosh/bull-board) or `redis-cli` if you need it — not bundled.
+Inspect queues with [Bull Board](https://github.com/felixmosh/bull-board) (`pnpm jobs:ui`, default http://127.0.0.1:3010). It is a separate localhost process — not mounted on the API. Requires `JOBS_PROVIDER=bullmq` and Redis. Bind stays `127.0.0.1` so the UI is not exposed on the network.

@@ -55,6 +55,7 @@ curl http://localhost:3000/ready
 | --- | --- |
 | `pnpm dev` | Dev server with hot reload (`tsx watch`) |
 | `pnpm worker` | Job worker with hot reload (`tsx watch`) |
+| `pnpm jobs:ui` | Bull Board dashboard (localhost, default http://127.0.0.1:3010) |
 | `pnpm build` | Compile to `dist/` |
 | `pnpm start` | Run production API build |
 | `pnpm start:worker` | Run production worker build |
@@ -144,6 +145,7 @@ Copy `.env.example` to `.env`. Important variables:
 | `JOBS_PREFIX` / `JOBS_QUEUE_NAME` | Redis key prefix and queue name |
 | `JOBS_CONCURRENCY` / `JOBS_ATTEMPTS` | Worker concurrency and retry count |
 | `JOBS_ACCOUNT_DELETION_SWEEP_CRON` | Due-deletion sweep (default every 15 minutes) |
+| `JOBS_DASHBOARD_HOST` / `JOBS_DASHBOARD_PORT` | Bull Board bind (`127.0.0.1:3010`); `pnpm jobs:ui` only |
 | `RATE_LIMIT_*` | Global rate limit window/max |
 | `TRUST_PROXY` | Proxy trust setting |
 
@@ -193,6 +195,7 @@ BullMQ on Redis. The API enqueues; a separate worker process consumes. Tests use
 
 ```bash
 pnpm worker
+pnpm jobs:ui   # optional queue UI at http://127.0.0.1:3010
 ```
 
 The first job applies due account deletions (`deleted_at` + revoke sessions) after the grace period.

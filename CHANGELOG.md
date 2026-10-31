@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - BullMQ job queue + dedicated worker (`pnpm worker`, Compose `worker`) with `IJobQueue` port (`bullmq` / `noop`)
 - Account-deletion delayed job plus 15-minute sweep that sets `deleted_at` and revokes sessions when due
+- Local Bull Board dashboard (`pnpm jobs:ui`, default http://127.0.0.1:3010) — not mounted on the API
 
 ### Fixed
 
