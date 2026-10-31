@@ -468,7 +468,7 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 
 `POST /api/v1/users/me/deletion-request`
 
-**Auth:** bearer. Sets deletion markers; does **not** set `deleted_at` yet. Account stays usable until `scheduledFor` (default grace: `AUTH_ACCOUNT_DELETION_GRACE_DAYS`, 14). Repeat calls keep the original schedule.
+**Auth:** bearer. Sets deletion markers and enqueues a delayed job. The worker applies `deleted_at` + session revoke at `scheduledFor` (and a 15-minute sweep as backup). Account stays usable until then. Repeat calls keep the original schedule. Needs `pnpm worker` (or Compose `worker`) running.
 
 ```json
 { "password": "optional-current-password", "reason": "optional" }

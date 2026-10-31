@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -13,6 +13,7 @@ import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/errors/identity-already-exists.error";
 import type {
   AddEmailIdentityInput,
+  ApplyDueAccountDeletionsInput,
   FindAuthenticatedPrincipalResult,
   FindOwnProfileResult,
   IIdentityRepository,
@@ -666,6 +667,47 @@ export class PostgresIdentityRepository implements IIdentityRepository {
       .where(eq(users.id, user.id));
 
     return { outcome: "scheduled", scheduledFor: input.scheduledFor };
+  }
+
+  public async applyDueAccountDeletions(input: ApplyDueAccountDeletionsInput): Promise<string[]> {
+    return db.transaction(async (tx) => {
+      const filters = [
+        isNull(users.deletedAt),
+        isNotNull(users.deletionScheduledFor),
+        lte(users.deletionScheduledFor, input.now),
+      ];
+
+      if (input.userId) {
+        filters.push(eq(users.id, input.userId));
+      }
+
+      const due = await tx
+        .select({ id: users.id })
+        .from(users)
+        .where(and(...filters));
+
+      if (due.length === 0) {
+        return [];
+      }
+
+      const userIds = due.map((row) => row.id);
+      const now = input.now;
+
+      await tx
+        .update(users)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(inArray(users.id, userIds));
+
+      await tx
+        .update(sessions)
+        .set({
+          revokedAt: now,
+          revocationReason: "logout_all",
+        })
+        .where(and(inArray(sessions.userId, userIds), isNull(sessions.revokedAt)));
+
+      return userIds;
+    });
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {

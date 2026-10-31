@@ -8,6 +8,7 @@ Production-oriented starter for Node.js APIs using Express, TypeScript, Drizzle/
 - **HTTP:** Express 5
 - **Language:** TypeScript (ESM)
 - **Database:** PostgreSQL 18 + Drizzle ORM
+- **Jobs:** BullMQ + Redis (API producer, `pnpm worker` consumer)
 - **Validation:** Zod
 - **Logging:** Pino
 - **Quality:** Biome, Vitest, Lefthook, Commitlint
@@ -36,6 +37,9 @@ pnpm db:migrate
 
 # Dev server (default http://localhost:3000)
 pnpm dev
+
+# Worker (separate terminal; required for delayed/cron jobs)
+pnpm worker
 ```
 
 Verify:
@@ -50,8 +54,10 @@ curl http://localhost:3000/ready
 | Script | Description |
 | --- | --- |
 | `pnpm dev` | Dev server with hot reload (`tsx watch`) |
+| `pnpm worker` | Job worker with hot reload (`tsx watch`) |
 | `pnpm build` | Compile to `dist/` |
-| `pnpm start` | Run production build |
+| `pnpm start` | Run production API build |
+| `pnpm start:worker` | Run production worker build |
 | `pnpm typecheck` | TypeScript check (no emit) |
 | `pnpm lint` | Biome lint/format check |
 | `pnpm format` | Biome format write |
@@ -65,8 +71,9 @@ curl http://localhost:3000/ready
 | `pnpm db:generate` | Generate Drizzle migrations |
 | `pnpm db:migrate` | Run migrations (host) |
 | `pnpm db:studio` | Drizzle Studio |
-| `pnpm docker:build` | Build the API image |
-| `pnpm docker:up` | Build and start API + Postgres + Redis |
+| `pnpm docker:build` | Build the API and worker images |
+| `pnpm docker:up` | Build and start API + worker + Postgres + Redis |
+| `pnpm docker:logs:worker` | Tail worker logs |
 | `pnpm docker:down` | Stop Compose stack |
 | `pnpm docker:logs` | Tail API logs |
 | `pnpm docker:reset` | Wipe volumes and rebuild the stack |
@@ -86,7 +93,8 @@ src/
     health/
     users/          # domain → application → infrastructure → presentation
   shared/           # Cross-cutting errors, HTTP helpers, logger
-  server.ts         # Process lifecycle (listen, graceful shutdown)
+  server.ts         # API process lifecycle (listen, graceful shutdown)
+  worker.ts         # Job worker process (BullMQ consumer)
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and composition conventions.
@@ -132,6 +140,10 @@ Copy `.env.example` to `.env`. Important variables:
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
 | `AUTH_ACCOUNT_DELETION_GRACE_DAYS` | Days before a deletion request is applied (default `14`) |
+| `JOBS_PROVIDER` | `bullmq` \| `noop` (default `bullmq`; tests use `noop`) |
+| `JOBS_PREFIX` / `JOBS_QUEUE_NAME` | Redis key prefix and queue name |
+| `JOBS_CONCURRENCY` / `JOBS_ATTEMPTS` | Worker concurrency and retry count |
+| `JOBS_ACCOUNT_DELETION_SWEEP_CRON` | Due-deletion sweep (default every 15 minutes) |
 | `RATE_LIMIT_*` | Global rate limit window/max |
 | `TRUST_PROXY` | Proxy trust setting |
 
@@ -175,6 +187,16 @@ Sample `uploads` module on top of `IObjectStorage` (no auth yet):
 
 Rejects oversized or disallowed MIME types with `422` (defaults in `uploads.constants.ts`; intended to become per-route later). Signed URL is returned when the storage adapter can produce one; otherwise `null` without failing the upload.
 
+## Background jobs
+
+BullMQ on Redis. The API enqueues; a separate worker process consumes. Tests use `JOBS_PROVIDER=noop`. See [docs/JOBS.md](docs/JOBS.md).
+
+```bash
+pnpm worker
+```
+
+The first job applies due account deletions (`deleted_at` + revoke sessions) after the grace period.
+
 ## Database
 
 Postgres runs via Docker Compose (`docker-compose.yml`). Schema and migrations live under `drizzle/` and `src/infrastructure/database/drizzle/`.
@@ -201,7 +223,7 @@ curl http://localhost:3000/ready
 
 Compose overrides `DATABASE_URL` to `postgres:5432` on the internal network. Host tools still use `localhost:5433` from `.env.example`.
 
-Set `RUN_MIGRATIONS=false` on the app service to skip automatic migrations.
+Set `RUN_MIGRATIONS=false` on the API service to skip automatic migrations. The `worker` service always skips migrations and has no HTTP healthcheck.
 
 ## Testing
 

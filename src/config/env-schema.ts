@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { EmailProvider } from "@/config/email-provider";
 import { Environment } from "@/config/environment";
+import { JobsProvider } from "@/config/jobs-provider";
 import { StorageProvider } from "@/config/storage-provider";
 import { LogLevel } from "@/shared/logger/log-level";
 
@@ -229,6 +230,36 @@ export const envSchema = z
       .min(1, "Auth account deletion grace period must be at least 1 day")
       .max(365, "Auth account deletion grace period must be at most 365 days")
       .default(14),
+
+    JOBS_PROVIDER: z
+      .enum(
+        JobsProvider,
+        `Invalid jobs provider. Must be one of: ${Object.values(JobsProvider).join(", ")}`,
+      )
+      .default(JobsProvider.BULLMQ),
+
+    JOBS_PREFIX: z.string("Jobs prefix is required.").min(1).default("neca"),
+
+    JOBS_QUEUE_NAME: z.string("Jobs queue name is required.").min(1).default("default"),
+
+    JOBS_CONCURRENCY: z.coerce
+      .number("Jobs concurrency is required.")
+      .int("Jobs concurrency must be an integer")
+      .min(1, "Jobs concurrency must be at least 1")
+      .max(50, "Jobs concurrency must be at most 50")
+      .default(5),
+
+    JOBS_ATTEMPTS: z.coerce
+      .number("Jobs attempts is required.")
+      .int("Jobs attempts must be an integer")
+      .min(1, "Jobs attempts must be at least 1")
+      .max(20, "Jobs attempts must be at most 20")
+      .default(5),
+
+    JOBS_ACCOUNT_DELETION_SWEEP_CRON: z
+      .string("Account deletion sweep cron is required.")
+      .min(1)
+      .default("*/15 * * * *"),
   })
   .superRefine((env, context) => {
     if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {

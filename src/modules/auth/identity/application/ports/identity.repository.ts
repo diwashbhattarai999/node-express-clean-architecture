@@ -99,6 +99,11 @@ export type ScheduleAccountDeletionResult =
   | { outcome: "not_found" }
   | { outcome: "scheduled"; scheduledFor: Date };
 
+export type ApplyDueAccountDeletionsInput = {
+  now: Date;
+  userId?: string;
+};
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -127,6 +132,8 @@ export interface IIdentityRepository {
   scheduleAccountDeletion(
     input: ScheduleAccountDeletionInput,
   ): Promise<ScheduleAccountDeletionResult>;
+
+  applyDueAccountDeletions(input: ApplyDueAccountDeletionsInput): Promise<string[]>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

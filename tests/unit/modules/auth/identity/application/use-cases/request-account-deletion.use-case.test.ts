@@ -6,6 +6,8 @@ import type { IIdentityRepository } from "@/modules/auth/identity/application/po
 import { RequestAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/request-account-deletion.use-case";
 import { TokenInvalidError } from "@/modules/auth/shared/application/errors/token-invalid.error";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
+import { JobName } from "@/shared/jobs/job-names";
+import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
 describe("RequestAccountDeletionUseCase", () => {
   const identityRepository: IIdentityRepository = {
@@ -19,6 +21,7 @@ describe("RequestAccountDeletionUseCase", () => {
     verifyAddedEmailByTokenHash: vi.fn(),
     removeEmailIdentity: vi.fn(),
     scheduleAccountDeletion: vi.fn(),
+    applyDueAccountDeletions: vi.fn(),
     upsertUsername: vi.fn(),
   };
 
@@ -37,10 +40,17 @@ describe("RequestAccountDeletionUseCase", () => {
     compare: vi.fn(),
   };
 
+  const jobQueue: IJobQueue = {
+    enqueue: vi.fn(),
+    upsertRepeatable: vi.fn(),
+    close: vi.fn(),
+  };
+
   const useCase = new RequestAccountDeletionUseCase(
     identityRepository,
     credentialsRepository,
     passwordHasher,
+    jobQueue,
     { graceDays: 14 },
   );
 
@@ -81,6 +91,14 @@ describe("RequestAccountDeletionUseCase", () => {
       userId: "user-1",
       scheduledFor: expect.any(Date),
     });
+    expect(jobQueue.enqueue).toHaveBeenCalledWith(
+      JobName.APPLY_ACCOUNT_DELETION,
+      { userId: "user-1" },
+      {
+        jobId: "apply-account-deletion__user-1",
+        delayMs: expect.any(Number),
+      },
+    );
   });
 
   it("verifies an optional password before scheduling", async () => {
@@ -117,6 +135,7 @@ describe("RequestAccountDeletionUseCase", () => {
       }),
     ).rejects.toBeInstanceOf(InvalidCredentialsError);
     expect(identityRepository.scheduleAccountDeletion).not.toHaveBeenCalled();
+    expect(jobQueue.enqueue).not.toHaveBeenCalled();
   });
 
   it("throws TokenInvalidError for invalid sessions", async () => {
@@ -131,5 +150,6 @@ describe("RequestAccountDeletionUseCase", () => {
       }),
     ).rejects.toBeInstanceOf(TokenInvalidError);
     expect(identityRepository.scheduleAccountDeletion).not.toHaveBeenCalled();
+    expect(jobQueue.enqueue).not.toHaveBeenCalled();
   });
 });

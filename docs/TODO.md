@@ -2,7 +2,7 @@
 
 Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
-**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + auth/uploads integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), auth module (+ `/users/me` self-service routes), uploads module (multipart + MIME/size), Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), outbound `IHttpClient` (Axios), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
+**Already in place:** Phases 1–5 foundation, Biome/Lefthook/commitlint, Vitest unit + auth/uploads integration tests, Express bootstrap (`/health`, `/ready` with Postgres + Redis, graceful shutdown), env Zod validation, middleware (helmet, CORS, rate limit, compression, request IDs, Pino), auth module (+ `/users/me` self-service routes), uploads module (multipart + MIME/size), Drizzle/Postgres + Redis client + Compose, email port (Resend/noop), object storage port (local/S3), outbound `IHttpClient` (Axios), BullMQ job worker (`pnpm worker` / Compose `worker`), Zod validators, AppError/field errors, pagination/filter/sort, `/api/v1`, GitHub Actions CI, Dependabot.
 
 | Priority | Item | Phase | Notes |
 | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P4 | Dependency audit / vulnerability scanning in CI | 15 / 23 / 25 | Dependabot present; no audit step |
 | P5 | Redis / caching layer (if required) | 16 | Client + readiness done; cache port/abstraction later |
 | P5 | Email / HTTP / storage external ports | 17 | Done — wire email into auth when Phase 13 lands |
-| P5 | Background jobs / queue | 18 | — |
+| P5 | Background jobs / queue | 18 | Done — BullMQ + worker; deletion sweep is the first job |
 | P5 | File uploads / object storage | 21 | Done — multipart uploads + object storage |
 | P5 | Metrics, tracing, OpenTelemetry | 12 / 27 | Logging only today |
 | P6 | Architecture enforcement (dependency-cruiser or similar) | 29 | Documented rules; not automated |
@@ -39,4 +39,4 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 2. Authorization / RBAC + error conventions
 3. OpenAPI / Swagger
 4. Coverage gates, real DB tests, E2E
-5. Optional infra (Redis cache abstraction, jobs, OTel)
+5. Optional infra (Redis cache abstraction, OTel)

@@ -9,6 +9,7 @@ Instructions for AI coding agents working in this repository.
 - [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — remaining work
 - [docs/AUTH.md](docs/AUTH.md) — auth design (not fully implemented)
 - [docs/AUTH_API.md](docs/AUTH_API.md) — auth/authz HTTP contracts
+- [docs/JOBS.md](docs/JOBS.md) — BullMQ worker and `IJobQueue`
 
 ## Cursor rules
 
@@ -20,4 +21,4 @@ Project rules live in [`.cursor/rules/`](.cursor/rules/). They cover architectur
 2. Wire new modules through the composition root; no global service containers.
 3. Update `CHANGELOG.md` under `[Unreleased]` after features, enhancements, and bug fixes.
 4. Match existing Biome/TypeScript style; run `pnpm lint` and `pnpm typecheck` when practical.
-5. Compose service name for the API image is `api` (`pnpm docker:build` → `docker compose build api`).
+5. Compose service names: `api` and `worker` (`pnpm docker:build` → `docker compose build api worker`). Background jobs: [docs/JOBS.md](docs/JOBS.md).

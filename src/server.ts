@@ -4,6 +4,7 @@ import { createApp } from "@/app/create-app";
 import { configureHttpServer } from "@/app/http/configure-http-server";
 import { env } from "@/config/env";
 import { closeDatabase } from "@/infrastructure/database/drizzle";
+import { closeJobQueue } from "@/infrastructure/jobs";
 import { closeRedis, connectRedis } from "@/infrastructure/redis";
 import { logger } from "@/shared/logger/logger";
 
@@ -57,6 +58,7 @@ const startServer = async (): Promise<void> => {
 
       logger.info("HTTP server closed successfully");
 
+      await closeJobQueue();
       await closeDatabase();
       await closeRedis();
 

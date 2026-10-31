@@ -2,6 +2,7 @@ allowBuilds:
   argon2: true
   esbuild: true
   lefthook: true
+  msgpackr-extract: true
 
 overrides:
   thread-stream: 4.1.0

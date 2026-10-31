@@ -36,7 +36,7 @@ Detailed remaining work lives in [TODO.md](TODO.md). Architecture rules: [ARCHIT
 | 15 | Security | Partial | 8/17 | Helmet, CORS, rate limit; audit/checklist pending |
 | 16 | Caching | Partial | 2/9 | Redis client + health; cache abstraction later |
 | 17 | External services | Done | — | Email, object storage, Axios `IHttpClient` (timeouts/retries) |
-| 18 | Background jobs & messaging | Optional | 0/13 | Queues, workers, domain events |
+| 18 | Background jobs & messaging | Partial | — | BullMQ + worker process; domain events later |
 | 19 | API documentation | Not started | 0/11 | OpenAPI / Swagger |
 | 20 | Pagination / filter / sort | Partial | 9/10 | Offset pagination on list APIs; cursor optional |
 | 21 | File uploads & storage | Done | — | Object storage + multipart uploads module |

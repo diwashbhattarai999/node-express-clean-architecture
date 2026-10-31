@@ -7,6 +7,8 @@ import { TokenExpiredError } from "@/modules/auth/shared/application/errors/toke
 import { TokenInvalidError } from "@/modules/auth/shared/application/errors/token-invalid.error";
 import { TokenRevokedError } from "@/modules/auth/shared/application/errors/token-revoked.error";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
+import { accountDeletionJobId, JobName } from "@/shared/jobs/job-names";
+import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
 export type RequestAccountDeletionUseCaseOptions = {
   graceDays: number;
@@ -22,6 +24,7 @@ export class RequestAccountDeletionUseCase {
     private readonly identityRepository: IIdentityRepository,
     private readonly credentialsRepository: ICredentialsRepository,
     private readonly passwordHasher: IPasswordHasher,
+    private readonly jobQueue: IJobQueue,
     private readonly options: RequestAccountDeletionUseCaseOptions,
   ) {}
 
@@ -67,6 +70,15 @@ export class RequestAccountDeletionUseCase {
     if (result.outcome === "not_found") {
       throw new TokenInvalidError("The access token is invalid.");
     }
+
+    await this.jobQueue.enqueue(
+      JobName.APPLY_ACCOUNT_DELETION,
+      { userId: input.userId },
+      {
+        jobId: accountDeletionJobId(input.userId),
+        delayMs: Math.max(0, result.scheduledFor.getTime() - Date.now()),
+      },
+    );
 
     return result.scheduledFor;
   }

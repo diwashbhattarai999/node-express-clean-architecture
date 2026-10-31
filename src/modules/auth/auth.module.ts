@@ -69,11 +69,13 @@ import { ResendPhoneVerificationController } from "@/modules/auth/verification/p
 import { VerifyEmailController } from "@/modules/auth/verification/presentation/http/controllers/verify-email.controller";
 import { VerifyPhoneController } from "@/modules/auth/verification/presentation/http/controllers/verify-phone.controller";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
+import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
 export type CreateAuthModuleOptions = {
   emailSender: IEmailSender;
   passwordHasher: IPasswordHasher;
   accessTokenSigner?: IAccessTokenSigner;
+  jobQueue: IJobQueue;
   env: TEnv;
 };
 
@@ -196,6 +198,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     identityRepository,
     credentialsRepository,
     options.passwordHasher,
+    options.jobQueue,
     { graceDays: options.env.AUTH_ACCOUNT_DELETION_GRACE_DAYS },
   );
   const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);

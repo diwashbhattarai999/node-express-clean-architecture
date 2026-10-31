@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- BullMQ job queue + dedicated worker (`pnpm worker`, Compose `worker`) with `IJobQueue` port (`bullmq` / `noop`)
+- Account-deletion delayed job plus 15-minute sweep that sets `deleted_at` and revokes sessions when due
+
+### Fixed
+
+- Account deletion enqueue no longer 500s: BullMQ custom job ids cannot contain `:`
+
 ## [1.2.0] - 2026-10-31
 
 ### Added

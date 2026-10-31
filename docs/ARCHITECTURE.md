@@ -40,6 +40,7 @@ Cross-cutting **ports** for external IO live under `shared` and are implemented 
 | Email | `IEmailSender` | Resend / noop |
 | Object storage | `IObjectStorage` | Local filesystem / S3 |
 | Outbound HTTP | `IHttpClient` | Axios (`AxiosHttpClient`) |
+| Jobs | `IJobQueue` | BullMQ / noop |
 
 Application and domain depend only on the ports. Axios and vendor SDKs stay in infrastructure. Compose implementations in `src/app/composition.ts`.
 
@@ -51,7 +52,7 @@ Application and domain depend only on the ports. Axios and vendor SDKs stay in i
 - Application and domain layers depend on abstractions.
 - Infrastructure implements application/domain abstractions.
 - `create-app.ts` is responsible for Express application assembly.
-- `server.ts` owns runtime lifecycle.
+- `server.ts` owns API runtime lifecycle; `worker.ts` owns the job worker.
 - Global mutable service containers are prohibited.
 - Infrastructure connections are initialized explicitly.
 - Infrastructure resources are closed during graceful shutdown.
