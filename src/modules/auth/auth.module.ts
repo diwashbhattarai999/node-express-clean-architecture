@@ -21,12 +21,14 @@ import {
   type VerificationModule,
 } from "@/modules/auth/verification/verification.module";
 import type { IEmailSender } from "@/shared/email/email-sender.port";
+import type { IHttpClient } from "@/shared/http-client/http-client.port";
 import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
 export type CreateAuthModuleOptions = {
   emailSender: IEmailSender;
   passwordHasher: IPasswordHasher;
   accessTokenSigner?: IAccessTokenSigner;
+  httpClient: IHttpClient;
   jobQueue: IJobQueue;
   env: TEnv;
 };
@@ -101,7 +103,11 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     ...createOAuthModule({
       env: options.env,
-      secureCookies: cookieOptions.secureCookies,
+      httpClient: options.httpClient,
+      sessionRepository,
+      accessTokenSigner,
+      sessionOptions,
+      cookieOptions,
     }),
     ...createAuthHttpGuards(accessTokenSigner),
   };

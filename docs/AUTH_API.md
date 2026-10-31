@@ -640,7 +640,7 @@ Providers: `google`, `github`, `apple`, `microsoft`, generic `oidc`. Native: Aut
 
 **Query:** `code`, `state`, error params from IdP
 
-**Response** `302` to app with session cookie set, or JSON `AuthTokensData` for configured SPA callback mode.
+**Response** `302` to the stored app `redirectUri` with session cookies set and the client `state` query. Existing `external_identities` log in; a new subject creates an active account. Email is attached only when verified and not already used — never auto-merged. `intent=link` is rejected here (use 6.5/6.6). Native PKCE (no verifier cookie) does not consume state: `302` to the app with `code` + client `state` for 6.3.
 
 **Errors:** `400 OAUTH_STATE_INVALID`, `409 CONFLICT` (identity linked elsewhere).
 
@@ -652,7 +652,11 @@ Providers: `google`, `github`, `apple`, `microsoft`, generic `oidc`. Native: Aut
 
 **Body:** `{ "code": string, "codeVerifier": string, "redirectUri": string, "state": string }`
 
+`state` is the client CSRF from authorize. `redirectUri` must match the stored authorize return URL. IdP `redirect_uri` remains the API callback.
+
 **Response** `200` `data`: `AuthTokensData` with `user`
+
+**Errors:** `400 OAUTH_STATE_INVALID`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND`, `409 CONFLICT`, `422 VALIDATION_ERROR`.
 
 ---
 
@@ -1212,8 +1216,8 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       | Done                                           |
 | 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       | Done                                           |
 | 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       | Done                                           |
-| 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       |                                                |
-| 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       |                                                |
+| 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       | Done                                           |
+| 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       | Done                                           |
 | 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       |                                                |
 | 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       |                                                |
 | 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       |                                                |

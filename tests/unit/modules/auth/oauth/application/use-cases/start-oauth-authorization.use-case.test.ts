@@ -14,6 +14,9 @@ describe("StartOAuthAuthorizationUseCase", () => {
 
   const authorizationStateRepository: IOauthAuthorizationStateRepository = {
     save: vi.fn(),
+    findActive: vi.fn(),
+    consume: vi.fn(),
+    consumeForExchange: vi.fn(),
   };
 
   const useCase = new StartOAuthAuthorizationUseCase(providerCatalog, authorizationStateRepository, {

@@ -21,6 +21,7 @@ export function createApplicationModules() {
     auth: createAuthModule({
       emailSender,
       passwordHasher: new Argon2PasswordHasher(),
+      httpClient,
       jobQueue,
       env,
     }),

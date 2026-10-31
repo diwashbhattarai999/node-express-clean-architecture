@@ -88,6 +88,8 @@ Frontend deep links from emails:
 | `POST` | `/logout` | refresh and/or bearer (+ CSRF if cookie) |
 | `POST` | `/logout-all` | bearer (+ CSRF if cookie) |
 | `GET` | `/oauth/{provider}/authorize` | public |
+| `GET` | `/oauth/{provider}/callback` | public (IdP redirect) |
+| `POST` | `/oauth/{provider}/exchange` | public (native PKCE) |
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
 | `POST` | `/password/reset/validate` | public |
@@ -287,7 +289,7 @@ Query:
 | `response` | no | `json` to get the IdP URL instead of a `302` |
 | `codeChallenge` / `codeChallengeMethod` | native | PKCE S256. Omitted for browser: the API generates PKCE and sets HttpOnly cookie `oauth_code_verifier` |
 
-IdP `redirect_uri` is the API callback (`{BASE_URL}/api/v1/auth/oauth/{provider}/callback`) — not `redirectUri`. Callback is not implemented yet.
+IdP `redirect_uri` is the API callback (`{BASE_URL}/api/v1/auth/oauth/{provider}/callback`) — not `redirectUri`.
 
 **Response** `302` to the IdP, or `200`:
 
@@ -296,6 +298,43 @@ IdP `redirect_uri` is the API callback (`{BASE_URL}/api/v1/auth/oauth/{provider}
 ```
 
 **Errors:** `404 NOT_FOUND`, `422 VALIDATION_ERROR`.
+
+---
+
+### OAuth callback
+
+`GET /api/v1/auth/oauth/{provider}/callback`
+
+**Auth:** public. The IdP redirects here with `code` + `state` (or `error`). Browser clients must send the `oauth_code_verifier` cookie set during authorize.
+
+On success the API sets session cookies (`refresh_token` + `csrf_token`) and `302`s to the stored app `redirectUri` with the original client `state` query. Existing `external_identities` log in; a new subject creates an active account. A matching email on another account is **not** merged — the new OAuth account is created without that email login identity.
+
+Native clients that sent their own PKCE get a `302` to `redirectUri` with `code` + client `state` (state is not consumed). Then call exchange.
+
+**Errors:** `400 OAUTH_STATE_INVALID` (bad/expired/consumed state, IdP error, or `intent=link`), `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND` (provider not configured for token exchange), `409 CONFLICT` (provider subject already linked in a race).
+
+---
+
+### Exchange native OAuth code
+
+`POST /api/v1/auth/oauth/{provider}/exchange`
+
+**Auth:** public. Use after authorize with client PKCE and the callback handoff.
+
+```json
+{
+  "code": "idp-authorization-code",
+  "codeVerifier": "the-pkce-verifier-you-created",
+  "redirectUri": "myapp://oauth",
+  "state": "the-same-client-csrf-as-authorize"
+}
+```
+
+`redirectUri` and `state` must match the authorize request. The API still talks to the IdP using the API callback URL.
+
+**Response** `200` — session tokens + cookies + `user` (same shape as login).
+
+**Errors:** `400 OAUTH_STATE_INVALID`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND`, `409 CONFLICT`, `422 VALIDATION_ERROR`.
 
 ---
 

@@ -14,6 +14,34 @@ export type SaveOAuthAuthorizationStateInput = {
   expiresAt: Date;
 };
 
+export type ConsumeOAuthAuthorizationStateInput = {
+  stateHash: string;
+  provider: TOauthProviderName;
+};
+
+export type ConsumeOAuthAuthorizationStateForExchangeInput = {
+  provider: TOauthProviderName;
+  clientState: string;
+  redirectUri: string;
+};
+
+export type ConsumedOAuthAuthorizationState = {
+  provider: TOauthProviderName;
+  intent: TOauthIntent;
+  redirectUri: string;
+  clientState: string;
+  userId: string | null;
+};
+
 export interface IOauthAuthorizationStateRepository {
   save(input: SaveOAuthAuthorizationStateInput): Promise<void>;
+  findActive(
+    input: ConsumeOAuthAuthorizationStateInput,
+  ): Promise<ConsumedOAuthAuthorizationState | null>;
+  consume(
+    input: ConsumeOAuthAuthorizationStateInput,
+  ): Promise<ConsumedOAuthAuthorizationState | null>;
+  consumeForExchange(
+    input: ConsumeOAuthAuthorizationStateForExchangeInput,
+  ): Promise<ConsumedOAuthAuthorizationState | null>;
 }

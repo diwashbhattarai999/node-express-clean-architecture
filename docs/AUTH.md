@@ -798,6 +798,8 @@ POST   /api/v1/auth/login
 POST   /api/v1/auth/magic-link/request
 POST   /api/v1/auth/magic-link/consume
 GET    /api/v1/auth/oauth/:provider/authorize
+GET    /api/v1/auth/oauth/:provider/callback
+POST   /api/v1/auth/oauth/:provider/exchange
 
 SESSION
 POST   /api/v1/auth/refresh

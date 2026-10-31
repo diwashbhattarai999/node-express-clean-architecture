@@ -19,6 +19,9 @@ const mockAuthAccountRepository = {
 
 const mockOAuthAuthorizationStateRepository = {
   save: vi.fn(),
+  findActive: vi.fn(),
+  consume: vi.fn(),
+  consumeForExchange: vi.fn(),
 };
 
 const mockPasswordHasher = {

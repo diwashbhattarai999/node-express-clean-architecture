@@ -14,10 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local Bull Board dashboard (`pnpm jobs:ui`, default http://127.0.0.1:3010) — not mounted on the API
 - `POST /api/v1/users/me/deletion-request/cancel` — clear pending deletion markers and remove the delayed job (`404` if nothing is pending)
 - `GET /api/v1/auth/oauth/{provider}/authorize` — start Google/GitHub/Apple/Microsoft/OIDC login (`302` or `?response=json`)
+- `GET /api/v1/auth/oauth/{provider}/callback` — consume IdP code, find-or-create an external identity (no email auto-merge), set session cookies, and `302` to the stored app return URL
+- `POST /api/v1/auth/oauth/{provider}/exchange` — native PKCE login: consume pending authorize by client `state` + `redirectUri`, return `AuthTokensData` + `user`
 
 ### Changed
 
 - Split auth composition into submodule factories (`identity`, `credentials`, `verification`, `sessions`, `oauth`); root `auth.module.ts` only wires shared ports
+- OAuth callback without the PKCE cookie now `302`s `code` + client `state` to the app (state stays unconsumed) so native exchange can finish login
 
 ### Fixed
 

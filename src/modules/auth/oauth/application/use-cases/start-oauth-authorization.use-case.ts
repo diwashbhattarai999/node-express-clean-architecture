@@ -8,8 +8,11 @@ import {
   toS256CodeChallenge,
 } from "@/modules/auth/oauth/application/utils/generate-pkce";
 import { isAllowedOAuthRedirectUri } from "@/modules/auth/oauth/application/utils/is-allowed-oauth-redirect-uri";
+import { buildOAuthCallbackUrl } from "@/modules/auth/oauth/application/utils/oauth-callback-url";
 import { hashToken } from "@/modules/auth/shared/application/utils/hash-token";
 import { ValidationError } from "@/shared/errors/validation-error";
+
+type OAuthAuthorizationStateWriter = Pick<IOauthAuthorizationStateRepository, "save">;
 
 export type StartOAuthAuthorizationOptions = {
   apiBaseUrl: string;
@@ -23,9 +26,6 @@ export type StartOAuthAuthorizationResult = {
   responseMode: StartOAuthAuthorizationDto["responseMode"];
   generatedCodeVerifier?: string;
 };
-
-const callbackUrl = (apiBaseUrl: string, provider: string): string =>
-  `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/auth/oauth/${provider}/callback`;
 
 const buildAuthorizationUrl = (
   definition: {
@@ -62,7 +62,7 @@ const buildAuthorizationUrl = (
 export class StartOAuthAuthorizationUseCase {
   public constructor(
     private readonly providerCatalog: IOauthProviderCatalog,
-    private readonly authorizationStateRepository: IOauthAuthorizationStateRepository,
+    private readonly authorizationStateRepository: OAuthAuthorizationStateWriter,
     private readonly options: StartOAuthAuthorizationOptions,
   ) {}
 
@@ -114,7 +114,7 @@ export class StartOAuthAuthorizationUseCase {
     });
 
     const authorizationUrl = buildAuthorizationUrl(provider, {
-      redirectUri: callbackUrl(this.options.apiBaseUrl, input.provider),
+      redirectUri: buildOAuthCallbackUrl(this.options.apiBaseUrl, input.provider),
       state: oauthState,
       codeChallenge,
     });

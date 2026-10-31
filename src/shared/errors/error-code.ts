@@ -28,6 +28,7 @@ export const ErrorCode = {
   ACCOUNT_NOT_VERIFIED: "ACCOUNT_NOT_VERIFIED",
   ACCOUNT_SUSPENDED: "ACCOUNT_SUSPENDED",
   ACCOUNT_DISABLED: "ACCOUNT_DISABLED",
+  OAUTH_STATE_INVALID: "OAUTH_STATE_INVALID",
 } as const;
 
 export type TErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

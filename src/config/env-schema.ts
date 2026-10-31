@@ -264,6 +264,9 @@ export const envSchema = z
     OAUTH_OIDC_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
     OAUTH_OIDC_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
     OAUTH_OIDC_AUTHORIZATION_URL: z.preprocess(emptyToUndefined, z.url().optional()),
+    OAUTH_OIDC_TOKEN_URL: z.preprocess(emptyToUndefined, z.url().optional()),
+    OAUTH_OIDC_USERINFO_URL: z.preprocess(emptyToUndefined, z.url().optional()),
+    OAUTH_OIDC_ISSUER: z.preprocess(emptyToUndefined, z.url().optional()),
     OAUTH_OIDC_SCOPES: z.preprocess(
       emptyToUndefined,
       z

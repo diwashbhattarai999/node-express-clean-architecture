@@ -25,3 +25,12 @@ export const setOAuthPkceCookie = (
 ): void => {
   res.cookie(OAUTH_PKCE_COOKIE_NAME, codeVerifier, cookieOptions(options));
 };
+
+export const clearOAuthPkceCookie = (res: Response, secure: boolean): void => {
+  res.clearCookie(OAUTH_PKCE_COOKIE_NAME, {
+    httpOnly: true,
+    secure,
+    sameSite: "lax",
+    path: OAUTH_PKCE_COOKIE_PATH,
+  });
+};
