@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Account-deletion delayed job plus 15-minute sweep that sets `deleted_at` and revokes sessions when due
 - Local Bull Board dashboard (`pnpm jobs:ui`, default http://127.0.0.1:3010) — not mounted on the API
 - `POST /api/v1/users/me/deletion-request/cancel` — clear pending deletion markers and remove the delayed job (`404` if nothing is pending)
+- `GET /api/v1/auth/oauth/{provider}/authorize` — start Google/GitHub/Apple/Microsoft/OIDC login (`302` or `?response=json`)
 
 ### Fixed
 

@@ -2,6 +2,7 @@ export const HttpStatus = {
   CONTINUE: 100,
 
   OK: 200,
+  FOUND: 302,
   CREATED: 201,
   ACCEPTED: 202,
   NO_CONTENT: 204,

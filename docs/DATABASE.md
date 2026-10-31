@@ -14,6 +14,7 @@ users
  ├── external_identities
  ├── sessions
  ├── auth_tokens
+ ├── oauth_authorization_states
  ├── mfa_factors
  ├── mfa_recovery_codes
  ├── mfa_challenges
@@ -137,6 +138,28 @@ OAuth/OIDC links. File: [`auth/external-identities.schema.ts`](../src/infrastruc
 | `created_at` / `updated_at` | `timestamptz` | |
 
 **Indexes:** Unique `(provider, provider_user_id)`; partial unique `(issuer, provider_user_id)` where `issuer is not null`; `(user_id, provider)`
+
+---
+
+## `oauth_authorization_states`
+
+In-flight OAuth authorize requests (one-time state). File: [`auth/oauth-authorization-states.schema.ts`](../src/infrastructure/database/drizzle/schema/auth/oauth-authorization-states.schema.ts).
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `uuid` PK | |
+| `state_hash` | `text` | Unique SHA-256 of the IdP `state` |
+| `provider` | `varchar(100)` | `google`, `github`, `apple`, `microsoft`, `oidc` |
+| `intent` | `varchar(20)` | `login` \| `link` |
+| `redirect_uri` | `varchar(2048)` | Client app return URL |
+| `client_state` | `text` | Client CSRF `state` query param |
+| `code_challenge` | `text` | PKCE S256 challenge |
+| `code_challenge_method` | `varchar(16)` | `S256` |
+| `user_id` | `uuid` FK | Nullable; for link later |
+| `expires_at` / `consumed_at` | `timestamptz` | |
+| `created_at` | `timestamptz` | |
+
+**Indexes:** Unique `state_hash`; `expires_at`; `(provider, expires_at)`
 
 ---
 

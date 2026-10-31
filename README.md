@@ -141,6 +141,9 @@ Copy `.env.example` to `.env`. Important variables:
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
 | `AUTH_ACCOUNT_DELETION_GRACE_DAYS` | Days before a deletion request is applied (default `14`) |
+| `AUTH_OAUTH_STATE_TTL_SECONDS` | OAuth authorize state TTL (default `600`) |
+| `OAUTH_*_CLIENT_ID` | Enable a provider on `GET /auth/oauth/{provider}/authorize` |
+| `OAUTH_REDIRECT_URIS` | Extra allow-listed app return URLs (FRONTEND origin is always allowed) |
 | `JOBS_PROVIDER` | `bullmq` \| `noop` (default `bullmq`; tests use `noop`) |
 | `JOBS_PREFIX` / `JOBS_QUEUE_NAME` | Redis key prefix and queue name |
 | `JOBS_CONCURRENCY` / `JOBS_ATTEMPTS` | Worker concurrency and retry count |

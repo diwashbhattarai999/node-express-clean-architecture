@@ -630,6 +630,8 @@ Providers: `google`, `github`, `apple`, `microsoft`, generic `oidc`. Native: Aut
 
 **Response** `302` to IdP (or `200` `{ "authorizationUrl": string }` if `?response=json`).
 
+**Errors:** `404 NOT_FOUND` (provider not configured), `422 VALIDATION_ERROR` (missing/invalid query, redirect URI not allow-listed).
+
 ---
 
 ### 6.2 Provider callback — P1
@@ -1209,7 +1211,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       |                                                |
 | 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       | Done                                           |
 | 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       | Done                                           |
-| 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       |                                                |
+| 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       | Done                                           |
 | 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       |                                                |
 | 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       |                                                |
 | 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       |                                                |

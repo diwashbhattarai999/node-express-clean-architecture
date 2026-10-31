@@ -87,6 +87,7 @@ Frontend deep links from emails:
 | `POST` | `/refresh` | refresh (+ CSRF if cookie) |
 | `POST` | `/logout` | refresh and/or bearer (+ CSRF if cookie) |
 | `POST` | `/logout-all` | bearer (+ CSRF if cookie) |
+| `GET` | `/oauth/{provider}/authorize` | public |
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
 | `POST` | `/password/reset/validate` | public |
@@ -267,6 +268,34 @@ Refresh returns the same fields **without** `user`.
 **Response** `200` — session tokens + cookies.
 
 **Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`.
+
+---
+
+### Start OAuth
+
+`GET /api/v1/auth/oauth/{provider}/authorize`
+
+**Auth:** public. `{provider}` is `google` \| `github` \| `apple` \| `microsoft` \| `oidc`. The provider must have a client id in env or the API returns `404`.
+
+Query:
+
+| Param | Required | Notes |
+| --- | --- | --- |
+| `redirectUri` | yes | App return URL. Same origin as `FRONTEND_BASE_URL`, or an exact `OAUTH_REDIRECT_URIS` entry |
+| `state` | yes | Client CSRF (8–512 chars). Stored and returned on callback later |
+| `intent` | no | `login` (default) or `link` |
+| `response` | no | `json` to get the IdP URL instead of a `302` |
+| `codeChallenge` / `codeChallengeMethod` | native | PKCE S256. Omitted for browser: the API generates PKCE and sets HttpOnly cookie `oauth_code_verifier` |
+
+IdP `redirect_uri` is the API callback (`{BASE_URL}/api/v1/auth/oauth/{provider}/callback`) — not `redirectUri`. Callback is not implemented yet.
+
+**Response** `302` to the IdP, or `200`:
+
+```json
+{ "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth?..." }
+```
+
+**Errors:** `404 NOT_FOUND`, `422 VALIDATION_ERROR`.
 
 ---
 

@@ -231,6 +231,52 @@ export const envSchema = z
       .max(365, "Auth account deletion grace period must be at most 365 days")
       .default(14),
 
+    AUTH_OAUTH_STATE_TTL_SECONDS: z.coerce
+      .number("OAuth state TTL is required.")
+      .int("OAuth state TTL must be an integer")
+      .min(60, "OAuth state TTL must be at least 60 seconds")
+      .max(3600, "OAuth state TTL must be at most 3600 seconds")
+      .default(600),
+
+    OAUTH_REDIRECT_URIS: z
+      .preprocess(
+        emptyToUndefined,
+        z
+          .string()
+          .default("")
+          .transform((value) =>
+            value
+              .split(",")
+              .map((uri) => uri.trim())
+              .filter(Boolean),
+          ),
+      )
+      .pipe(z.array(z.string().min(1))),
+
+    OAUTH_GOOGLE_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_GOOGLE_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_GITHUB_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_GITHUB_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_APPLE_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_APPLE_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_MICROSOFT_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_MICROSOFT_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_OIDC_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_OIDC_CLIENT_SECRET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    OAUTH_OIDC_AUTHORIZATION_URL: z.preprocess(emptyToUndefined, z.url().optional()),
+    OAUTH_OIDC_SCOPES: z.preprocess(
+      emptyToUndefined,
+      z
+        .string()
+        .default("openid email profile")
+        .transform((value) =>
+          value
+            .split(/[\s,]+/)
+            .map((scope) => scope.trim())
+            .filter(Boolean),
+        ),
+    ),
+
     JOBS_PROVIDER: z
       .enum(
         JobsProvider,
@@ -295,6 +341,14 @@ export const envSchema = z
           message: "RESEND_API_KEY is required when EMAIL_PROVIDER is resend.",
         });
       }
+    }
+
+    if (env.OAUTH_OIDC_CLIENT_ID && !env.OAUTH_OIDC_AUTHORIZATION_URL) {
+      context.addIssue({
+        code: "custom",
+        path: ["OAUTH_OIDC_AUTHORIZATION_URL"],
+        message: "OAUTH_OIDC_AUTHORIZATION_URL is required when OAUTH_OIDC_CLIENT_ID is set.",
+      });
     }
 
     if (env.STORAGE_PROVIDER === StorageProvider.LOCAL) {

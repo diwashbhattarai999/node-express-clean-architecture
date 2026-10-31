@@ -36,6 +36,10 @@ import { RemoveEmailController } from "@/modules/auth/identity/presentation/http
 import { RequestAccountDeletionController } from "@/modules/auth/identity/presentation/http/controllers/request-account-deletion.controller";
 import { UpdateOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/update-own-profile.controller";
 import { VerifyAddedEmailController } from "@/modules/auth/identity/presentation/http/controllers/verify-added-email.controller";
+import { StartOAuthAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-authorization.use-case";
+import { createOAuthProviderCatalog } from "@/modules/auth/oauth/infrastructure/create-oauth-provider-catalog";
+import { PostgresOAuthAuthorizationStateRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-authorization-state.repository";
+import { StartOAuthAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-authorization.controller";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
 import { ListSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/list-sessions.use-case";
 import { LogoutUseCase } from "@/modules/auth/sessions/application/use-cases/logout.use-case";
@@ -100,6 +104,7 @@ export type AuthModule = {
   removeEmailController: RemoveEmailController;
   requestAccountDeletionController: RequestAccountDeletionController;
   cancelAccountDeletionController: CancelAccountDeletionController;
+  startOAuthAuthorizationController: StartOAuthAuthorizationController;
   changeUsernameController: ChangeUsernameController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
@@ -121,6 +126,8 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const credentialsRepository = new PostgresCredentialsRepository();
   const verificationRepository = new PostgresVerificationRepository();
   const sessionRepository = new PostgresSessionRepository();
+  const oauthAuthorizationStateRepository = new PostgresOAuthAuthorizationStateRepository();
+  const oauthProviderCatalog = createOAuthProviderCatalog(options.env);
 
   const accessTokenSigner =
     options.accessTokenSigner ??
@@ -208,6 +215,16 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     identityRepository,
     options.jobQueue,
   );
+  const startOAuthAuthorizationUseCase = new StartOAuthAuthorizationUseCase(
+    oauthProviderCatalog,
+    oauthAuthorizationStateRepository,
+    {
+      apiBaseUrl: options.env.BASE_URL,
+      frontendBaseUrl: options.env.FRONTEND_BASE_URL,
+      allowedRedirectUris: options.env.OAUTH_REDIRECT_URIS,
+      stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
+    },
+  );
   const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
   const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
   const getSessionUseCase = new GetSessionUseCase(sessionRepository);
@@ -261,6 +278,13 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     ),
     cancelAccountDeletionController: new CancelAccountDeletionController(
       cancelAccountDeletionUseCase,
+    ),
+    startOAuthAuthorizationController: new StartOAuthAuthorizationController(
+      startOAuthAuthorizationUseCase,
+      {
+        secureCookies: cookieOptions.secureCookies,
+        stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
+      },
     ),
     changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
     listSessionsController: new ListSessionsController(listSessionsUseCase),
