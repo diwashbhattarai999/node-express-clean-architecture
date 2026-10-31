@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BullMQ job queue + dedicated worker (`pnpm worker`, Compose `worker`) with `IJobQueue` port (`bullmq` / `noop`)
 - Account-deletion delayed job plus 15-minute sweep that sets `deleted_at` and revokes sessions when due
 - Local Bull Board dashboard (`pnpm jobs:ui`, default http://127.0.0.1:3010) — not mounted on the API
+- `POST /api/v1/users/me/deletion-request/cancel` — clear pending deletion markers and remove the delayed job (`404` if nothing is pending)
 
 ### Fixed
 
 - Account deletion enqueue no longer 500s: BullMQ custom job ids cannot contain `:`
+- Apply-due deletions re-check pending markers before setting `deleted_at`, so a concurrent cancel wins
 
 ## [1.2.0] - 2026-10-31
 

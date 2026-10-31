@@ -46,7 +46,7 @@ Applying a due deletion:
 - sets `users.deleted_at`
 - revokes remaining sessions
 
-Until the worker (or sweep) runs, the account stays usable. Cancel (next API) can still clear markers before that.
+Until the worker (or sweep) runs, the account stays usable. `POST /api/v1/users/me/deletion-request/cancel` clears markers and removes the delayed job. Apply re-checks that markers are still present so a concurrent cancel wins.
 
 ## Adding a job
 

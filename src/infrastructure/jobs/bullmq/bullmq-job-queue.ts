@@ -9,6 +9,7 @@ import type {
   IJobQueue,
   RepeatableJobOptions,
 } from "@/shared/jobs/job-queue.port";
+import { logger } from "@/shared/logger/logger";
 
 export type BullMqJobQueueOptions = {
   queue: Queue;
@@ -54,6 +55,23 @@ export class BullMqJobQueue implements IJobQueue {
         opts: createDefaultJobOptions({ attempts: this.options.attempts }),
       },
     );
+  }
+
+  public async remove(jobId: string): Promise<void> {
+    const job = await this.options.queue.getJob(jobId);
+
+    if (!job) {
+      return;
+    }
+
+    try {
+      await job.remove();
+    } catch (error) {
+      logger.warn(
+        { err: error, jobId },
+        "Failed to remove job; worker will no-op if markers are gone",
+      );
+    }
   }
 
   public async close(): Promise<void> {

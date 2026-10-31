@@ -28,5 +28,7 @@ export interface IJobQueue {
     options: RepeatableJobOptions,
   ): Promise<void>;
 
+  remove(jobId: string): Promise<void>;
+
   close(): Promise<void>;
 }

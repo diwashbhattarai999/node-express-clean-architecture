@@ -108,6 +108,7 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/emails/verify` | public (or matching bearer) |
 | `DELETE` | `/me/emails/{identityId}` | bearer |
 | `POST` | `/me/deletion-request` | bearer |
+| `POST` | `/me/deletion-request/cancel` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -481,6 +482,18 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 ```
 
 **Errors:** `401 INVALID_CREDENTIALS` (password sent and wrong), `422`, `401 TOKEN_*`.
+
+---
+
+### Cancel account deletion
+
+`POST /api/v1/users/me/deletion-request/cancel`
+
+**Auth:** bearer. Clears deletion markers and removes the delayed apply job. Account stays fully usable. Safe until the worker has already applied `deleted_at`.
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `404 NOT_FOUND` (no pending request), `401 TOKEN_*`.
 
 ---
 

@@ -18,6 +18,7 @@ describe("UpdateOwnProfileUseCase", () => {
     verifyAddedEmailByTokenHash: vi.fn(),
     removeEmailIdentity: vi.fn(),
     scheduleAccountDeletion: vi.fn(),
+    cancelAccountDeletion: vi.fn(),
     applyDueAccountDeletions: vi.fn(),
     upsertUsername: vi.fn(),
   };

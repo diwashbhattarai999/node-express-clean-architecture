@@ -99,6 +99,8 @@ export type ScheduleAccountDeletionResult =
   | { outcome: "not_found" }
   | { outcome: "scheduled"; scheduledFor: Date };
 
+export type CancelAccountDeletionResult = { outcome: "not_found" } | { outcome: "cancelled" };
+
 export type ApplyDueAccountDeletionsInput = {
   now: Date;
   userId?: string;
@@ -132,6 +134,8 @@ export interface IIdentityRepository {
   scheduleAccountDeletion(
     input: ScheduleAccountDeletionInput,
   ): Promise<ScheduleAccountDeletionResult>;
+
+  cancelAccountDeletion(userId: string): Promise<CancelAccountDeletionResult>;
 
   applyDueAccountDeletions(input: ApplyDueAccountDeletionsInput): Promise<string[]>;
 

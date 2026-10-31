@@ -602,7 +602,9 @@ Admin permission APIs require future tables `permissions` and `role_permissions`
 
 `POST /api/v1/users/me/deletion-request/cancel` · **Auth:** bearer
 
-**Response** `200` `data`: `null`
+**Response** `200` `data`: `null` — clears deletion markers and removes the delayed apply job.
+
+**Errors:** `404 NOT_FOUND` (no pending deletion request)
 
 ---
 
@@ -1206,7 +1208,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 30  | POST   | `/api/v1/users/me/phones`                                 | P2       |                                                |
 | 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       |                                                |
 | 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       | Done                                           |
-| 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       |                                                |
+| 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       | Done                                           |
 | 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       |                                                |
 | 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       |                                                |
 | 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       |                                                |

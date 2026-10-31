@@ -24,6 +24,10 @@ export class NoopJobQueue implements IJobQueue {
     logger.debug({ name, payload, options }, "Noop job queue upsertRepeatable");
   }
 
+  public async remove(jobId: string): Promise<void> {
+    logger.debug({ jobId }, "Noop job queue remove");
+  }
+
   public async close(): Promise<void> {
     return;
   }

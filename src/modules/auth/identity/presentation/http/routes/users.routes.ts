@@ -45,6 +45,12 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
   );
 
   router.post(
+    "/me/deletion-request/cancel",
+    authModule.requireBearerAuth,
+    asRequestHandler(authModule.cancelAccountDeletionController),
+  );
+
+  router.post(
     "/me/deletion-request",
     validate(requestAccountDeletionSchema),
     authModule.requireBearerAuth,

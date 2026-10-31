@@ -14,6 +14,7 @@ import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/
 import type {
   AddEmailIdentityInput,
   ApplyDueAccountDeletionsInput,
+  CancelAccountDeletionResult,
   FindAuthenticatedPrincipalResult,
   FindOwnProfileResult,
   IIdentityRepository,
@@ -669,6 +670,28 @@ export class PostgresIdentityRepository implements IIdentityRepository {
     return { outcome: "scheduled", scheduledFor: input.scheduledFor };
   }
 
+  public async cancelAccountDeletion(userId: string): Promise<CancelAccountDeletionResult> {
+    const now = new Date();
+    const [updated] = await db
+      .update(users)
+      .set({
+        deletionRequestedAt: null,
+        deletionScheduledFor: null,
+        deletionReason: null,
+        updatedAt: now,
+      })
+      .where(
+        and(eq(users.id, userId), isNull(users.deletedAt), isNotNull(users.deletionScheduledFor)),
+      )
+      .returning({ id: users.id });
+
+    if (!updated) {
+      return { outcome: "not_found" };
+    }
+
+    return { outcome: "cancelled" };
+  }
+
   public async applyDueAccountDeletions(input: ApplyDueAccountDeletionsInput): Promise<string[]> {
     return db.transaction(async (tx) => {
       const filters = [
@@ -693,10 +716,23 @@ export class PostgresIdentityRepository implements IIdentityRepository {
       const userIds = due.map((row) => row.id);
       const now = input.now;
 
-      await tx
+      const updated = await tx
         .update(users)
         .set({ deletedAt: now, updatedAt: now })
-        .where(inArray(users.id, userIds));
+        .where(
+          and(
+            inArray(users.id, userIds),
+            isNull(users.deletedAt),
+            isNotNull(users.deletionScheduledFor),
+          ),
+        )
+        .returning({ id: users.id });
+
+      const appliedUserIds = updated.map((row) => row.id);
+
+      if (appliedUserIds.length === 0) {
+        return [];
+      }
 
       await tx
         .update(sessions)
@@ -704,9 +740,9 @@ export class PostgresIdentityRepository implements IIdentityRepository {
           revokedAt: now,
           revocationReason: "logout_all",
         })
-        .where(and(inArray(sessions.userId, userIds), isNull(sessions.revokedAt)));
+        .where(and(inArray(sessions.userId, appliedUserIds), isNull(sessions.revokedAt)));
 
-      return userIds;
+      return appliedUserIds;
     });
   }
 
