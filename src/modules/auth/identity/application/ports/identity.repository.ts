@@ -1,5 +1,6 @@
 import type {
   AuthUser,
+  AuthUserProfile,
   TLoginIdentityType,
 } from "@/modules/auth/shared/application/types/auth.types";
 
@@ -35,6 +36,13 @@ export type FindAuthenticatedPrincipalResult =
   | { outcome: "user_not_found" }
   | { outcome: "ok"; user: AuthUser; roles: string[] };
 
+export type FindOwnProfileResult =
+  | { outcome: "invalid_session" }
+  | { outcome: "expired_session" }
+  | { outcome: "revoked_session" }
+  | { outcome: "user_not_found" }
+  | { outcome: "ok"; user: AuthUser; profile: AuthUserProfile };
+
 export type UpsertUsernameInput = {
   userId: string;
   identifier: string;
@@ -53,6 +61,8 @@ export interface IIdentityRepository {
     userId: string,
     sessionId: string,
   ): Promise<FindAuthenticatedPrincipalResult>;
+
+  findOwnProfile(userId: string, sessionId: string): Promise<FindOwnProfileResult>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

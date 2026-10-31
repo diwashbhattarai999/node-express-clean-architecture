@@ -13,6 +13,22 @@ export type AuthUser = {
   updatedAt: Date;
 };
 
+export type AuthUserProfile = {
+  firstName: string | null;
+  lastName: string | null;
+  locale: string | null;
+  timezone: string | null;
+  bio: string | null;
+};
+
+export const EMPTY_AUTH_USER_PROFILE: AuthUserProfile = {
+  firstName: null,
+  lastName: null,
+  locale: null,
+  timezone: null,
+  bio: null,
+};
+
 export type CreateSessionInput = {
   id: string;
   familyId: string;

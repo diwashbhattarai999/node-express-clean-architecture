@@ -1,6 +1,6 @@
 import { type IRouter, Router } from "express";
 
-import { asHandler, validate } from "@/app/middleware/validation";
+import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
 
@@ -11,6 +11,12 @@ import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/
  */
 export function createUsersRouter(authModule: AuthModule): IRouter {
   const router = Router();
+
+  router.get(
+    "/me",
+    authModule.requireBearerAuth,
+    asRequestHandler(authModule.getOwnProfileController),
+  );
 
   router.patch(
     "/me/username",

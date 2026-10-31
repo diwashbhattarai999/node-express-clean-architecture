@@ -72,10 +72,10 @@ export class JoseAccessTokenSigner implements IAccessTokenSigner {
       }
 
       if (error instanceof JoseErrors.JWTExpired) {
-        throw new TokenExpiredError("The access token has expired.");
+        throw new TokenExpiredError("Unauthorized. Please login again.");
       }
 
-      throw new TokenInvalidError("The access token is invalid.");
+      throw new TokenInvalidError("Unauthorized. Please login again.");
     }
   }
 }

@@ -8,17 +8,20 @@ import { passwordCredentials } from "@/infrastructure/database/drizzle/schema/au
 import { sessions } from "@/infrastructure/database/drizzle/schema/auth/sessions.schema";
 import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
 import { userRoles } from "@/infrastructure/database/drizzle/schema/authorization/user-roles.schema";
+import { userProfiles } from "@/infrastructure/database/drizzle/schema/user-profiles.schema";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/errors/identity-already-exists.error";
 import type {
   FindAuthenticatedPrincipalResult,
+  FindOwnProfileResult,
   IIdentityRepository,
   RegisterAccountInput,
   UpsertUsernameInput,
 } from "@/modules/auth/identity/application/ports/identity.repository";
-import type {
-  AuthUser,
-  TLoginIdentityType,
+import {
+  type AuthUser,
+  EMPTY_AUTH_USER_PROFILE,
+  type TLoginIdentityType,
 } from "@/modules/auth/shared/application/types/auth.types";
 
 export class PostgresIdentityRepository implements IIdentityRepository {
@@ -209,6 +212,40 @@ export class PostgresIdentityRepository implements IIdentityRepository {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
+    };
+  }
+
+  public async findOwnProfile(userId: string, sessionId: string): Promise<FindOwnProfileResult> {
+    const principal = await this.findAuthenticatedPrincipal(userId, sessionId);
+
+    if (principal.outcome !== "ok") {
+      return principal;
+    }
+
+    const [profile] = await db
+      .select({
+        firstName: userProfiles.firstName,
+        lastName: userProfiles.lastName,
+        locale: userProfiles.locale,
+        timezone: userProfiles.timezone,
+        bio: userProfiles.bio,
+      })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, principal.user.id))
+      .limit(1);
+
+    return {
+      outcome: "ok",
+      user: principal.user,
+      profile: profile
+        ? {
+            firstName: profile.firstName ?? null,
+            lastName: profile.lastName ?? null,
+            locale: profile.locale ?? null,
+            timezone: profile.timezone ?? null,
+            bio: profile.bio ?? null,
+          }
+        : EMPTY_AUTH_USER_PROFILE,
     };
   }
 

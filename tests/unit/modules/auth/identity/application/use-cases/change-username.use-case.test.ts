@@ -10,6 +10,7 @@ describe("ChangeUsernameUseCase", () => {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
+    findOwnProfile: vi.fn(),
     upsertUsername: vi.fn(),
   };
 
