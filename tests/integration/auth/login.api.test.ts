@@ -157,7 +157,7 @@ describe("Auth login API", () => {
     expect(response.body.code).toBe("INVALID_CREDENTIALS");
   });
 
-  it("returns 403 EMAIL_NOT_VERIFIED for pending accounts", async () => {
+  it("returns 403 ACCOUNT_NOT_VERIFIED for pending accounts", async () => {
     mockAuthAccountRepository.findPasswordLoginCandidate.mockResolvedValue({
       userId: "550e8400-e29b-41d4-a716-446655440000",
       status: "pending_verification",
@@ -176,7 +176,7 @@ describe("Auth login API", () => {
     });
 
     expect(response.status).toBe(403);
-    expect(response.body.code).toBe("EMAIL_NOT_VERIFIED");
+    expect(response.body.code).toBe("ACCOUNT_NOT_VERIFIED");
   });
 
   it("returns 422 when body is invalid", async () => {

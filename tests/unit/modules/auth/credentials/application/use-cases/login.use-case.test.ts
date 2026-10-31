@@ -123,7 +123,7 @@ describe("LoginUseCase", () => {
 
     await expect(
       useCase.execute({ identifier: "ada@example.com", password: "StrongPassword123!" }),
-    ).rejects.toMatchObject({ code: "EMAIL_NOT_VERIFIED" });
+    ).rejects.toMatchObject({ code: "ACCOUNT_NOT_VERIFIED" });
   });
 
   it("blocks suspended accounts", async () => {
