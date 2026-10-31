@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-31
+
 ### Added
 
 - BullMQ job queue + dedicated worker (`pnpm worker`, Compose `worker`) with `IJobQueue` port (`bullmq` / `noop`)
