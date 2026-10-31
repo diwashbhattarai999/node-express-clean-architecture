@@ -28,6 +28,7 @@ describe("ExchangeOAuthCodeUseCase", () => {
   const accountRepository: IOauthAccountRepository = {
     findByProviderUser: vi.fn(),
     findEmailOwner: vi.fn(),
+    listForUser: vi.fn(),
     createAccount: vi.fn(),
     recordSuccessfulLogin: vi.fn(),
   };

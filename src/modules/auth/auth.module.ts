@@ -6,6 +6,7 @@ import {
 } from "@/modules/auth/credentials/credentials.module";
 import { PostgresCredentialsRepository } from "@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository";
 import { createIdentityModule, type IdentityModule } from "@/modules/auth/identity/identity.module";
+import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
 import { createOAuthModule, type OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { PostgresSessionRepository } from "@/modules/auth/sessions/infrastructure/repositories/postgres-session.repository";
 import { createSessionsModule, type SessionsModule } from "@/modules/auth/sessions/sessions.module";
@@ -42,6 +43,7 @@ export type AuthModule = IdentityModule &
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const credentialsRepository = new PostgresCredentialsRepository();
+  const identityRepository = new PostgresIdentityRepository();
   const sessionRepository = new PostgresSessionRepository();
 
   const accessTokenSigner =
@@ -71,6 +73,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
 
   return {
     ...createIdentityModule({
+      identityRepository,
       credentialsRepository,
       passwordHasher: options.passwordHasher,
       emailSender: options.emailSender,
@@ -104,6 +107,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     ...createOAuthModule({
       env: options.env,
       httpClient: options.httpClient,
+      identityRepository,
       sessionRepository,
       accessTokenSigner,
       sessionOptions,

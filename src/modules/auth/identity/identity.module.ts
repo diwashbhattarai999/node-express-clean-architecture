@@ -1,4 +1,5 @@
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
+import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import { AddEmailUseCase } from "@/modules/auth/identity/application/use-cases/add-email.use-case";
 import { CancelAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/cancel-account-deletion.use-case";
 import { ChangeUsernameUseCase } from "@/modules/auth/identity/application/use-cases/change-username.use-case";
@@ -10,7 +11,6 @@ import { RemoveEmailUseCase } from "@/modules/auth/identity/application/use-case
 import { RequestAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/request-account-deletion.use-case";
 import { UpdateOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/update-own-profile.use-case";
 import { VerifyAddedEmailUseCase } from "@/modules/auth/identity/application/use-cases/verify-added-email.use-case";
-import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
 import { AddEmailController } from "@/modules/auth/identity/presentation/http/controllers/add-email.controller";
 import { CancelAccountDeletionController } from "@/modules/auth/identity/presentation/http/controllers/cancel-account-deletion.controller";
 import { ChangeUsernameController } from "@/modules/auth/identity/presentation/http/controllers/change-username.controller";
@@ -28,6 +28,7 @@ import type { IEmailSender } from "@/shared/email/email-sender.port";
 import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 
 export type CreateIdentityModuleOptions = {
+  identityRepository: IIdentityRepository;
   credentialsRepository: ICredentialsRepository;
   passwordHasher: IPasswordHasher;
   emailSender: IEmailSender;
@@ -51,7 +52,7 @@ export type IdentityModule = {
 };
 
 export function createIdentityModule(options: CreateIdentityModuleOptions): IdentityModule {
-  const identityRepository = new PostgresIdentityRepository();
+  const { identityRepository } = options;
 
   return {
     registerController: new RegisterController(

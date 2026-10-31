@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -10,6 +10,7 @@ import { OAuthIdentityLinkedError } from "@/modules/auth/oauth/application/error
 import type {
   CreateOAuthAccountInput,
   IOauthAccountRepository,
+  OAuthAccount,
   OAuthLinkedAccount,
 } from "@/modules/auth/oauth/application/ports/oauth-account.repository";
 import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
@@ -113,6 +114,20 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
       .limit(1);
 
     return row ?? null;
+  }
+
+  public async listForUser(userId: string): Promise<OAuthAccount[]> {
+    return db
+      .select({
+        id: externalIdentities.id,
+        provider: externalIdentities.provider,
+        providerEmail: externalIdentities.providerEmail,
+        linkedAt: externalIdentities.createdAt,
+        lastUsedAt: externalIdentities.lastUsedAt,
+      })
+      .from(externalIdentities)
+      .where(eq(externalIdentities.userId, userId))
+      .orderBy(desc(externalIdentities.createdAt), asc(externalIdentities.provider));
   }
 
   public async createAccount(input: CreateOAuthAccountInput): Promise<AuthUser> {

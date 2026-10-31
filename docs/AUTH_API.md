@@ -1218,7 +1218,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       | Done                                           |
 | 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       | Done                                           |
 | 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       | Done                                           |
-| 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       |                                                |
+| 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       | Done                                           |
 | 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       |                                                |
 | 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       |                                                |
 | 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       |                                                |

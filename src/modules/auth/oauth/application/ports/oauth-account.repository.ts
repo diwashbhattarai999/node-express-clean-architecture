@@ -1,6 +1,14 @@
 import type { TOauthProviderName } from "@/modules/auth/oauth/application/constants/oauth-providers";
 import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
 
+export type OAuthAccount = {
+  id: string;
+  provider: string;
+  providerEmail: string | null;
+  linkedAt: Date;
+  lastUsedAt: Date | null;
+};
+
 export type OAuthLinkedAccount = {
   externalIdentityId: string;
   user: AuthUser;
@@ -33,6 +41,8 @@ export interface IOauthAccountRepository {
   ): Promise<OAuthLinkedAccount | null>;
 
   findEmailOwner(normalizedEmail: string): Promise<{ userId: string } | null>;
+
+  listForUser(userId: string): Promise<OAuthAccount[]>;
 
   createAccount(input: CreateOAuthAccountInput): Promise<AuthUser>;
 

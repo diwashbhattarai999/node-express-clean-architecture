@@ -8,15 +8,18 @@ import { removeEmailSchema } from "@/modules/auth/identity/presentation/http/val
 import { requestAccountDeletionSchema } from "@/modules/auth/identity/presentation/http/validators/request-account-deletion.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
+import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 /**
  * HTTP mount for `/api/v1/users`.
- * Self-service `/me` routes are implemented in auth/identity for now
- * (login identities); mount them here so v1 only wires module roots.
+ * Self-service `/me` routes are implemented in auth/identity (login identities)
+ * and auth/oauth (linked accounts); mount them here so v1 only wires module roots.
  */
 export function createUsersRouter(
-  authModule: IdentityModule & Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
+  authModule: IdentityModule &
+    Pick<OAuthModule, "listOwnOAuthAccountsController"> &
+    Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
 ): IRouter {
   const router = Router();
 
@@ -24,6 +27,12 @@ export function createUsersRouter(
     "/me/identities",
     authModule.requireBearerAuth,
     asRequestHandler(authModule.listOwnIdentitiesController),
+  );
+
+  router.get(
+    "/me/oauth-accounts",
+    authModule.requireBearerAuth,
+    asRequestHandler(authModule.listOwnOAuthAccountsController),
   );
 
   router.post(

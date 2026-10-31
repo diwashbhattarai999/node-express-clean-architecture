@@ -11,6 +11,7 @@ const mockOAuthAuthorizationStateRepository = {
 const mockOAuthAccountRepository = {
   findByProviderUser: vi.fn(),
   findEmailOwner: vi.fn(),
+  listForUser: vi.fn(),
   createAccount: vi.fn(),
   recordSuccessfulLogin: vi.fn(),
 };

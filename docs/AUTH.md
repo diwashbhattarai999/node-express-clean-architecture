@@ -800,6 +800,7 @@ POST   /api/v1/auth/magic-link/consume
 GET    /api/v1/auth/oauth/:provider/authorize
 GET    /api/v1/auth/oauth/:provider/callback
 POST   /api/v1/auth/oauth/:provider/exchange
+GET    /api/v1/users/me/oauth-accounts
 
 SESSION
 POST   /api/v1/auth/refresh

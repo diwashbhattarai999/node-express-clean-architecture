@@ -112,6 +112,7 @@ Also under `/api/v1/users` (same bearer):
 | `DELETE` | `/me/emails/{identityId}` | bearer |
 | `POST` | `/me/deletion-request` | bearer |
 | `POST` | `/me/deletion-request/cancel` | bearer |
+| `GET` | `/me/oauth-accounts` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -149,6 +150,20 @@ Also under `/api/v1/users` (same bearer):
 ```
 
 `type`: `email` | `phone` | `username`. `identifier` is the display form (not necessarily normalized).
+
+### `OAuthAccount`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440020",
+  "provider": "google",
+  "providerEmail": "ada@example.com",
+  "linkedAt": "2026-01-01T00:00:00.000Z",
+  "lastUsedAt": "2026-01-03T00:00:00.000Z"
+}
+```
+
+`provider`: `google` | `github` | `apple` | `microsoft` | `oidc`. `providerEmail` and `lastUsedAt` may be `null`.
 
 ### Session tokens (`data` after login / verify)
 
@@ -335,6 +350,16 @@ Native clients that sent their own PKCE get a `302` to `redirectUri` with `code`
 **Response** `200` — session tokens + cookies + `user` (same shape as login).
 
 **Errors:** `400 OAUTH_STATE_INVALID`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND`, `409 CONFLICT`, `422 VALIDATION_ERROR`.
+
+---
+
+### List linked OAuth accounts
+
+`GET /api/v1/users/me/oauth-accounts`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `OAuthAccount[]` (newest `linkedAt` first). Empty list when none are linked.
 
 ---
 
