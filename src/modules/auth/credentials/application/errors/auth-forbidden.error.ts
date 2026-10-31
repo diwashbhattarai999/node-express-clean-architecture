@@ -4,7 +4,7 @@ import { HttpStatus } from "@/shared/http/http-status";
 
 type AuthForbiddenCode = Extract<
   TErrorCode,
-  "EMAIL_NOT_VERIFIED" | "ACCOUNT_SUSPENDED" | "ACCOUNT_DISABLED"
+  "ACCOUNT_NOT_VERIFIED" | "ACCOUNT_SUSPENDED" | "ACCOUNT_DISABLED"
 >;
 
 export class AuthForbiddenError extends AppError {

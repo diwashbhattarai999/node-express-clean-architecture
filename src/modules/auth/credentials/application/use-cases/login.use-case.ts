@@ -58,7 +58,7 @@ export class LoginUseCase {
 
     if (candidate.status === "pending_verification") {
       throw new AuthForbiddenError(
-        ErrorCode.EMAIL_NOT_VERIFIED,
+        ErrorCode.ACCOUNT_NOT_VERIFIED,
         "Please verify your account before signing in.",
       );
     }
