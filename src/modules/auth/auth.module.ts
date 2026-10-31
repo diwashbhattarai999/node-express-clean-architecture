@@ -20,6 +20,7 @@ import { GetOwnProfileUseCase } from "@/modules/auth/identity/application/use-ca
 import { ListOwnIdentitiesUseCase } from "@/modules/auth/identity/application/use-cases/list-own-identities.use-case";
 import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
 import { RemoveEmailUseCase } from "@/modules/auth/identity/application/use-cases/remove-email.use-case";
+import { RequestAccountDeletionUseCase } from "@/modules/auth/identity/application/use-cases/request-account-deletion.use-case";
 import { UpdateOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/update-own-profile.use-case";
 import { VerifyAddedEmailUseCase } from "@/modules/auth/identity/application/use-cases/verify-added-email.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
@@ -30,6 +31,7 @@ import { GetOwnProfileController } from "@/modules/auth/identity/presentation/ht
 import { ListOwnIdentitiesController } from "@/modules/auth/identity/presentation/http/controllers/list-own-identities.controller";
 import { RegisterController } from "@/modules/auth/identity/presentation/http/controllers/register.controller";
 import { RemoveEmailController } from "@/modules/auth/identity/presentation/http/controllers/remove-email.controller";
+import { RequestAccountDeletionController } from "@/modules/auth/identity/presentation/http/controllers/request-account-deletion.controller";
 import { UpdateOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/update-own-profile.controller";
 import { VerifyAddedEmailController } from "@/modules/auth/identity/presentation/http/controllers/verify-added-email.controller";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
@@ -92,6 +94,7 @@ export type AuthModule = {
   addEmailController: AddEmailController;
   verifyAddedEmailController: VerifyAddedEmailController;
   removeEmailController: RemoveEmailController;
+  requestAccountDeletionController: RequestAccountDeletionController;
   changeUsernameController: ChangeUsernameController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
@@ -189,6 +192,12 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   );
   const verifyAddedEmailUseCase = new VerifyAddedEmailUseCase(identityRepository);
   const removeEmailUseCase = new RemoveEmailUseCase(identityRepository);
+  const requestAccountDeletionUseCase = new RequestAccountDeletionUseCase(
+    identityRepository,
+    credentialsRepository,
+    options.passwordHasher,
+    { graceDays: options.env.AUTH_ACCOUNT_DELETION_GRACE_DAYS },
+  );
   const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
   const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
   const getSessionUseCase = new GetSessionUseCase(sessionRepository);
@@ -237,6 +246,9 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     addEmailController: new AddEmailController(addEmailUseCase),
     verifyAddedEmailController: new VerifyAddedEmailController(verifyAddedEmailUseCase),
     removeEmailController: new RemoveEmailController(removeEmailUseCase),
+    requestAccountDeletionController: new RequestAccountDeletionController(
+      requestAccountDeletionUseCase,
+    ),
     changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
     listSessionsController: new ListSessionsController(listSessionsUseCase),
     getSessionController: new GetSessionController(getSessionUseCase),

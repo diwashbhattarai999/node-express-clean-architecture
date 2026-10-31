@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { userStatusEnum } from "./enums";
@@ -38,11 +39,28 @@ export const users = pgTable(
       mode: "date",
     }),
 
+    deletionRequestedAt: timestamp("deletion_requested_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+
+    deletionScheduledFor: timestamp("deletion_scheduled_for", {
+      withTimezone: true,
+      mode: "date",
+    }),
+
+    deletionReason: varchar("deletion_reason", {
+      length: 500,
+    }),
+
     ...withTimestamps(),
   },
   (table) => [
     index("users_status_created_at_idx").on(table.status, table.createdAt),
     index("users_created_at_idx").on(table.createdAt),
+    index("users_deletion_scheduled_for_idx")
+      .on(table.deletionScheduledFor)
+      .where(sql`${table.deletionScheduledFor} is not null and ${table.deletedAt} is null`),
   ],
 );
 

@@ -107,6 +107,7 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/emails` | bearer |
 | `POST` | `/me/emails/verify` | public (or matching bearer) |
 | `DELETE` | `/me/emails/{identityId}` | bearer |
+| `POST` | `/me/deletion-request` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -460,6 +461,26 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 **Response** `200` `data`: `null`.
 
 **Errors:** `409 LAST_AUTH_METHOD`, `404 NOT_FOUND`, `422` (invalid UUID), `401 TOKEN_*`.
+
+---
+
+### Request account deletion
+
+`POST /api/v1/users/me/deletion-request`
+
+**Auth:** bearer. Sets deletion markers; does **not** set `deleted_at` yet. Account stays usable until `scheduledFor` (default grace: `AUTH_ACCOUNT_DELETION_GRACE_DAYS`, 14). Repeat calls keep the original schedule.
+
+```json
+{ "password": "optional-current-password", "reason": "optional" }
+```
+
+**Response** `200`:
+
+```json
+{ "scheduledFor": "2026-11-14T00:00:00.000Z" }
+```
+
+**Errors:** `401 INVALID_CREDENTIALS` (password sent and wrong), `422`, `401 TOKEN_*`.
 
 ---
 

@@ -222,6 +222,13 @@ export const envSchema = z
       .int("Auth refresh token TTL must be an integer")
       .positive("Auth refresh token TTL must be a positive number")
       .default(2_592_000),
+
+    AUTH_ACCOUNT_DELETION_GRACE_DAYS: z.coerce
+      .number("Auth account deletion grace period is required.")
+      .int("Auth account deletion grace period must be an integer")
+      .min(1, "Auth account deletion grace period must be at least 1 day")
+      .max(365, "Auth account deletion grace period must be at most 365 days")
+      .default(14),
   })
   .superRefine((env, context) => {
     if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {

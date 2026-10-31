@@ -62,10 +62,13 @@ Account row. File: [`users.schema.ts`](../src/infrastructure/database/drizzle/sc
 | `activated_at` | `timestamptz` | Nullable |
 | `suspended_at` | `timestamptz` | Nullable |
 | `disabled_at` | `timestamptz` | Nullable |
-| `deleted_at` | `timestamptz` | Soft delete |
+| `deleted_at` | `timestamptz` | Soft delete (applied after grace period) |
+| `deletion_requested_at` | `timestamptz` | When the user asked to delete |
+| `deletion_scheduled_for` | `timestamptz` | Grace-period deadline |
+| `deletion_reason` | `varchar(500)` | Optional user reason |
 | `created_at` / `updated_at` | `timestamptz` | |
 
-**Indexes:** `(status, created_at)`, `created_at`
+**Indexes:** `(status, created_at)`, `created_at`, partial `(deletion_scheduled_for)` where scheduled and not yet deleted
 
 ---
 

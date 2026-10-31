@@ -1205,7 +1205,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 29  | DELETE | `/api/v1/users/me/emails/{identityId}`                    | P1       | Done                                           |
 | 30  | POST   | `/api/v1/users/me/phones`                                 | P2       |                                                |
 | 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       |                                                |
-| 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       |                                                |
+| 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       | Done                                           |
 | 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       |                                                |
 | 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       |                                                |
 | 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       |                                                |
@@ -1266,3 +1266,9 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 90  | DELETE | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       |                                                |
 | 91  | POST   | `/api/v1/auth/step-up/challenge`                          | P2       |                                                |
 | 92  | POST   | `/api/v1/auth/step-up/verify`                             | P2       |                                                |
+
+# Stats
+
+- Total: 92
+- Done: 32
+- Remaining: 60

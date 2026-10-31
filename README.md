@@ -131,6 +131,7 @@ Copy `.env.example` to `.env`. Important variables:
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 | `LOG_LEVEL` | Pino level |
 | `COOKIES_SECRET` | Cookie signing secret (min 32 chars) |
+| `AUTH_ACCOUNT_DELETION_GRACE_DAYS` | Days before a deletion request is applied (default `14`) |
 | `RATE_LIMIT_*` | Global rate limit window/max |
 | `TRUST_PROXY` | Proxy trust setting |
 

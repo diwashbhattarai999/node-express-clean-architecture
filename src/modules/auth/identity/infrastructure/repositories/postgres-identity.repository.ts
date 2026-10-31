@@ -19,6 +19,8 @@ import type {
   RegisterAccountInput,
   RemoveEmailIdentityInput,
   RemoveEmailIdentityResult,
+  ScheduleAccountDeletionInput,
+  ScheduleAccountDeletionResult,
   UpdateOwnProfileInput,
   UpdateOwnProfileResult,
   UpsertUsernameInput,
@@ -622,6 +624,48 @@ export class PostgresIdentityRepository implements IIdentityRepository {
 
       return { outcome: "removed" as const };
     });
+  }
+
+  public async scheduleAccountDeletion(
+    input: ScheduleAccountDeletionInput,
+  ): Promise<ScheduleAccountDeletionResult> {
+    const [user] = await db
+      .select({
+        id: users.id,
+        deletionScheduledFor: users.deletionScheduledFor,
+      })
+      .from(users)
+      .where(and(eq(users.id, input.userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return { outcome: "not_found" };
+    }
+
+    const now = new Date();
+
+    if (user.deletionScheduledFor) {
+      if (input.reason !== undefined) {
+        await db
+          .update(users)
+          .set({ deletionReason: input.reason, updatedAt: now })
+          .where(eq(users.id, user.id));
+      }
+
+      return { outcome: "scheduled", scheduledFor: user.deletionScheduledFor };
+    }
+
+    await db
+      .update(users)
+      .set({
+        deletionRequestedAt: now,
+        deletionScheduledFor: input.scheduledFor,
+        updatedAt: now,
+        ...(input.reason !== undefined ? { deletionReason: input.reason } : {}),
+      })
+      .where(eq(users.id, user.id));
+
+    return { outcome: "scheduled", scheduledFor: input.scheduledFor };
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {

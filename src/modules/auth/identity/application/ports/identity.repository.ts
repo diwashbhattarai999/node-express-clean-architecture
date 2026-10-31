@@ -89,6 +89,16 @@ export type RemoveEmailIdentityResult =
   | { outcome: "not_found" }
   | { outcome: "last_auth_method" };
 
+export type ScheduleAccountDeletionInput = {
+  userId: string;
+  scheduledFor: Date;
+  reason?: string;
+};
+
+export type ScheduleAccountDeletionResult =
+  | { outcome: "not_found" }
+  | { outcome: "scheduled"; scheduledFor: Date };
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -113,6 +123,10 @@ export interface IIdentityRepository {
   verifyAddedEmailByTokenHash(tokenHash: string): Promise<VerifyAddedEmailByTokenHashResult>;
 
   removeEmailIdentity(input: RemoveEmailIdentityInput): Promise<RemoveEmailIdentityResult>;
+
+  scheduleAccountDeletion(
+    input: ScheduleAccountDeletionInput,
+  ): Promise<ScheduleAccountDeletionResult>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

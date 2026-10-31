@@ -17,6 +17,7 @@ describe("RegisterUseCase", () => {
     addEmailIdentity: vi.fn(),
     verifyAddedEmailByTokenHash: vi.fn(),
     removeEmailIdentity: vi.fn(),
+    scheduleAccountDeletion: vi.fn(),
     upsertUsername: vi.fn(),
   };
 

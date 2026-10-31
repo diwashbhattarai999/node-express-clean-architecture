@@ -22,10 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/users/me/emails` — add a secondary email (unverified + verification email; `409` if taken)
 - `POST /api/v1/users/me/emails/verify` — verify an added email by token (public or matching bearer; no new session)
 - `DELETE /api/v1/users/me/emails/{identityId}` — remove an email identity (`409 LAST_AUTH_METHOD` if last sign-in method)
+- `POST /api/v1/users/me/deletion-request` — schedule account deletion after `AUTH_ACCOUNT_DELETION_GRACE_DAYS` (optional password + reason)
 
 ### Changed
 
 - Mount `/api/v1/users` as a module root; nest `/me/*` under it (auth/identity owns the handlers for now)
+- `users` now stores pending-deletion markers (`deletion_requested_at`, `deletion_scheduled_for`, `deletion_reason`)
 
 ### Removed
 
