@@ -12,6 +12,7 @@ describe("RegisterUseCase", () => {
     register: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
     findOwnProfile: vi.fn(),
+    updateOwnProfile: vi.fn(),
     upsertUsername: vi.fn(),
   };
 

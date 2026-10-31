@@ -16,6 +16,8 @@ import type {
   FindOwnProfileResult,
   IIdentityRepository,
   RegisterAccountInput,
+  UpdateOwnProfileInput,
+  UpdateOwnProfileResult,
   UpsertUsernameInput,
 } from "@/modules/auth/identity/application/ports/identity.repository";
 import {
@@ -247,6 +249,139 @@ export class PostgresIdentityRepository implements IIdentityRepository {
           }
         : EMPTY_AUTH_USER_PROFILE,
     };
+  }
+
+  public async updateOwnProfile(input: UpdateOwnProfileInput): Promise<UpdateOwnProfileResult> {
+    return db.transaction(async (tx) => {
+      const now = new Date();
+      const userPatch: {
+        displayName?: string | null;
+        avatarUrl?: string | null;
+        updatedAt: Date;
+      } = { updatedAt: now };
+
+      if (input.displayName !== undefined) {
+        userPatch.displayName = input.displayName;
+      }
+
+      if (input.avatarUrl !== undefined) {
+        userPatch.avatarUrl = input.avatarUrl;
+      }
+
+      if (input.displayName !== undefined || input.avatarUrl !== undefined) {
+        await tx.update(users).set(userPatch).where(eq(users.id, input.userId));
+      }
+
+      const profilePatch: {
+        firstName?: string | null;
+        lastName?: string | null;
+        locale?: string | null;
+        timezone?: string | null;
+        bio?: string | null;
+      } = {};
+
+      if (input.firstName !== undefined) {
+        profilePatch.firstName = input.firstName;
+      }
+
+      if (input.lastName !== undefined) {
+        profilePatch.lastName = input.lastName;
+      }
+
+      if (input.locale !== undefined) {
+        profilePatch.locale = input.locale;
+      }
+
+      if (input.timezone !== undefined) {
+        profilePatch.timezone = input.timezone;
+      }
+
+      if (input.bio !== undefined) {
+        profilePatch.bio = input.bio;
+      }
+
+      if (Object.keys(profilePatch).length > 0) {
+        await tx
+          .insert(userProfiles)
+          .values({
+            userId: input.userId,
+            ...profilePatch,
+          })
+          .onConflictDoUpdate({
+            target: userProfiles.userId,
+            set: {
+              ...profilePatch,
+              updatedAt: now,
+            },
+          });
+      }
+
+      const [user] = await tx
+        .select()
+        .from(users)
+        .where(and(eq(users.id, input.userId), isNull(users.deletedAt)))
+        .limit(1);
+
+      if (!user) {
+        throw new Error("User not found.");
+      }
+
+      const identities = await tx
+        .select({
+          type: loginIdentities.type,
+          identifier: loginIdentities.normalizedIdentifier,
+          isPrimary: loginIdentities.isPrimary,
+          verifiedAt: loginIdentities.verifiedAt,
+        })
+        .from(loginIdentities)
+        .where(eq(loginIdentities.userId, user.id));
+
+      const primaryEmail =
+        identities.find(
+          (identity) =>
+            identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+        )?.identifier ??
+        identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+          ?.identifier ??
+        null;
+
+      const username =
+        identities.find((identity) => identity.type === "username")?.identifier ?? null;
+
+      const [profile] = await tx
+        .select({
+          firstName: userProfiles.firstName,
+          lastName: userProfiles.lastName,
+          locale: userProfiles.locale,
+          timezone: userProfiles.timezone,
+          bio: userProfiles.bio,
+        })
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, user.id))
+        .limit(1);
+
+      return {
+        user: {
+          id: user.id,
+          status: user.status,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          email: primaryEmail,
+          username,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+        profile: profile
+          ? {
+              firstName: profile.firstName ?? null,
+              lastName: profile.lastName ?? null,
+              locale: profile.locale ?? null,
+              timezone: profile.timezone ?? null,
+              bio: profile.bio ?? null,
+            }
+          : EMPTY_AUTH_USER_PROFILE,
+      };
+    });
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {

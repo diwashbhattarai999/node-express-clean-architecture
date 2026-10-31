@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/password/reset/validate` — public soft check for reset-token validity (`valid` + optional `expiresAt`)
 - `PATCH /api/v1/users/me/username` — bearer-authenticated create/replace username login identity (normalized uniqueness)
 - `GET /api/v1/users/me` — bearer-authenticated own profile (`user` + `profile`; empty profile fields when unset)
+- `PATCH /api/v1/users/me` — bearer-authenticated own profile update (`displayName`, `avatarUrl`, and `user_profiles` fields)
 
 ### Changed
 

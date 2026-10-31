@@ -19,6 +19,7 @@ const mockAuthAccountRepository = {
   revokeOtherSessionsForUser: vi.fn(),
   findAuthenticatedPrincipal: vi.fn(),
   findOwnProfile: vi.fn(),
+  updateOwnProfile: vi.fn(),
   upsertUsername: vi.fn(),
   findPasswordResetTarget: vi.fn(),
   replacePasswordResetToken: vi.fn(),

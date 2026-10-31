@@ -49,6 +49,22 @@ export type UpsertUsernameInput = {
   normalizedIdentifier: string;
 };
 
+export type UpdateOwnProfileInput = {
+  userId: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  locale?: string | null;
+  timezone?: string | null;
+  bio?: string | null;
+};
+
+export type UpdateOwnProfileResult = {
+  user: AuthUser;
+  profile: AuthUserProfile;
+};
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -63,6 +79,8 @@ export interface IIdentityRepository {
   ): Promise<FindAuthenticatedPrincipalResult>;
 
   findOwnProfile(userId: string, sessionId: string): Promise<FindOwnProfileResult>;
+
+  updateOwnProfile(input: UpdateOwnProfileInput): Promise<UpdateOwnProfileResult>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

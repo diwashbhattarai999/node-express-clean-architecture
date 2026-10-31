@@ -3,6 +3,7 @@ import { type IRouter, Router } from "express";
 import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
 import type { AuthModule } from "@/modules/auth/auth.module";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
+import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 
 /**
  * HTTP mount for `/api/v1/users`.
@@ -23,6 +24,13 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
     validate(changeUsernameSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.changeUsernameController),
+  );
+
+  router.patch(
+    "/me",
+    validate(updateOwnProfileSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.updateOwnProfileController),
   );
 
   return router;

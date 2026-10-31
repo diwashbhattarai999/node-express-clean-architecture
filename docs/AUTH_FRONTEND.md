@@ -102,6 +102,7 @@ Also under `/api/v1/users` (same bearer):
 | Method | Path | Auth |
 | --- | --- | --- |
 | `GET` | `/me` | bearer |
+| `PATCH` | `/me` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -365,6 +366,30 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 
 ---
 
+### Update own profile
+
+`PATCH /api/v1/users/me`
+
+**Auth:** bearer. All fields optional; send at least one. `null` or `""` clears a field.
+
+```json
+{
+  "displayName": "Ada",
+  "avatarUrl": "https://cdn.example.com/ada.png",
+  "firstName": "Ada",
+  "lastName": "Lovelace",
+  "locale": "en-US",
+  "timezone": "UTC",
+  "bio": null
+}
+```
+
+**Response** `200` — same shape as `GET /users/me` (`user` + `profile`).
+
+**Errors:** `422` (empty body / invalid field), `401 TOKEN_*`.
+
+---
+
 ### Change or set username
 
 `PATCH /api/v1/users/me/username`
@@ -611,7 +636,7 @@ If you revoke the **current** session, auth cookies are cleared (same as logout)
 ## Suggested frontend flows
 
 1. **Register** → open verify email/phone → **verify** → store access (+ refresh for native) → app.
-2. **Login** → store tokens → call **`/auth/me`** (authz snapshot) and/or **`/users/me`** (profile) as needed.
+2. **Login** → store tokens → call **`/auth/me`** (authz snapshot) and/or **`GET/PATCH /users/me`** (profile) as needed.
 3. On `401 TOKEN_EXPIRED` / `TOKEN_INVALID` for API calls → **refresh** once → retry; if refresh fails → login screen.
 4. **Logout** (or **logout-all**) → clear local access token; cookies cleared by API.
 5. **Revoke others** from a sessions UI → other devices signed out; current session stays.
