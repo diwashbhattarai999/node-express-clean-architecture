@@ -14,6 +14,12 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
   const router = Router();
 
   router.get(
+    "/me/identities",
+    authModule.requireBearerAuth,
+    asRequestHandler(authModule.listOwnIdentitiesController),
+  );
+
+  router.get(
     "/me",
     authModule.requireBearerAuth,
     asRequestHandler(authModule.getOwnProfileController),

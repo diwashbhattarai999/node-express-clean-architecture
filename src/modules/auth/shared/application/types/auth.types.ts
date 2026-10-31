@@ -29,6 +29,15 @@ export const EMPTY_AUTH_USER_PROFILE: AuthUserProfile = {
   bio: null,
 };
 
+export type AuthLoginIdentity = {
+  id: string;
+  type: TLoginIdentityType;
+  identifier: string;
+  verifiedAt: Date | null;
+  isPrimary: boolean;
+  createdAt: Date;
+};
+
 export type CreateSessionInput = {
   id: string;
   familyId: string;

@@ -1,4 +1,5 @@
 import type {
+  AuthLoginIdentity,
   AuthUser,
   AuthUserProfile,
   TLoginIdentityType,
@@ -81,6 +82,8 @@ export interface IIdentityRepository {
   findOwnProfile(userId: string, sessionId: string): Promise<FindOwnProfileResult>;
 
   updateOwnProfile(input: UpdateOwnProfileInput): Promise<UpdateOwnProfileResult>;
+
+  listIdentitiesForUser(userId: string): Promise<AuthLoginIdentity[]>;
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;

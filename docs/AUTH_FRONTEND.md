@@ -103,6 +103,7 @@ Also under `/api/v1/users` (same bearer):
 | --- | --- | --- |
 | `GET` | `/me` | bearer |
 | `PATCH` | `/me` | bearer |
+| `GET` | `/me/identities` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -125,6 +126,21 @@ Also under `/api/v1/users` (same bearer):
 ```
 
 `status`: `pending_verification` | `active` | `suspended` | `disabled`
+
+### `LoginIdentity`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440010",
+  "type": "email",
+  "identifier": "ada@example.com",
+  "verifiedAt": "2026-01-01T00:00:00.000Z",
+  "isPrimary": true,
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+`type`: `email` | `phone` | `username`. `identifier` is the display form (not necessarily normalized).
 
 ### Session tokens (`data` after login / verify)
 
@@ -387,6 +403,16 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 **Response** `200` — same shape as `GET /users/me` (`user` + `profile`).
 
 **Errors:** `422` (empty body / invalid field), `401 TOKEN_*`.
+
+---
+
+### List login identities
+
+`GET /api/v1/users/me/identities`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `LoginIdentity[]` (primary first).
 
 ---
 

@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -21,6 +21,7 @@ import type {
   UpsertUsernameInput,
 } from "@/modules/auth/identity/application/ports/identity.repository";
 import {
+  type AuthLoginIdentity,
   type AuthUser,
   EMPTY_AUTH_USER_PROFILE,
   type TLoginIdentityType,
@@ -382,6 +383,23 @@ export class PostgresIdentityRepository implements IIdentityRepository {
           : EMPTY_AUTH_USER_PROFILE,
       };
     });
+  }
+
+  public async listIdentitiesForUser(userId: string): Promise<AuthLoginIdentity[]> {
+    const rows = await db
+      .select({
+        id: loginIdentities.id,
+        type: loginIdentities.type,
+        identifier: loginIdentities.identifier,
+        verifiedAt: loginIdentities.verifiedAt,
+        isPrimary: loginIdentities.isPrimary,
+        createdAt: loginIdentities.createdAt,
+      })
+      .from(loginIdentities)
+      .where(eq(loginIdentities.userId, userId))
+      .orderBy(desc(loginIdentities.isPrimary), asc(loginIdentities.createdAt));
+
+    return rows;
   }
 
   public async upsertUsername(input: UpsertUsernameInput): Promise<AuthUser> {

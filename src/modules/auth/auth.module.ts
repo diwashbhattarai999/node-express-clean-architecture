@@ -16,12 +16,14 @@ import { ValidatePasswordResetController } from "@/modules/auth/credentials/pres
 import { ChangeUsernameUseCase } from "@/modules/auth/identity/application/use-cases/change-username.use-case";
 import { GetMeUseCase } from "@/modules/auth/identity/application/use-cases/get-me.use-case";
 import { GetOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/get-own-profile.use-case";
+import { ListOwnIdentitiesUseCase } from "@/modules/auth/identity/application/use-cases/list-own-identities.use-case";
 import { RegisterUseCase } from "@/modules/auth/identity/application/use-cases/register.use-case";
 import { UpdateOwnProfileUseCase } from "@/modules/auth/identity/application/use-cases/update-own-profile.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
 import { ChangeUsernameController } from "@/modules/auth/identity/presentation/http/controllers/change-username.controller";
 import { GetMeController } from "@/modules/auth/identity/presentation/http/controllers/get-me.controller";
 import { GetOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/get-own-profile.controller";
+import { ListOwnIdentitiesController } from "@/modules/auth/identity/presentation/http/controllers/list-own-identities.controller";
 import { RegisterController } from "@/modules/auth/identity/presentation/http/controllers/register.controller";
 import { UpdateOwnProfileController } from "@/modules/auth/identity/presentation/http/controllers/update-own-profile.controller";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
@@ -77,6 +79,7 @@ export type AuthModule = {
   getMeController: GetMeController;
   getOwnProfileController: GetOwnProfileController;
   updateOwnProfileController: UpdateOwnProfileController;
+  listOwnIdentitiesController: ListOwnIdentitiesController;
   changeUsernameController: ChangeUsernameController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
@@ -165,6 +168,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const getMeUseCase = new GetMeUseCase(identityRepository);
   const getOwnProfileUseCase = new GetOwnProfileUseCase(identityRepository);
   const updateOwnProfileUseCase = new UpdateOwnProfileUseCase(identityRepository);
+  const listOwnIdentitiesUseCase = new ListOwnIdentitiesUseCase(identityRepository);
   const changeUsernameUseCase = new ChangeUsernameUseCase(identityRepository);
   const listSessionsUseCase = new ListSessionsUseCase(sessionRepository);
   const getSessionUseCase = new GetSessionUseCase(sessionRepository);
@@ -209,6 +213,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     getMeController: new GetMeController(getMeUseCase),
     getOwnProfileController: new GetOwnProfileController(getOwnProfileUseCase),
     updateOwnProfileController: new UpdateOwnProfileController(updateOwnProfileUseCase),
+    listOwnIdentitiesController: new ListOwnIdentitiesController(listOwnIdentitiesUseCase),
     changeUsernameController: new ChangeUsernameController(changeUsernameUseCase),
     listSessionsController: new ListSessionsController(listSessionsUseCase),
     getSessionController: new GetSessionController(getSessionUseCase),
