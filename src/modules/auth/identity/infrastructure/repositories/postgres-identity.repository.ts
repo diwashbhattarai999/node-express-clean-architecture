@@ -17,6 +17,8 @@ import type {
   FindOwnProfileResult,
   IIdentityRepository,
   RegisterAccountInput,
+  RemoveEmailIdentityInput,
+  RemoveEmailIdentityResult,
   UpdateOwnProfileInput,
   UpdateOwnProfileResult,
   UpsertUsernameInput,
@@ -551,6 +553,74 @@ export class PostgresIdentityRepository implements IIdentityRepository {
           createdAt: identity.createdAt,
         },
       };
+    });
+  }
+
+  public async removeEmailIdentity(
+    input: RemoveEmailIdentityInput,
+  ): Promise<RemoveEmailIdentityResult> {
+    return db.transaction(async (tx) => {
+      const [identity] = await tx
+        .select({
+          id: loginIdentities.id,
+          isPrimary: loginIdentities.isPrimary,
+        })
+        .from(loginIdentities)
+        .where(
+          and(
+            eq(loginIdentities.id, input.identityId),
+            eq(loginIdentities.userId, input.userId),
+            eq(loginIdentities.type, "email"),
+          ),
+        )
+        .limit(1);
+
+      if (!identity) {
+        return { outcome: "not_found" as const };
+      }
+
+      const [other] = await tx
+        .select({ id: loginIdentities.id })
+        .from(loginIdentities)
+        .where(and(eq(loginIdentities.userId, input.userId), ne(loginIdentities.id, identity.id)))
+        .limit(1);
+
+      if (!other) {
+        return { outcome: "last_auth_method" as const };
+      }
+
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.identityId, identity.id),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.delete(loginIdentities).where(eq(loginIdentities.id, identity.id));
+
+      if (identity.isPrimary) {
+        const [nextEmail] = await tx
+          .select({ id: loginIdentities.id })
+          .from(loginIdentities)
+          .where(and(eq(loginIdentities.userId, input.userId), eq(loginIdentities.type, "email")))
+          .orderBy(asc(loginIdentities.createdAt))
+          .limit(1);
+
+        if (nextEmail) {
+          await tx
+            .update(loginIdentities)
+            .set({ isPrimary: true, updatedAt: now })
+            .where(eq(loginIdentities.id, nextEmail.id));
+        }
+      }
+
+      return { outcome: "removed" as const };
     });
   }
 

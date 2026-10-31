@@ -1172,97 +1172,97 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 
 ## 13. Endpoint index
 
-| # | Method | Path | Priority |
-| --- | --- | --- | --- |
-| 1 | POST | `/api/v1/auth/register` | P0 |
-| 2 | POST | `/api/v1/auth/email/verify` | P0 |
-| 3 | POST | `/api/v1/auth/email/verification/resend` | P0 |
-| 4 | POST | `/api/v1/auth/phone/verify` | P1 |
-| 5 | POST | `/api/v1/auth/phone/verification/resend` | P1 |
-| 6 | POST | `/api/v1/auth/login` | P0 |
-| 7 | POST | `/api/v1/auth/refresh` | P0 |
-| 8 | POST | `/api/v1/auth/logout` | P0 |
-| 9 | POST | `/api/v1/auth/logout-all` | P1 |
-| 10 | GET | `/api/v1/auth/me` | P0 |
-| 11 | POST | `/api/v1/auth/identifiers/check` | P2 |
-| 12 | POST | `/api/v1/auth/password/forgot` | P0 |
-| 13 | POST | `/api/v1/auth/password/reset/validate` | P1 |
-| 14 | POST | `/api/v1/auth/password/reset` | P0 |
-| 15 | POST | `/api/v1/auth/password/change` | P1 |
-| 16 | PATCH | `/api/v1/users/me/username` | P1 |
-| 17 | POST | `/api/v1/auth/magic-link/request` | P2 |
-| 18 | POST | `/api/v1/auth/magic-link/consume` | P2 |
-| 19 | GET | `/api/v1/auth/sessions` | P1 |
-| 20 | GET | `/api/v1/auth/sessions/{sessionId}` | P1 |
-| 21 | DELETE | `/api/v1/auth/sessions/{sessionId}` | P1 |
-| 22 | POST | `/api/v1/auth/sessions/revoke-others` | P1 |
-| 23 | PATCH | `/api/v1/auth/sessions/{sessionId}` | P2 |
-| 24 | GET | `/api/v1/users/me` | P0 |
-| 25 | PATCH | `/api/v1/users/me` | P1 |
-| 26 | GET | `/api/v1/users/me/identities` | P1 |
-| 27 | POST | `/api/v1/users/me/emails` | P1 |
-| 28 | POST | `/api/v1/users/me/emails/verify` | P1 |
-| 29 | DELETE | `/api/v1/users/me/emails/{identityId}` | P1 |
-| 30 | POST | `/api/v1/users/me/phones` | P2 |
-| 31 | DELETE | `/api/v1/users/me/phones/{identityId}` | P2 |
-| 32 | POST | `/api/v1/users/me/deletion-request` | P1 |
-| 33 | POST | `/api/v1/users/me/deletion-request/cancel` | P1 |
-| 34 | GET | `/api/v1/auth/oauth/{provider}/authorize` | P1 |
-| 35 | GET | `/api/v1/auth/oauth/{provider}/callback` | P1 |
-| 36 | POST | `/api/v1/auth/oauth/{provider}/exchange` | P1 |
-| 37 | GET | `/api/v1/users/me/oauth-accounts` | P1 |
-| 38 | GET | `/api/v1/users/me/oauth-accounts/{provider}/authorize` | P1 |
-| 39 | POST | `/api/v1/users/me/oauth-accounts/{provider}/link` | P1 |
-| 40 | DELETE | `/api/v1/users/me/oauth-accounts/{provider}` | P1 |
-| 41 | GET | `/api/v1/auth/providers` | P1 |
-| 42 | GET | `/api/v1/authz/me/roles` | P0 |
-| 43 | GET | `/api/v1/authz/me/permissions` | P0 |
-| 44 | POST | `/api/v1/authz/check` | P1 |
-| 45 | GET | `/api/v1/admin/roles` | P1 |
-| 46 | GET | `/api/v1/admin/roles/{roleId}` | P1 |
-| 47 | POST | `/api/v1/admin/roles` | P1 |
-| 48 | PATCH | `/api/v1/admin/roles/{roleId}` | P1 |
-| 49 | DELETE | `/api/v1/admin/roles/{roleId}` | P1 |
-| 50 | GET | `/api/v1/admin/permissions` | P1 |
-| 51 | GET | `/api/v1/admin/permissions/{permissionId}` | P2 |
-| 52 | PUT | `/api/v1/admin/roles/{roleId}/permissions` | P1 |
-| 53 | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1 |
-| 54 | GET | `/api/v1/admin/roles/{roleId}/users` | P2 |
-| 55 | GET | `/api/v1/admin/users/{userId}/roles` | P1 |
-| 56 | POST | `/api/v1/admin/users/{userId}/roles` | P1 |
-| 57 | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}` | P1 |
-| 58 | PUT | `/api/v1/admin/users/{userId}/roles` | P2 |
-| 59 | GET | `/api/v1/admin/users/{userId}/permissions` | P2 |
-| 60 | GET | `/api/v1/admin/users` | P1 |
-| 61 | GET | `/api/v1/admin/users/{userId}` | P1 |
-| 62 | PATCH | `/api/v1/admin/users/{userId}` | P1 |
-| 63 | POST | `/api/v1/admin/users/{userId}/suspend` | P1 |
-| 64 | POST | `/api/v1/admin/users/{userId}/reactivate` | P1 |
-| 65 | POST | `/api/v1/admin/users/{userId}/disable` | P1 |
-| 66 | POST | `/api/v1/admin/users/{userId}/enable` | P1 |
-| 67 | POST | `/api/v1/admin/users/{userId}/sessions/revoke-all` | P1 |
-| 68 | POST | `/api/v1/admin/users/{userId}/password-reset` | P2 |
-| 69 | DELETE | `/api/v1/admin/users/{userId}` | P2 |
-| 70 | GET | `/api/v1/users/me/security-events` | P1 |
-| 71 | GET | `/api/v1/admin/audit-logs` | P1 |
-| 72 | GET | `/api/v1/admin/audit-logs/{eventId}` | P2 |
-| 73 | POST | `/api/v1/admin/audit-logs/exports` | P2 |
-| 74 | GET | `/api/v1/auth/config` | P1 |
-| 75 | GET | `/health` | P0 |
-| 76 | GET | `/ready` | P1 |
-| 77 | GET | `/api/v1/users/me/mfa` | P2 |
-| 78 | POST | `/api/v1/users/me/mfa/enroll` | P2 |
-| 79 | POST | `/api/v1/users/me/mfa/enroll/confirm` | P2 |
-| 80 | DELETE | `/api/v1/users/me/mfa` | P2 |
-| 81 | POST | `/api/v1/auth/mfa/challenge` | P2 |
-| 82 | POST | `/api/v1/auth/mfa/challenge/verify` | P2 |
-| 83 | POST | `/api/v1/users/me/mfa/recovery-codes/regenerate` | P2 |
-| 84 | GET | `/api/v1/users/me/passkeys` | P2 |
-| 85 | POST | `/api/v1/users/me/passkeys/register/options` | P2 |
-| 86 | POST | `/api/v1/users/me/passkeys/register/verify` | P2 |
-| 87 | POST | `/api/v1/auth/passkeys/login/options` | P2 |
-| 88 | POST | `/api/v1/auth/passkeys/login/verify` | P2 |
-| 89 | PATCH | `/api/v1/users/me/passkeys/{passkeyId}` | P2 |
-| 90 | DELETE | `/api/v1/users/me/passkeys/{passkeyId}` | P2 |
-| 91 | POST | `/api/v1/auth/step-up/challenge` | P2 |
-| 92 | POST | `/api/v1/auth/step-up/verify` | P2 |
+| #   | Method | Path                                                      | Priority | Status                                         |
+| --- | ------ | --------------------------------------------------------- | -------- | ---------------------------------------------- |
+| 1   | POST   | `/api/v1/auth/register`                                   | P0       | Done                                           |
+| 2   | POST   | `/api/v1/auth/email/verify`                               | P0       | Done                                           |
+| 3   | POST   | `/api/v1/auth/email/verification/resend`                  | P0       | Done                                           |
+| 4   | POST   | `/api/v1/auth/phone/verify`                               | P1       | Partially Done (SMS provider integration left) |
+| 5   | POST   | `/api/v1/auth/phone/verification/resend`                  | P1       | Partially Done                                 |
+| 6   | POST   | `/api/v1/auth/login`                                      | P0       | Done                                           |
+| 7   | POST   | `/api/v1/auth/refresh`                                    | P0       | Done                                           |
+| 8   | POST   | `/api/v1/auth/logout`                                     | P0       | Done                                           |
+| 9   | POST   | `/api/v1/auth/logout-all`                                 | P1       | Done                                           |
+| 10  | GET    | `/api/v1/auth/me`                                         | P0       | Done                                           |
+| 11  | POST   | `/api/v1/auth/identifiers/check`                          | P2       |                                                |
+| 12  | POST   | `/api/v1/auth/password/forgot`                            | P0       | Done                                           |
+| 13  | POST   | `/api/v1/auth/password/reset/validate`                    | P1       | Done                                           |
+| 14  | POST   | `/api/v1/auth/password/reset`                             | P0       | Done                                           |
+| 15  | POST   | `/api/v1/auth/password/change`                            | P1       | Done                                           |
+| 16  | PATCH  | `/api/v1/users/me/username`                               | P1       | Done                                           |
+| 17  | POST   | `/api/v1/auth/magic-link/request`                         | P2       |                                                |
+| 18  | POST   | `/api/v1/auth/magic-link/consume`                         | P2       |                                                |
+| 19  | GET    | `/api/v1/auth/sessions`                                   | P1       | Done                                           |
+| 20  | GET    | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
+| 21  | DELETE | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
+| 22  | POST   | `/api/v1/auth/sessions/revoke-others`                     | P1       | Done                                           |
+| 23  | PATCH  | `/api/v1/auth/sessions/{sessionId}`                       | P2       |                                                |
+| 24  | GET    | `/api/v1/users/me`                                        | P0       | Done                                           |
+| 25  | PATCH  | `/api/v1/users/me`                                        | P1       | Done                                           |
+| 26  | GET    | `/api/v1/users/me/identities`                             | P1       | Done                                           |
+| 27  | POST   | `/api/v1/users/me/emails`                                 | P1       | Done                                           |
+| 28  | POST   | `/api/v1/users/me/emails/verify`                          | P1       | Done                                           |
+| 29  | DELETE | `/api/v1/users/me/emails/{identityId}`                    | P1       | Done                                           |
+| 30  | POST   | `/api/v1/users/me/phones`                                 | P2       |                                                |
+| 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       |                                                |
+| 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       |                                                |
+| 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       |                                                |
+| 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       |                                                |
+| 35  | GET    | `/api/v1/auth/oauth/{provider}/callback`                  | P1       |                                                |
+| 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       |                                                |
+| 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       |                                                |
+| 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       |                                                |
+| 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       |                                                |
+| 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       |                                                |
+| 41  | GET    | `/api/v1/auth/providers`                                  | P1       |                                                |
+| 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       |                                                |
+| 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       |                                                |
+| 44  | POST   | `/api/v1/authz/check`                                     | P1       |                                                |
+| 45  | GET    | `/api/v1/admin/roles`                                     | P1       |                                                |
+| 46  | GET    | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
+| 47  | POST   | `/api/v1/admin/roles`                                     | P1       |                                                |
+| 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
+| 49  | DELETE | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
+| 50  | GET    | `/api/v1/admin/permissions`                               | P1       |                                                |
+| 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       |                                                |
+| 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       |                                                |
+| 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       |                                                |
+| 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       |                                                |
+| 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
+| 56  | POST   | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
+| 57  | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}`             | P1       |                                                |
+| 58  | PUT    | `/api/v1/admin/users/{userId}/roles`                      | P2       |                                                |
+| 59  | GET    | `/api/v1/admin/users/{userId}/permissions`                | P2       |                                                |
+| 60  | GET    | `/api/v1/admin/users`                                     | P1       |                                                |
+| 61  | GET    | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
+| 62  | PATCH  | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
+| 63  | POST   | `/api/v1/admin/users/{userId}/suspend`                    | P1       |                                                |
+| 64  | POST   | `/api/v1/admin/users/{userId}/reactivate`                 | P1       |                                                |
+| 65  | POST   | `/api/v1/admin/users/{userId}/disable`                    | P1       |                                                |
+| 66  | POST   | `/api/v1/admin/users/{userId}/enable`                     | P1       |                                                |
+| 67  | POST   | `/api/v1/admin/users/{userId}/sessions/revoke-all`        | P1       |                                                |
+| 68  | POST   | `/api/v1/admin/users/{userId}/password-reset`             | P2       |                                                |
+| 69  | DELETE | `/api/v1/admin/users/{userId}`                            | P2       |                                                |
+| 70  | GET    | `/api/v1/users/me/security-events`                        | P1       |                                                |
+| 71  | GET    | `/api/v1/admin/audit-logs`                                | P1       |                                                |
+| 72  | GET    | `/api/v1/admin/audit-logs/{eventId}`                      | P2       |                                                |
+| 73  | POST   | `/api/v1/admin/audit-logs/exports`                        | P2       |                                                |
+| 74  | GET    | `/api/v1/auth/config`                                     | P1       |                                                |
+| 75  | GET    | `/health`                                                 | P0       |                                                |
+| 76  | GET    | `/ready`                                                  | P1       |                                                |
+| 77  | GET    | `/api/v1/users/me/mfa`                                    | P2       |                                                |
+| 78  | POST   | `/api/v1/users/me/mfa/enroll`                             | P2       |                                                |
+| 79  | POST   | `/api/v1/users/me/mfa/enroll/confirm`                     | P2       |                                                |
+| 80  | DELETE | `/api/v1/users/me/mfa`                                    | P2       |                                                |
+| 81  | POST   | `/api/v1/auth/mfa/challenge`                              | P2       |                                                |
+| 82  | POST   | `/api/v1/auth/mfa/challenge/verify`                       | P2       |                                                |
+| 83  | POST   | `/api/v1/users/me/mfa/recovery-codes/regenerate`          | P2       |                                                |
+| 84  | GET    | `/api/v1/users/me/passkeys`                               | P2       |                                                |
+| 85  | POST   | `/api/v1/users/me/passkeys/register/options`              | P2       |                                                |
+| 86  | POST   | `/api/v1/users/me/passkeys/register/verify`               | P2       |                                                |
+| 87  | POST   | `/api/v1/auth/passkeys/login/options`                     | P2       |                                                |
+| 88  | POST   | `/api/v1/auth/passkeys/login/verify`                      | P2       |                                                |
+| 89  | PATCH  | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       |                                                |
+| 90  | DELETE | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       |                                                |
+| 91  | POST   | `/api/v1/auth/step-up/challenge`                          | P2       |                                                |
+| 92  | POST   | `/api/v1/auth/step-up/verify`                             | P2       |                                                |

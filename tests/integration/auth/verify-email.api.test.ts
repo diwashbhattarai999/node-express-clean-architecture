@@ -23,6 +23,7 @@ const mockAuthAccountRepository = {
   listIdentitiesForUser: vi.fn(),
   addEmailIdentity: vi.fn(),
   verifyAddedEmailByTokenHash: vi.fn(),
+  removeEmailIdentity: vi.fn(),
   upsertUsername: vi.fn(),
   findPasswordResetTarget: vi.fn(),
   replacePasswordResetToken: vi.fn(),

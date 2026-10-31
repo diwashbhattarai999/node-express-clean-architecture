@@ -16,6 +16,7 @@ describe("ListOwnIdentitiesUseCase", () => {
     listIdentitiesForUser: vi.fn(),
     addEmailIdentity: vi.fn(),
     verifyAddedEmailByTokenHash: vi.fn(),
+    removeEmailIdentity: vi.fn(),
     upsertUsername: vi.fn(),
   };
 

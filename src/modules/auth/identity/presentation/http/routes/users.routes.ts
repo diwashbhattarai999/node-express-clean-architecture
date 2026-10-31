@@ -4,6 +4,7 @@ import { asHandler, asRequestHandler, validate } from "@/app/middleware/validati
 import type { AuthModule } from "@/modules/auth/auth.module";
 import { addEmailSchema } from "@/modules/auth/identity/presentation/http/validators/add-email.validator";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
+import { removeEmailSchema } from "@/modules/auth/identity/presentation/http/validators/remove-email.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
 
@@ -33,6 +34,13 @@ export function createUsersRouter(authModule: AuthModule): IRouter {
     validate(addEmailSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.addEmailController),
+  );
+
+  router.delete(
+    "/me/emails/:identityId",
+    validate(removeEmailSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.removeEmailController),
   );
 
   router.get(

@@ -106,6 +106,7 @@ Also under `/api/v1/users` (same bearer):
 | `GET` | `/me/identities` | bearer |
 | `POST` | `/me/emails` | bearer |
 | `POST` | `/me/emails/verify` | public (or matching bearer) |
+| `DELETE` | `/me/emails/{identityId}` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -447,6 +448,18 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 **Response** `200` `data`: `LoginIdentity` (`verifiedAt` set).
 
 **Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `422`.
+
+---
+
+### Remove email
+
+`DELETE /api/v1/users/me/emails/{identityId}`
+
+**Auth:** bearer. Unlinks that email identity. Remaining emails keep a primary (oldest remaining email is promoted when the removed one was primary). Blocked when it is the last login identity (email, phone, or username).
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `409 LAST_AUTH_METHOD`, `404 NOT_FOUND`, `422` (invalid UUID), `401 TOKEN_*`.
 
 ---
 
