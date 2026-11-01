@@ -1,6 +1,7 @@
 import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
+import { OAUTH_PKCE_LINK_COOKIE_PATH } from "@/modules/auth/oauth/application/constants/oauth-pkce-cookie";
 import { OAuthResponseMode } from "@/modules/auth/oauth/application/constants/oauth-providers";
 import type { StartOAuthLinkAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-link-authorization.use-case";
 import { setOAuthPkceCookie } from "@/modules/auth/oauth/presentation/http/cookies/oauth-pkce.cookie";
@@ -50,6 +51,7 @@ export class StartOAuthLinkAuthorizationController {
       setOAuthPkceCookie(res, result.generatedCodeVerifier, {
         secure: this.options.secureCookies,
         maxAgeSeconds: this.options.stateTtlSeconds,
+        path: OAUTH_PKCE_LINK_COOKIE_PATH,
       });
     }
 

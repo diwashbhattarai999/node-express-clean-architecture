@@ -14,6 +14,7 @@ const mockOAuthAccountRepository = {
   listForUser: vi.fn(),
   createAccount: vi.fn(),
   recordSuccessfulLogin: vi.fn(),
+  linkToUser: vi.fn(),
 };
 
 const mockSessionRepository = {
@@ -150,13 +151,15 @@ describe("Auth OAuth callback API", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOAuthAuthorizationStateRepository.consume.mockResolvedValue({
+    const pendingState = {
       provider: "google",
       intent: "login",
       redirectUri: "http://localhost:5173/auth/callback",
       clientState: "client-csrf",
       userId: null,
-    });
+    };
+    mockOAuthAuthorizationStateRepository.findActive.mockResolvedValue(pendingState);
+    mockOAuthAuthorizationStateRepository.consume.mockResolvedValue(pendingState);
     mockHttpClient.request
       .mockResolvedValueOnce({
         status: 200,

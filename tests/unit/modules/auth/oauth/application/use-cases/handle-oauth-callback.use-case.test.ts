@@ -32,6 +32,7 @@ describe("HandleOAuthCallbackUseCase", () => {
     listForUser: vi.fn(),
     createAccount: vi.fn(),
     recordSuccessfulLogin: vi.fn(),
+    linkToUser: vi.fn(),
   };
 
   const providerClient: IOauthProviderClient = {
@@ -243,22 +244,28 @@ describe("HandleOAuthCallbackUseCase", () => {
     expect(providerClient.exchangeAuthorizationCode).not.toHaveBeenCalled();
   });
 
-  it("rejects intent=link on the login callback", async () => {
-    vi.mocked(authorizationStateRepository.consume).mockResolvedValue({
+  it("hands off intent=link without consuming so the link endpoint can finish", async () => {
+    vi.mocked(authorizationStateRepository.findActive).mockResolvedValue({
       ...consumedState,
       intent: OAuthIntent.LINK,
+      userId: "user-1",
     });
 
-    await expect(
-      useCase.execute({
-        provider: OAuthProviderName.GOOGLE,
-        code: "auth-code",
-        state: "idp-state",
-        codeVerifier: "verifier",
-      }),
-    ).rejects.toMatchObject({
-      code: ErrorCode.OAUTH_STATE_INVALID,
+    const result = await useCase.execute({
+      provider: OAuthProviderName.GOOGLE,
+      code: "auth-code",
+      state: "idp-state",
+      codeVerifier: "verifier",
     });
+
+    expect(result).toEqual({
+      outcome: "handoff",
+      code: "auth-code",
+      redirectUri: "http://localhost:5173/auth/callback",
+      clientState: "client-csrf",
+    });
+    expect(authorizationStateRepository.consume).not.toHaveBeenCalled();
+    expect(providerClient.exchangeAuthorizationCode).not.toHaveBeenCalled();
   });
 
   it("consumes state and rejects when the IdP returns an error", async () => {

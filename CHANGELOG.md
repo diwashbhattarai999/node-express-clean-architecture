@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `GET /api/v1/users/me/oauth-accounts` — bearer-authenticated list of linked OAuth accounts
 - `GET /api/v1/users/me/oauth-accounts/{provider}/authorize` — start linking an OAuth provider to the current account (`intent=link`, stores `userId`)
+- `POST /api/v1/users/me/oauth-accounts/{provider}/link` — complete OAuth link for the current account (`OAuthAccount`; PKCE from body or link cookie)
+
+### Changed
+
+- OAuth login callback now `302`s `code` + client `state` for `intent=link` without consuming, so `POST .../link` can finish
 
 ## [1.3.0] - 2026-10-31
 

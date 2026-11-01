@@ -18,6 +18,7 @@ describe("ListOwnOAuthAccountsUseCase", () => {
     listForUser: vi.fn(),
     createAccount: vi.fn(),
     recordSuccessfulLogin: vi.fn(),
+    linkToUser: vi.fn(),
   };
 
   const useCase = new ListOwnOAuthAccountsUseCase(identityRepository, accountRepository);

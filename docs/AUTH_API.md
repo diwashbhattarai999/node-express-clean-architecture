@@ -640,9 +640,9 @@ Providers: `google`, `github`, `apple`, `microsoft`, generic `oidc`. Native: Aut
 
 **Query:** `code`, `state`, error params from IdP
 
-**Response** `302` to the stored app `redirectUri` with session cookies set and the client `state` query. Existing `external_identities` log in; a new subject creates an active account. Email is attached only when verified and not already used — never auto-merged. `intent=link` is rejected here (use 6.5/6.6). Native PKCE (no verifier cookie) does not consume state: `302` to the app with `code` + client `state` for 6.3.
+**Response** `302` to the stored app `redirectUri` with session cookies set and the client `state` query. Existing `external_identities` log in; a new subject creates an active account. Email is attached only when verified and not already used — never auto-merged. `intent=link` does not complete login: `302` to the app with `code` + client `state` (state stays unconsumed) so 6.6 can finish. Native PKCE (no verifier cookie) does not consume state: `302` to the app with `code` + client `state` for 6.3.
 
-**Errors:** `400 OAUTH_STATE_INVALID`, `409 CONFLICT` (identity linked elsewhere).
+**Errors:** `400 OAUTH_STATE_INVALID`, `409 CONFLICT` (identity linked elsewhere). `intent=link` is not an error — it is handed off for 6.6.
 
 ---
 
@@ -1220,7 +1220,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 36  | POST   | `/api/v1/auth/oauth/{provider}/exchange`                  | P1       | Done                                           |
 | 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       | Done                                           |
 | 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       | Done                                           |
-| 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       |                                                |
+| 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       | Done                                           |
 | 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       |                                                |
 | 41  | GET    | `/api/v1/auth/providers`                                  | P1       |                                                |
 | 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       |                                                |

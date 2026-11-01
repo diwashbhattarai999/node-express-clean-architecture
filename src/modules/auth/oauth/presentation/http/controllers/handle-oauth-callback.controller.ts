@@ -1,13 +1,15 @@
 import type { Response } from "express";
 
 import type { ValidatedRequest } from "@/app/middleware/validation";
-import { OAUTH_PKCE_COOKIE_NAME } from "@/modules/auth/oauth/application/constants/oauth-pkce-cookie";
 import type {
   HandleOAuthCallbackResult,
   HandleOAuthCallbackUseCase,
 } from "@/modules/auth/oauth/application/use-cases/handle-oauth-callback.use-case";
 import { appendOAuthRedirectQuery } from "@/modules/auth/oauth/application/utils/oauth-callback-url";
-import { clearOAuthPkceCookie } from "@/modules/auth/oauth/presentation/http/cookies/oauth-pkce.cookie";
+import {
+  clearOAuthPkceCookie,
+  readOAuthPkceCookie,
+} from "@/modules/auth/oauth/presentation/http/cookies/oauth-pkce.cookie";
 import type { HandleOAuthCallbackSchema } from "@/modules/auth/oauth/presentation/http/validators/handle-oauth-callback.validator";
 import { setAuthSessionCookies } from "@/modules/auth/shared/presentation/http/cookies/refresh-token.cookie";
 import { HttpStatus } from "@/shared/http/http-status";
@@ -15,16 +17,6 @@ import { HttpStatus } from "@/shared/http/http-status";
 export type HandleOAuthCallbackControllerOptions = {
   refreshTokenTtlSeconds: number;
   secureCookies: boolean;
-};
-
-const readCodeVerifier = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-
-  return trimmed.length > 0 ? trimmed : undefined;
 };
 
 export class HandleOAuthCallbackController {
@@ -37,7 +29,7 @@ export class HandleOAuthCallbackController {
     req: ValidatedRequest<HandleOAuthCallbackSchema>,
     res: Response,
   ): Promise<void> {
-    const codeVerifier = readCodeVerifier(req.cookies?.[OAUTH_PKCE_COOKIE_NAME]);
+    const codeVerifier = readOAuthPkceCookie(req);
 
     let result: HandleOAuthCallbackResult;
 

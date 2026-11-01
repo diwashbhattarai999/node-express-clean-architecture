@@ -7,9 +7,11 @@ import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/l
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import type { TOauthProviderName } from "@/modules/auth/oauth/application/constants/oauth-providers";
 import { OAuthIdentityLinkedError } from "@/modules/auth/oauth/application/errors/oauth-identity-linked.error";
+import { OAuthProviderAlreadyLinkedError } from "@/modules/auth/oauth/application/errors/oauth-provider-already-linked.error";
 import type {
   CreateOAuthAccountInput,
   IOauthAccountRepository,
+  LinkOAuthAccountInput,
   OAuthAccount,
   OAuthLinkedAccount,
 } from "@/modules/auth/oauth/application/ports/oauth-account.repository";
@@ -22,6 +24,14 @@ type IdentityRow = {
   identifier: string;
   isPrimary: boolean;
   verifiedAt: Date | null;
+};
+
+const oauthAccountColumns = {
+  id: externalIdentities.id,
+  provider: externalIdentities.provider,
+  providerEmail: externalIdentities.providerEmail,
+  linkedAt: externalIdentities.createdAt,
+  lastUsedAt: externalIdentities.lastUsedAt,
 };
 
 const uniqueConstraintName = (error: unknown): string | undefined => {
@@ -118,13 +128,7 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
 
   public async listForUser(userId: string): Promise<OAuthAccount[]> {
     return db
-      .select({
-        id: externalIdentities.id,
-        provider: externalIdentities.provider,
-        providerEmail: externalIdentities.providerEmail,
-        linkedAt: externalIdentities.createdAt,
-        lastUsedAt: externalIdentities.lastUsedAt,
-      })
+      .select(oauthAccountColumns)
       .from(externalIdentities)
       .where(eq(externalIdentities.userId, userId))
       .orderBy(desc(externalIdentities.createdAt), asc(externalIdentities.provider));
@@ -145,6 +149,55 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
           return this.insertAccount(input, false);
         }
 
+        throw new OAuthIdentityLinkedError();
+      }
+
+      throw error;
+    }
+  }
+
+  public async linkToUser(input: LinkOAuthAccountInput): Promise<OAuthAccount> {
+    const existing = await this.findByProviderUser(input.provider, input.providerUserId);
+
+    if (existing) {
+      if (existing.user.id !== input.userId) {
+        throw new OAuthIdentityLinkedError();
+      }
+
+      const alreadyLinked = await this.findAccountById(existing.externalIdentityId);
+
+      if (alreadyLinked) {
+        return alreadyLinked;
+      }
+    }
+
+    const sameProvider = await this.findAccountForUserProvider(input.userId, input.provider);
+
+    if (sameProvider) {
+      throw new OAuthProviderAlreadyLinkedError();
+    }
+
+    try {
+      const [created] = await db
+        .insert(externalIdentities)
+        .values({
+          userId: input.userId,
+          provider: input.provider,
+          providerUserId: input.providerUserId,
+          providerEmailVerified: input.providerEmailVerified,
+          lastUsedAt: new Date(),
+          ...(input.issuer !== undefined ? { issuer: input.issuer } : {}),
+          ...(input.providerEmail !== undefined ? { providerEmail: input.providerEmail } : {}),
+        })
+        .returning(oauthAccountColumns);
+
+      if (!created) {
+        throw new OAuthIdentityLinkedError();
+      }
+
+      return created;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
         throw new OAuthIdentityLinkedError();
       }
 
@@ -255,6 +308,29 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
 
       return toAuthUser(createdUser, identities);
     });
+  }
+
+  private async findAccountById(id: string): Promise<OAuthAccount | null> {
+    const [row] = await db
+      .select(oauthAccountColumns)
+      .from(externalIdentities)
+      .where(eq(externalIdentities.id, id))
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  private async findAccountForUserProvider(
+    userId: string,
+    provider: TOauthProviderName,
+  ): Promise<OAuthAccount | null> {
+    const [row] = await db
+      .select(oauthAccountColumns)
+      .from(externalIdentities)
+      .where(and(eq(externalIdentities.userId, userId), eq(externalIdentities.provider, provider)))
+      .limit(1);
+
+    return row ?? null;
   }
 
   private async listIdentities(userId: string): Promise<IdentityRow[]> {

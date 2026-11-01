@@ -114,6 +114,7 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/deletion-request/cancel` | bearer |
 | `GET` | `/me/oauth-accounts` | bearer |
 | `GET` | `/me/oauth-accounts/{provider}/authorize` | bearer |
+| `POST` | `/me/oauth-accounts/{provider}/link` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -327,7 +328,7 @@ On success the API sets session cookies (`refresh_token` + `csrf_token`) and `30
 
 Native clients that sent their own PKCE get a `302` to `redirectUri` with `code` + client `state` (state is not consumed). Then call exchange.
 
-**Errors:** `400 OAUTH_STATE_INVALID` (bad/expired/consumed state, IdP error, or `intent=link`), `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND` (provider not configured for token exchange), `409 CONFLICT` (provider subject already linked in a race).
+**Errors:** `400 OAUTH_STATE_INVALID` (bad/expired/consumed state or IdP error), `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `404 NOT_FOUND` (provider not configured for token exchange), `409 CONFLICT` (provider subject already linked in a race). `intent=link` does **not** sign in: `302` to the app with `code` + client `state` so you can call `POST /users/me/oauth-accounts/{provider}/link`.
 
 ---
 
@@ -368,11 +369,34 @@ Native clients that sent their own PKCE get a `302` to `redirectUri` with `code`
 
 `GET /api/v1/users/me/oauth-accounts/{provider}/authorize`
 
-**Auth:** bearer. Same query as start OAuth (`redirectUri`, `state`, optional `response=json` and PKCE). Always stored as `intent=link` with the current user id — complete later with `POST .../link` (not the login callback).
+**Auth:** bearer. Same query as start OAuth (`redirectUri`, `state`, optional `response=json` and PKCE). Always stored as `intent=link` with the current user id. Browser PKCE cookie `oauth_code_verifier` is scoped to `/api/v1/users/me/oauth-accounts` so it is sent to `POST .../link`, not the login callback.
 
-**Response** `302` to the IdP, or `200` `{ "authorizationUrl": "…" }`.
+**Response** `302` to the IdP, or `200` `{ "authorizationUrl": "…" }`. After the IdP, the login callback `302`s `code` + `state` to `redirectUri`. Then call complete link.
 
 **Errors:** `401 TOKEN_*`, `404 NOT_FOUND`, `422 VALIDATION_ERROR`.
+
+---
+
+### Complete OAuth link
+
+`POST /api/v1/users/me/oauth-accounts/{provider}/link`
+
+**Auth:** bearer. Use after start-link + IdP + callback handoff.
+
+```json
+{
+  "code": "idp-authorization-code",
+  "codeVerifier": "optional-if-browser-cookie-is-present",
+  "redirectUri": "http://localhost:5173/settings/linked",
+  "state": "the-same-client-csrf-as-authorize"
+}
+```
+
+`redirectUri` and `state` must match the start-link request. `codeVerifier` is required for native PKCE; browser clients can omit it when the `oauth_code_verifier` cookie is present. Does **not** issue a new session.
+
+**Response** `200` `data`: `OAuthAccount`.
+
+**Errors:** `400 OAUTH_STATE_INVALID`, `401 TOKEN_*`, `404 NOT_FOUND`, `409 CONFLICT` (subject linked elsewhere, or this provider already linked), `422 VALIDATION_ERROR`.
 
 ---
 

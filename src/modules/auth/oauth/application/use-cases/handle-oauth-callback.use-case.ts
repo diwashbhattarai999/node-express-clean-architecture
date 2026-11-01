@@ -82,17 +82,13 @@ export class HandleOAuthCallbackUseCase {
       provider: dto.provider,
     };
 
-    if (dto.codeVerifier === undefined) {
-      const pending = await this.authorizationStateRepository.findActive(stateLookup);
+    const pending = await this.authorizationStateRepository.findActive(stateLookup);
 
-      if (!pending) {
-        throw new OAuthStateInvalidError();
-      }
+    if (!pending) {
+      throw new OAuthStateInvalidError();
+    }
 
-      if (pending.intent !== OAuthIntent.LOGIN) {
-        throw new OAuthStateInvalidError("OAuth linking is not completed on the login callback.");
-      }
-
+    if (pending.intent !== OAuthIntent.LOGIN || dto.codeVerifier === undefined) {
       return {
         outcome: "handoff",
         code: dto.code,
@@ -105,10 +101,6 @@ export class HandleOAuthCallbackUseCase {
 
     if (!consumed) {
       throw new OAuthStateInvalidError();
-    }
-
-    if (consumed.intent !== OAuthIntent.LOGIN) {
-      throw new OAuthStateInvalidError("OAuth linking is not completed on the login callback.");
     }
 
     const tokens = await this.providerClient.exchangeAuthorizationCode({

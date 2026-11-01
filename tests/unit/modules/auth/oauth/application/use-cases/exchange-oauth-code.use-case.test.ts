@@ -31,6 +31,7 @@ describe("ExchangeOAuthCodeUseCase", () => {
     listForUser: vi.fn(),
     createAccount: vi.fn(),
     recordSuccessfulLogin: vi.fn(),
+    linkToUser: vi.fn(),
   };
 
   const providerClient: IOauthProviderClient = {

@@ -20,6 +20,15 @@ export type CreateOAuthAccountEmail = {
   verifiedAt: Date;
 };
 
+export type LinkOAuthAccountInput = {
+  userId: string;
+  provider: TOauthProviderName;
+  providerUserId: string;
+  issuer?: string;
+  providerEmail?: string;
+  providerEmailVerified: boolean;
+};
+
 export type CreateOAuthAccountInput = {
   id: string;
   displayName: string | null;
@@ -47,4 +56,6 @@ export interface IOauthAccountRepository {
   createAccount(input: CreateOAuthAccountInput): Promise<AuthUser>;
 
   recordSuccessfulLogin(externalIdentityId: string): Promise<AuthUser>;
+
+  linkToUser(input: LinkOAuthAccountInput): Promise<OAuthAccount>;
 }

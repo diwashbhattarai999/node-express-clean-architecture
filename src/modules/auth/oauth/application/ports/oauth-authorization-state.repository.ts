@@ -24,6 +24,8 @@ export type ConsumeOAuthAuthorizationStateForExchangeInput = {
   provider: TOauthProviderName;
   clientState: string;
   redirectUri: string;
+  intent?: TOauthIntent;
+  userId?: string;
 };
 
 export type ConsumedOAuthAuthorizationState = {

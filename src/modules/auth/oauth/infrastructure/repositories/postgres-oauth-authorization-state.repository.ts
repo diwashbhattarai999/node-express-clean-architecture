@@ -128,6 +128,12 @@ export class PostgresOAuthAuthorizationStateRepository
             eq(oauthAuthorizationStates.redirectUri, input.redirectUri),
             isNull(oauthAuthorizationStates.consumedAt),
             gt(oauthAuthorizationStates.expiresAt, now),
+            input.intent !== undefined
+              ? eq(oauthAuthorizationStates.intent, input.intent)
+              : undefined,
+            input.userId !== undefined
+              ? eq(oauthAuthorizationStates.userId, input.userId)
+              : undefined,
           ),
         )
         .orderBy(desc(oauthAuthorizationStates.createdAt))
