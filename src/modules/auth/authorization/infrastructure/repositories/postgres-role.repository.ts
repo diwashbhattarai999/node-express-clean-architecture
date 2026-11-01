@@ -1,9 +1,11 @@
-import { and, asc, count, desc, eq, ilike, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, isNull, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
+import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
 import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
 import { userRoles } from "@/infrastructure/database/drizzle/schema/authorization/user-roles.schema";
+import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { RoleAlreadyExistsError } from "@/modules/auth/authorization/application/errors/role-already-exists.error";
 import type {
   CreateRoleData,
@@ -11,9 +13,12 @@ import type {
   IRoleRepository,
   ListRolesQuery,
   ListRolesResult,
+  ListRoleUsersQuery,
+  ListRoleUsersResult,
   Role,
   UpdateRoleData,
 } from "@/modules/auth/authorization/application/ports/role.repository";
+import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
 import { getPaginationOffset } from "@/shared/http/pagination";
 
 const roleColumns = {
@@ -148,6 +153,73 @@ export class PostgresRoleRepository implements IRoleRepository {
       return "deleted";
     });
   }
+
+  public async listUsersForRole(
+    roleId: string,
+    query: ListRoleUsersQuery,
+  ): Promise<ListRoleUsersResult> {
+    const assignedUsers = and(eq(userRoles.roleId, roleId), isNull(users.deletedAt));
+    const offset = getPaginationOffset(query.page, query.limit);
+
+    const [totalResult] = await db
+      .select({ value: count() })
+      .from(userRoles)
+      .innerJoin(users, eq(users.id, userRoles.userId))
+      .where(assignedUsers);
+
+    const rows = await db
+      .select({
+        id: users.id,
+        status: users.status,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(userRoles)
+      .innerJoin(users, eq(users.id, userRoles.userId))
+      .where(assignedUsers)
+      .orderBy(desc(userRoles.assignedAt), asc(users.id))
+      .limit(query.limit)
+      .offset(offset);
+
+    if (rows.length === 0) {
+      return { total: totalResult?.value ?? 0, items: [] };
+    }
+
+    const identities = await db
+      .select({
+        userId: loginIdentities.userId,
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(
+        inArray(
+          loginIdentities.userId,
+          rows.map((row) => row.id),
+        ),
+      );
+
+    const identitiesByUser = new Map<string, typeof identities>();
+
+    for (const identity of identities) {
+      const existing = identitiesByUser.get(identity.userId);
+
+      if (existing) {
+        existing.push(identity);
+      } else {
+        identitiesByUser.set(identity.userId, [identity]);
+      }
+    }
+
+    return {
+      total: totalResult?.value ?? 0,
+      items: rows.map((row) => toAuthUser(row, identitiesByUser.get(row.id) ?? [])),
+    };
+  }
 }
 
 const toRole = (row: {
@@ -163,3 +235,39 @@ const toRole = (row: {
   description: row.description ?? null,
   createdAt: row.createdAt,
 });
+
+const toAuthUser = (
+  row: {
+    id: string;
+    status: AuthUser["status"];
+    displayName: string | null;
+    avatarUrl: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  },
+  identities: Array<{
+    type: string;
+    identifier: string;
+    isPrimary: boolean;
+    verifiedAt: Date | null;
+  }>,
+): AuthUser => {
+  const email =
+    identities.find(
+      (identity) => identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+    )?.identifier ??
+    identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+      ?.identifier ??
+    null;
+
+  return {
+    id: row.id,
+    status: row.status,
+    displayName: row.displayName,
+    avatarUrl: row.avatarUrl,
+    email,
+    username: identities.find((identity) => identity.type === "username")?.identifier ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+};

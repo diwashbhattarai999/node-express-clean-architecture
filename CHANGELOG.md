@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /api/v1/admin/permissions/{permissionId}` — permission by id (`permissions.read`)
 - `PUT /api/v1/admin/roles/{roleId}/permissions` — replace a role's permission set (`permissions.assign`)
 - `DELETE /api/v1/admin/roles/{roleId}/permissions/{permissionId}` — remove one permission from a role (`permissions.assign`)
+- `GET /api/v1/admin/roles/{roleId}/users` — paginated users assigned to a role (`roles.read`)
 - `403 PERMISSION_DENIED` plus `requirePermission` middleware for admin routes
 - `permissions` and `role_permissions` tables for RBAC
 - `pnpm db:seed` — upsert default permissions/roles (`member`, `admin`, `superadmin`) and optionally create a superadmin from `SEED_SUPERADMIN_*`

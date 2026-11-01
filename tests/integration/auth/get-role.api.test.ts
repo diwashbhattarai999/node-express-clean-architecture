@@ -9,6 +9,7 @@ const mockRoleRepository = {
   create: vi.fn(),
   update: vi.fn(),
   deleteById: vi.fn(),
+  listUsersForRole: vi.fn(),
 };
 
 const mockPermissionRepository = {

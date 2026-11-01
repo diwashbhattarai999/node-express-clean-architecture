@@ -1,3 +1,5 @@
+import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
+
 export type Role = {
   id: string;
   key: string;
@@ -30,6 +32,16 @@ export type UpdateRoleData = {
 
 export type DeleteRoleResult = "deleted" | "not_found" | "assigned";
 
+export type ListRoleUsersQuery = {
+  page: number;
+  limit: number;
+};
+
+export type ListRoleUsersResult = {
+  items: AuthUser[];
+  total: number;
+};
+
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
   list(query: ListRolesQuery): Promise<ListRolesResult>;
@@ -38,4 +50,5 @@ export interface IRoleRepository {
   create(data: CreateRoleData): Promise<Role>;
   update(roleId: string, data: UpdateRoleData): Promise<Role | null>;
   deleteById(roleId: string): Promise<DeleteRoleResult>;
+  listUsersForRole(roleId: string, query: ListRoleUsersQuery): Promise<ListRoleUsersResult>;
 }

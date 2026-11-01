@@ -141,6 +141,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | `GET` | `/permissions/:permissionId` | bearer + `permissions.read` |
 | `PUT` | `/roles/:roleId/permissions` | bearer + `permissions.assign` |
 | `DELETE` | `/roles/:roleId/permissions/:permissionId` | bearer + `permissions.assign` |
+| `GET` | `/roles/:roleId/users` | bearer + `roles.read` |
 
 ---
 
@@ -732,6 +733,20 @@ Full replace. Empty array clears all. Duplicates are ignored. Unknown permission
 **Response** `200` `data`: `null`.
 
 **Errors:** `404 NOT_FOUND` if the role is missing or the permission is not assigned, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### List users for role (admin)
+
+`GET /api/v1/admin/roles/{roleId}/users`
+
+**Auth:** bearer + `roles.read`. `roleId` must be a UUID.
+
+**Query:** `page` (default 1), `limit` (default 10, max 100).
+
+**Response** `200` `data`: `UserPublic[]` + `meta`. Newest assignments first. Soft-deleted users are omitted.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

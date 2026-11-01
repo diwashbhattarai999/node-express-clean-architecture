@@ -34,6 +34,7 @@ describe("DeleteRoleUseCase", () => {
     create: vi.fn(),
     update: vi.fn(),
     deleteById: vi.fn(),
+    listUsersForRole: vi.fn(),
   };
 
   const useCase = new DeleteRoleUseCase(identityRepository, permissionRepository, roleRepository);

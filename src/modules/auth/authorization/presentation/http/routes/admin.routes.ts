@@ -9,6 +9,7 @@ import { deleteRoleSchema } from "@/modules/auth/authorization/presentation/http
 import { getPermissionSchema } from "@/modules/auth/authorization/presentation/http/validators/get-permission.validator";
 import { getRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/get-role.validator";
 import { listPermissionsSchema } from "@/modules/auth/authorization/presentation/http/validators/list-permissions.validator";
+import { listRoleUsersSchema } from "@/modules/auth/authorization/presentation/http/validators/list-role-users.validator";
 import { listRolesSchema } from "@/modules/auth/authorization/presentation/http/validators/list-roles.validator";
 import { removeRolePermissionSchema } from "@/modules/auth/authorization/presentation/http/validators/remove-role-permission.validator";
 import { updateRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/update-role.validator";
@@ -89,6 +90,14 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.PERMISSIONS_ASSIGN),
     asHandler(authModule.removeRolePermissionController),
+  );
+
+  router.get(
+    "/roles/:roleId/users",
+    validate(listRoleUsersSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.ROLES_READ),
+    asHandler(authModule.listRoleUsersController),
   );
 
   return router;

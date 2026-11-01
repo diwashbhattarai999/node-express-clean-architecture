@@ -34,6 +34,7 @@ describe("UpdateRoleUseCase", () => {
     create: vi.fn(),
     update: vi.fn(),
     deleteById: vi.fn(),
+    listUsersForRole: vi.fn(),
   };
 
   const useCase = new UpdateRoleUseCase(identityRepository, permissionRepository, roleRepository);
