@@ -87,6 +87,26 @@ const mockCredentialsRepository = {
   findMagicLinkTarget: vi.fn(),
   replaceMagicLinkToken: vi.fn(),
   consumeMagicLinkByTokenHash: vi.fn(),
+    findAuthUserById: vi.fn(),
+    hasVerifiedFactor: vi.fn(),
+    listVerifiedFactors: vi.fn(),
+    findFactorForUser: vi.fn(),
+    findFactorByType: vi.fn(),
+    insertFactor: vi.fn(),
+    updateFactor: vi.fn(),
+    markFactorVerified: vi.fn(),
+    disableFactorsForUser: vi.fn(),
+    insertChallenge: vi.fn(),
+    findChallengeById: vi.fn(),
+    findLatestChallengeForFactor: vi.fn(),
+    findPendingLoginByTokenHash: vi.fn(),
+    updateChallenge: vi.fn(),
+    incrementChallengeAttempts: vi.fn(),
+    consumePendingLoginsForUser: vi.fn(),
+    replaceRecoveryCodes: vi.fn(),
+    findUnusedRecoveryCodes: vi.fn(),
+    markRecoveryCodeUsed: vi.fn(),
+    revokeUnusedRecoveryCodes: vi.fn(),
 };
 
 vi.mock("@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository", () => ({
@@ -118,6 +138,13 @@ vi.mock("@/modules/auth/sessions/infrastructure/repositories/postgres-session.re
     return mockSessionRepository;
   }),
 }));
+
+vi.mock("@/modules/auth/mfa/infrastructure/repositories/postgres-mfa.repository", () => ({
+  PostgresMfaRepository: vi.fn(function PostgresMfaRepository() {
+    return mockIdentityRepository;
+  }),
+}));
+
 
 vi.mock("@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository", () => ({
   PostgresRoleRepository: vi.fn(function PostgresRoleRepository() {

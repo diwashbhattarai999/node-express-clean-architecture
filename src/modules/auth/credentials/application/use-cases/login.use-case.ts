@@ -6,6 +6,7 @@ import { AuthForbiddenError } from "@/modules/auth/credentials/application/error
 import { InvalidCredentialsError } from "@/modules/auth/credentials/application/errors/invalid-credentials.error";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import { resolveLoginIdentifier } from "@/modules/auth/credentials/application/utils/resolve-login-identifier";
+import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
@@ -37,6 +38,7 @@ export class LoginUseCase {
     private readonly sessionRepository: ISessionRepository,
     private readonly passwordHasher: IPasswordHasher,
     private readonly accessTokenSigner: IAccessTokenSigner,
+    private readonly mfaSignInGuard: MfaSignInGuard,
     private readonly options: LoginUseCaseOptions,
   ) {}
 
@@ -70,6 +72,8 @@ export class LoginUseCase {
     if (candidate.status === "disabled") {
       throw new AuthForbiddenError(ErrorCode.ACCOUNT_DISABLED, "This account is disabled.");
     }
+
+    await this.mfaSignInGuard.assertNotRequired(candidate.userId);
 
     const sessionId = randomUUID();
     const familyId = randomUUID();

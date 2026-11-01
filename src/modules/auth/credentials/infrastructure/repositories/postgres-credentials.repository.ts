@@ -17,10 +17,7 @@ import type {
   ResetPasswordByTokenHashResult,
   ValidatePasswordResetTokenResult,
 } from "@/modules/auth/credentials/application/ports/credentials.repository";
-import type {
-  CreateSessionInput,
-  TLoginIdentityType,
-} from "@/modules/auth/shared/application/types/auth.types";
+import type { TLoginIdentityType } from "@/modules/auth/shared/application/types/auth.types";
 
 export class PostgresCredentialsRepository implements ICredentialsRepository {
   public async findPasswordLoginCandidate(
@@ -453,7 +450,6 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
 
   public async consumeMagicLinkByTokenHash(
     tokenHash: string,
-    session: CreateSessionInput,
   ): Promise<ConsumeMagicLinkByTokenHashResult> {
     const [token] = await db
       .select()
@@ -553,16 +549,6 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
         }
       }
 
-      await tx.insert(sessions).values({
-        id: session.id,
-        userId: user.id,
-        familyId: session.familyId,
-        refreshTokenHash: session.refreshTokenHash,
-        expiresAt: session.expiresAt,
-        ipAddress: session.ipAddress ?? null,
-        userAgent: session.userAgent ?? null,
-      });
-
       const identities = await tx
         .select({
           type: loginIdentities.type,
@@ -586,7 +572,6 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
 
       return {
         outcome: "consumed" as const,
-        sessionId: session.id,
         user: {
           id: user.id,
           status,

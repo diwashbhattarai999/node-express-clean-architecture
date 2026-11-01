@@ -12,6 +12,8 @@ import { removePhoneSchema } from "@/modules/auth/identity/presentation/http/val
 import { requestAccountDeletionSchema } from "@/modules/auth/identity/presentation/http/validators/request-account-deletion.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
+import type { MfaModule } from "@/modules/auth/mfa/mfa.module";
+import { createMfaUserRouter } from "@/modules/auth/mfa/presentation/http/routes/mfa-user.routes";
 import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { linkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http/validators/link-oauth-account.validator";
 import { startOAuthAuthorizationSchema } from "@/modules/auth/oauth/presentation/http/validators/start-oauth-authorization.validator";
@@ -27,6 +29,14 @@ export function createUsersRouter(
   authModule: IdentityModule &
     Pick<AuditModule, "listOwnSecurityEventsController"> &
     Pick<
+      MfaModule,
+      | "getMfaStatusController"
+      | "beginMfaEnrollController"
+      | "confirmMfaEnrollController"
+      | "disableMfaController"
+      | "regenerateMfaRecoveryCodesController"
+    > &
+    Pick<
       OAuthModule,
       | "listOwnOAuthAccountsController"
       | "startOAuthLinkAuthorizationController"
@@ -36,6 +46,8 @@ export function createUsersRouter(
     Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
 ): IRouter {
   const router = Router();
+
+  router.use(createMfaUserRouter(authModule));
 
   router.get(
     "/me/security-events",

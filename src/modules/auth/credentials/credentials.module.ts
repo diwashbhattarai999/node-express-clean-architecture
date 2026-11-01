@@ -17,6 +17,7 @@ import { RequestMagicLinkController } from "@/modules/auth/credentials/presentat
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
 import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
+import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
@@ -33,6 +34,7 @@ export type CreateCredentialsModuleOptions = {
   sessionRepository: ISessionRepository;
   passwordHasher: IPasswordHasher;
   accessTokenSigner: IAccessTokenSigner;
+  mfaSignInGuard: MfaSignInGuard;
   emailSender: IEmailSender;
   emailOptions: AuthEmailOptions;
   sessionOptions: AuthSessionOptions;
@@ -62,6 +64,7 @@ export function createCredentialsModule(
         options.sessionRepository,
         options.passwordHasher,
         options.accessTokenSigner,
+        options.mfaSignInGuard,
         options.sessionOptions,
       ),
       options.cookieOptions,
@@ -76,7 +79,9 @@ export function createCredentialsModule(
     consumeMagicLinkController: new ConsumeMagicLinkController(
       new ConsumeMagicLinkUseCase(
         options.credentialsRepository,
+        options.sessionRepository,
         options.accessTokenSigner,
+        options.mfaSignInGuard,
         options.sessionOptions,
       ),
       options.cookieOptions,

@@ -1,6 +1,5 @@
 import type {
   AuthUser,
-  CreateSessionInput,
   TLoginIdentityType,
   TUserStatus,
 } from "@/modules/auth/shared/application/types/auth.types";
@@ -56,7 +55,7 @@ export type ConsumeMagicLinkByTokenHashResult =
   | { outcome: "expired" }
   | { outcome: "suspended" }
   | { outcome: "disabled" }
-  | { outcome: "consumed"; user: AuthUser; sessionId: string };
+  | { outcome: "consumed"; user: AuthUser };
 
 export interface ICredentialsRepository {
   findPasswordLoginCandidate(
@@ -90,10 +89,7 @@ export interface ICredentialsRepository {
 
   replaceMagicLinkToken(input: ReplaceMagicLinkTokenInput): Promise<void>;
 
-  consumeMagicLinkByTokenHash(
-    tokenHash: string,
-    session: CreateSessionInput,
-  ): Promise<ConsumeMagicLinkByTokenHashResult>;
+  consumeMagicLinkByTokenHash(tokenHash: string): Promise<ConsumeMagicLinkByTokenHashResult>;
 }
 
 export type { AuthUser };

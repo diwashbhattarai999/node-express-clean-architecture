@@ -30,6 +30,7 @@ export const ErrorCode = {
   ACCOUNT_SUSPENDED: "ACCOUNT_SUSPENDED",
   ACCOUNT_DISABLED: "ACCOUNT_DISABLED",
   OAUTH_STATE_INVALID: "OAUTH_STATE_INVALID",
+  MFA_REQUIRED: "MFA_REQUIRED",
 } as const;
 
 export type TErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

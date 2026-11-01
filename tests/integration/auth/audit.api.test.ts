@@ -50,7 +50,11 @@ const mockIdentityRepository = {
   findAdminDetails: vi.fn(),
   setUserStatus: vi.fn(),
   hardDeleteById: vi.fn(),
+  hasVerifiedFactor: vi.fn(),
+  insertChallenge: vi.fn(),
+  findAuthUserById: vi.fn(),
 };
+
 
 const mockAuditLogRepository = {
   list: vi.fn(),

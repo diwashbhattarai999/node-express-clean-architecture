@@ -1,5 +1,6 @@
 import type { TEnv } from "@/config/env-schema";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
+import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 import { CompleteOAuthSignIn } from "@/modules/auth/oauth/application/services/complete-oauth-sign-in";
 import { ExchangeOAuthCodeUseCase } from "@/modules/auth/oauth/application/use-cases/exchange-oauth-code.use-case";
 import { GetAuthConfigUseCase } from "@/modules/auth/oauth/application/use-cases/get-auth-config.use-case";
@@ -37,6 +38,7 @@ export type CreateOAuthModuleOptions = {
   identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal">;
   sessionRepository: ISessionRepository;
   accessTokenSigner: IAccessTokenSigner;
+  mfaSignInGuard: MfaSignInGuard;
   sessionOptions: AuthSessionOptions;
   cookieOptions: AuthCookieOptions;
 };
@@ -67,6 +69,7 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
     accountRepository,
     options.sessionRepository,
     options.accessTokenSigner,
+    options.mfaSignInGuard,
     { refreshTokenTtlSeconds: options.sessionOptions.refreshTokenTtlSeconds },
   );
 

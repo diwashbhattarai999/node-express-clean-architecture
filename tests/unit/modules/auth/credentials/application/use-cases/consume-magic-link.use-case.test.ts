@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthForbiddenError } from "@/modules/auth/credentials/application/errors/auth-forbidden.error";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import { ConsumeMagicLinkUseCase } from "@/modules/auth/credentials/application/use-cases/consume-magic-link.use-case";
+import { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
+import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import { TokenExpiredError } from "@/modules/auth/shared/application/errors/token-expired.error";
 import { TokenInvalidError } from "@/modules/auth/shared/application/errors/token-invalid.error";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
@@ -22,14 +24,37 @@ describe("ConsumeMagicLinkUseCase", () => {
     consumeMagicLinkByTokenHash: vi.fn(),
   };
 
+  const sessionRepository: ISessionRepository = {
+    createSession: vi.fn(),
+    rotateRefreshSession: vi.fn(),
+    revokeSessionByRefreshTokenHash: vi.fn(),
+    revokeSessionById: vi.fn(),
+    revokeAllSessionsForUser: vi.fn(),
+    revokeOtherSessionsForUser: vi.fn(),
+    listSessionsForUser: vi.fn(),
+    findSessionForUser: vi.fn(),
+    updateSessionLabelForUser: vi.fn(),
+    revokeSessionForUser: vi.fn(),
+  };
+
   const accessTokenSigner: IAccessTokenSigner = {
     sign: vi.fn(),
     verify: vi.fn(),
   };
 
-  const useCase = new ConsumeMagicLinkUseCase(credentialsRepository, accessTokenSigner, {
-    refreshTokenTtlSeconds: 2_592_000,
-  });
+  const mfaSignInGuard = {
+    assertNotRequired: vi.fn(),
+  } as unknown as MfaSignInGuard;
+
+  const useCase = new ConsumeMagicLinkUseCase(
+    credentialsRepository,
+    sessionRepository,
+    accessTokenSigner,
+    mfaSignInGuard,
+    {
+      refreshTokenTtlSeconds: 2_592_000,
+    },
+  );
 
   const consumedUser = {
     id: "user-1",
@@ -48,12 +73,13 @@ describe("ConsumeMagicLinkUseCase", () => {
       accessToken: "access.jwt",
       expiresIn: 600,
     });
+    vi.mocked(sessionRepository.createSession).mockResolvedValue(undefined);
+    vi.mocked(mfaSignInGuard.assertNotRequired).mockResolvedValue(undefined);
   });
 
   it("consumes a valid token and returns a session", async () => {
     vi.mocked(credentialsRepository.consumeMagicLinkByTokenHash).mockResolvedValue({
       outcome: "consumed",
-      sessionId: "session-1",
       user: consumedUser,
     });
 
@@ -62,18 +88,11 @@ describe("ConsumeMagicLinkUseCase", () => {
       { ipAddress: "127.0.0.1", userAgent: "vitest" },
     );
 
-    expect(credentialsRepository.consumeMagicLinkByTokenHash).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        refreshTokenHash: expect.any(String),
-        expiresAt: expect.any(Date),
-        ipAddress: "127.0.0.1",
-        userAgent: "vitest",
-      }),
-    );
+    expect(credentialsRepository.consumeMagicLinkByTokenHash).toHaveBeenCalledWith(expect.any(String));
+    expect(sessionRepository.createSession).toHaveBeenCalledOnce();
     expect(accessTokenSigner.sign).toHaveBeenCalledWith({
       userId: "user-1",
-      sessionId: "session-1",
+      sessionId: expect.any(String),
     });
     expect(result).toMatchObject({
       accessToken: "access.jwt",

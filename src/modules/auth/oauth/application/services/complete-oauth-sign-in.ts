@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 import type { TOauthProviderName } from "@/modules/auth/oauth/application/constants/oauth-providers";
 import { OAuthAccountBlockedError } from "@/modules/auth/oauth/application/errors/oauth-account-blocked.error";
 import type { IOauthAccountRepository } from "@/modules/auth/oauth/application/ports/oauth-account.repository";
@@ -60,6 +61,7 @@ export class CompleteOAuthSignIn {
     private readonly accountRepository: IOauthAccountRepository,
     private readonly sessionRepository: ISessionRepository,
     private readonly accessTokenSigner: IAccessTokenSigner,
+    private readonly mfaSignInGuard: MfaSignInGuard,
     private readonly options: CompleteOAuthSignInOptions,
   ) {}
 
@@ -136,6 +138,8 @@ export class CompleteOAuthSignIn {
     user: AuthUser,
     meta: CompleteOAuthSignInMeta,
   ): Promise<CompleteOAuthSignInResult> {
+    await this.mfaSignInGuard.assertNotRequired(user.id);
+
     const sessionId = randomUUID();
     const familyId = randomUUID();
     const refreshToken = generateRefreshToken();

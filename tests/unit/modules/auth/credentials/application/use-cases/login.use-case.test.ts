@@ -7,6 +7,8 @@ import type { ICredentialsRepository } from "@/modules/auth/credentials/applicat
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
 import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
+import { MfaRequiredError } from "@/modules/auth/mfa/application/errors/mfa-required.error";
+import { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 
 describe("LoginUseCase", () => {
   const credentialsRepository: ICredentialsRepository = {
@@ -43,14 +45,19 @@ describe("LoginUseCase", () => {
 
   const accessTokenSigner: IAccessTokenSigner = {
     sign: vi.fn(),
-  verify: vi.fn(),
+    verify: vi.fn(),
   };
+
+  const mfaSignInGuard = {
+    assertNotRequired: vi.fn(),
+  } as unknown as MfaSignInGuard;
 
   const useCase = new LoginUseCase(
     credentialsRepository,
     sessionRepository,
     passwordHasher,
     accessTokenSigner,
+    mfaSignInGuard,
     { refreshTokenTtlSeconds: 2_592_000 },
   );
 
@@ -74,6 +81,7 @@ describe("LoginUseCase", () => {
       expiresIn: 600,
     });
     vi.mocked(sessionRepository.createSession).mockResolvedValue(undefined);
+    vi.mocked(mfaSignInGuard.assertNotRequired).mockResolvedValue(undefined);
   });
 
   it("logs in an active user and creates a session", async () => {
@@ -129,6 +137,16 @@ describe("LoginUseCase", () => {
     await expect(
       useCase.execute({ identifier: "ada@example.com", password: "StrongPassword123!" }),
     ).rejects.toMatchObject({ code: "ACCOUNT_NOT_VERIFIED" });
+  });
+
+  it("requires MFA without creating a session", async () => {
+    vi.mocked(credentialsRepository.findPasswordLoginCandidate).mockResolvedValue(activeCandidate);
+    vi.mocked(mfaSignInGuard.assertNotRequired).mockRejectedValue(new MfaRequiredError("mfa-token"));
+
+    await expect(
+      useCase.execute({ identifier: "ada@example.com", password: "StrongPassword123!" }),
+    ).rejects.toMatchObject({ code: "MFA_REQUIRED" });
+    expect(sessionRepository.createSession).not.toHaveBeenCalled();
   });
 
   it("blocks suspended accounts", async () => {

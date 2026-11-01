@@ -7,6 +7,7 @@ import type { IOauthAccountRepository } from "@/modules/auth/oauth/application/p
 import type { IOauthAuthorizationStateRepository } from "@/modules/auth/oauth/application/ports/oauth-authorization-state.repository";
 import type { IOauthProviderCatalog } from "@/modules/auth/oauth/application/ports/oauth-provider-catalog.port";
 import type { IOauthProviderClient } from "@/modules/auth/oauth/application/ports/oauth-provider-client.port";
+import { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
 import { CompleteOAuthSignIn } from "@/modules/auth/oauth/application/services/complete-oauth-sign-in";
 import { ExchangeOAuthCodeUseCase } from "@/modules/auth/oauth/application/use-cases/exchange-oauth-code.use-case";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
@@ -63,9 +64,15 @@ describe("ExchangeOAuthCodeUseCase", () => {
     providerCatalog,
     authorizationStateRepository,
     providerClient,
-    new CompleteOAuthSignIn(accountRepository, sessionRepository, accessTokenSigner, {
-      refreshTokenTtlSeconds: 2_592_000,
-    }),
+    new CompleteOAuthSignIn(
+      accountRepository,
+      sessionRepository,
+      accessTokenSigner,
+      { assertNotRequired: vi.fn().mockResolvedValue(undefined) } as unknown as MfaSignInGuard,
+      {
+        refreshTokenTtlSeconds: 2_592_000,
+      },
+    ),
     { apiBaseUrl: "http://localhost:3000" },
   );
 

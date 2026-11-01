@@ -31,7 +31,7 @@ export class GetAuthConfigUseCase {
           (provider) => (provider.type === "oauth" || provider.type === "oidc") && provider.enabled,
         ),
         magicLink: providers.some((provider) => provider.type === "magic_link" && provider.enabled),
-        mfa: false,
+        mfa: true,
         passkeys: false,
         phoneAuth: true,
       },

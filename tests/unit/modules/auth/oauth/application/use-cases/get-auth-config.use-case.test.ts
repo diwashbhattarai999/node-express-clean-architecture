@@ -28,7 +28,7 @@ describe("GetAuthConfigUseCase", () => {
       registration: true,
       oauth: true,
       magicLink: true,
-      mfa: false,
+      mfa: true,
       passkeys: false,
       phoneAuth: true,
     });

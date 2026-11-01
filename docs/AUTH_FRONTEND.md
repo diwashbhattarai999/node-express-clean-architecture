@@ -37,6 +37,7 @@ For the full planned contract (unimplemented routes), see [AUTH_API.md](AUTH_API
 | 401 | `TOKEN_INVALID` / `TOKEN_EXPIRED` / `TOKEN_REVOKED` / `TOKEN_REUSED` | Bad/missing/expired JWT or refresh |
 | 401 | `INVALID_CREDENTIALS` | Wrong login password/identifier |
 | 403 | `EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` | Account not allowed to sign in |
+| 403 | `MFA_REQUIRED` | Password/OAuth/magic-link succeeded; continue with `details.mfaToken` |
 | 403 | `PERMISSION_DENIED` | Missing required permission (admin routes) |
 | 409 | `CONFLICT` | Identity already registered |
 | 422 | `VALIDATION_ERROR` | Bad body/query (`details` has field errors) |
@@ -63,7 +64,7 @@ Access JWT TTL is short (~10 minutes; `expiresIn` is seconds). Refresh TTL is lo
 
 **Always send cookies** on auth calls from the browser: `credentials: "include"`.
 
-Endpoints that **set** cookies: login, email/phone verify, refresh.  
+Endpoints that **set** cookies: login, email/phone verify, magic-link consume, MFA challenge verify, refresh.  
 Endpoints that **clear** cookies: logout, logout-all, password reset.
 
 **CSRF required** when the refresh cookie is present: refresh, logout, logout-all.
@@ -87,6 +88,8 @@ Frontend deep links from emails:
 | `POST` | `/phone/verify` | public |
 | `POST` | `/phone/verification/resend` | public |
 | `POST` | `/login` | public |
+| `POST` | `/mfa/challenge` | public |
+| `POST` | `/mfa/challenge/verify` | public |
 | `POST` | `/magic-link/request` | public |
 | `POST` | `/magic-link/consume` | public |
 | `POST` | `/refresh` | refresh (+ CSRF if cookie) |
@@ -128,6 +131,11 @@ Also under `/api/v1/users` (same bearer):
 | `DELETE` | `/me/oauth-accounts/{provider}` | bearer |
 | `PATCH` | `/me/username` | bearer |
 | `GET` | `/me/security-events` | bearer |
+| `GET` | `/me/mfa` | bearer |
+| `POST` | `/me/mfa/enroll` | bearer |
+| `POST` | `/me/mfa/enroll/confirm` | bearer |
+| `DELETE` | `/me/mfa` | bearer |
+| `POST` | `/me/mfa/recovery-codes/regenerate` | bearer |
 
 Also under `/api/v1/authz` (same bearer):
 
@@ -414,7 +422,7 @@ Refresh returns the same fields **without** `user`.
 
 **Response** `200` — session tokens + cookies.
 
-**Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`.
+**Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `403 MFA_REQUIRED` (`details.mfaToken`).
 
 ---
 
@@ -454,7 +462,95 @@ Email deep link: `{FRONTEND_BASE_URL}/magic-link?token=…`. POST that token to 
 
 **Response** `200` — same `AuthTokensData` + cookies as login (`message`: `Signed in.`).
 
-**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` (token not consumed), `422`.
+**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` (token not consumed), `403 MFA_REQUIRED` (`details.mfaToken`), `422`.
+
+---
+
+### MFA status
+
+`GET /api/v1/users/me/mfa`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `{ enabled, factors: [{ id, type, label, verifiedAt }] }`.
+
+---
+
+### Begin MFA enroll
+
+`POST /api/v1/users/me/mfa/enroll`
+
+```json
+{ "type": "totp" }
+```
+
+`type` is `totp` | `sms` | `email`. SMS/email may include `destination`; otherwise the verified phone/email is used.
+
+**Response** `200` TOTP: `{ factorId, secret, otpauthUrl }`. SMS/email: `{ factorId }` and a 10-minute OTP is sent (SMS is logged until a provider is wired).
+
+---
+
+### Confirm MFA enroll
+
+`POST /api/v1/users/me/mfa/enroll/confirm`
+
+```json
+{ "factorId": "uuid", "code": "123456" }
+```
+
+**Response** `200` `{ recoveryCodes: string[] }` — 10 codes on first enable; store them, they are not shown again.
+
+---
+
+### Disable MFA
+
+`DELETE /api/v1/users/me/mfa`
+
+```json
+{ "password": "Test@1234" }
+```
+
+Or `{ "code": "123456" }` (TOTP or recovery code).
+
+**Response** `200` `data`: `null`.
+
+---
+
+### Begin MFA challenge
+
+`POST /api/v1/auth/mfa/challenge`
+
+Use `details.mfaToken` from `403 MFA_REQUIRED` after login / magic-link / OAuth.
+
+```json
+{ "mfaToken": "continuation-token" }
+```
+
+Optional `factorId`. **Response** `200`: `{ challengeId, expiresAt }`.
+
+---
+
+### Verify MFA challenge
+
+`POST /api/v1/auth/mfa/challenge/verify`
+
+```json
+{ "challengeId": "uuid", "code": "123456" }
+```
+
+`code` may be TOTP, SMS/email OTP, or a recovery code.
+
+**Response** `200` — same `AuthTokensData` + cookies as login.
+
+---
+
+### Regenerate recovery codes
+
+`POST /api/v1/users/me/mfa/recovery-codes/regenerate`
+
+**Auth:** bearer. Invalidates unused codes.
+
+**Response** `200` `{ recoveryCodes: string[] }`.
 
 ---
 
@@ -489,7 +585,7 @@ Email deep link: `{FRONTEND_BASE_URL}/magic-link?token=…`. POST that token to 
     "registration": true,
     "oauth": true,
     "magicLink": true,
-    "mfa": false,
+    "mfa": true,
     "passkeys": false,
     "phoneAuth": true
   },

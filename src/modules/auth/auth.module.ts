@@ -12,6 +12,10 @@ import {
 import { PostgresCredentialsRepository } from "@/modules/auth/credentials/infrastructure/repositories/postgres-credentials.repository";
 import { createIdentityModule, type IdentityModule } from "@/modules/auth/identity/identity.module";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
+import { PostgresMfaRepository } from "@/modules/auth/mfa/infrastructure/repositories/postgres-mfa.repository";
+import { AesGcmSecretEncryptor } from "@/modules/auth/mfa/infrastructure/security/aes-gcm-secret.encryptor";
+import { Rfc6238TotpService } from "@/modules/auth/mfa/infrastructure/security/rfc6238-totp.service";
+import { createMfaModule, type MfaModule } from "@/modules/auth/mfa/mfa.module";
 import { createOAuthModule, type OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { PostgresSessionRepository } from "@/modules/auth/sessions/infrastructure/repositories/postgres-session.repository";
 import { createSessionsModule, type SessionsModule } from "@/modules/auth/sessions/sessions.module";
@@ -48,12 +52,18 @@ export type AuthModule = IdentityModule &
   OAuthModule &
   AuthorizationModule &
   AuditModule &
+  MfaModule &
   AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const credentialsRepository = new PostgresCredentialsRepository();
   const identityRepository = new PostgresIdentityRepository();
   const sessionRepository = new PostgresSessionRepository();
+  const mfaRepository = new PostgresMfaRepository();
+  const totpService = new Rfc6238TotpService();
+  const secretEncryptor = new AesGcmSecretEncryptor(
+    options.env.AUTH_MFA_ENCRYPTION_KEY ?? options.env.AUTH_JWT_SECRET,
+  );
 
   const accessTokenSigner =
     options.accessTokenSigner ??
@@ -80,6 +90,21 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       options.env.NODE_ENV === Environment.STAGING,
   };
 
+  const mfaModule = createMfaModule({
+    mfaRepository,
+    identityRepository,
+    credentialsRepository,
+    sessionRepository,
+    passwordHasher: options.passwordHasher,
+    accessTokenSigner,
+    totpService,
+    secretEncryptor,
+    emailSender: options.emailSender,
+    emailOptions,
+    sessionOptions,
+    cookieOptions,
+  });
+
   return {
     ...createIdentityModule({
       identityRepository,
@@ -97,6 +122,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       sessionRepository,
       passwordHasher: options.passwordHasher,
       accessTokenSigner,
+      mfaSignInGuard: mfaModule.mfaSignInGuard,
       emailSender: options.emailSender,
       emailOptions,
       sessionOptions,
@@ -122,6 +148,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       identityRepository,
       sessionRepository,
       accessTokenSigner,
+      mfaSignInGuard: mfaModule.mfaSignInGuard,
       sessionOptions,
       cookieOptions,
     }),
@@ -133,6 +160,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       jobQueue: options.jobQueue,
       objectStorage: options.objectStorage,
     }),
+    ...mfaModule,
     ...createAuthHttpGuards(accessTokenSigner),
   };
 }

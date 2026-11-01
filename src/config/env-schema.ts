@@ -208,6 +208,11 @@ export const envSchema = z
       .string("Auth JWT secret is required.")
       .min(32, "Auth JWT secret must be at least 32 characters long"),
 
+    AUTH_MFA_ENCRYPTION_KEY: z.preprocess(
+      emptyToUndefined,
+      z.string().min(32, "Auth MFA encryption key must be at least 32 characters long").optional(),
+    ),
+
     AUTH_JWT_ISSUER: z.string("Auth JWT issuer is required.").min(1).default("api"),
 
     AUTH_JWT_AUDIENCE: z.string("Auth JWT audience is required.").min(1).default("api"),

@@ -21,10 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PATCH /api/v1/auth/sessions/{sessionId}` — set a session device label (`deviceName`, max 255)
 - `POST /api/v1/auth/magic-link/request` — public passwordless sign-in email (anti-enumeration; 15-minute single-use token)
 - `POST /api/v1/auth/magic-link/consume` — consume a magic-link token and issue a session (activates `pending_verification`; no auto-signup)
+- `GET /api/v1/users/me/mfa` — MFA status and verified factors
+- `POST /api/v1/users/me/mfa/enroll` — begin TOTP/SMS/email enrollment
+- `POST /api/v1/users/me/mfa/enroll/confirm` — confirm enrollment and issue recovery codes on first enable
+- `DELETE /api/v1/users/me/mfa` — disable MFA with password or TOTP/recovery code
+- `POST /api/v1/auth/mfa/challenge` — start an MFA challenge from a login continuation token
+- `POST /api/v1/auth/mfa/challenge/verify` — verify TOTP/OTP/recovery code and issue a session
+- `POST /api/v1/users/me/mfa/recovery-codes/regenerate` — replace unused recovery codes
 
 ### Changed
 
 - Public `/auth/providers` and `/auth/config` now enable `magic_link` (`features.magicLink: true`)
+- `GET /auth/config` `features.mfa` is true
+- Password login, magic-link consume, and OAuth sign-in return `403 MFA_REQUIRED` with `details.mfaToken` when MFA is enabled (no session until challenge verify)
 
 ## [1.6.0] - 2026-11-01
 

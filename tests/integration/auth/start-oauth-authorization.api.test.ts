@@ -74,6 +74,13 @@ vi.mock("@/modules/auth/sessions/infrastructure/repositories/postgres-session.re
   }),
 }));
 
+vi.mock("@/modules/auth/mfa/infrastructure/repositories/postgres-mfa.repository", () => ({
+  PostgresMfaRepository: vi.fn(function PostgresMfaRepository() {
+    return mockAuthAccountRepository;
+  }),
+}));
+
+
 vi.mock(
   "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-authorization-state.repository",
   () => ({

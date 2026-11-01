@@ -106,7 +106,7 @@ Login, password forgot, identifier check, and magic-link request must not reveal
 | `TOKEN_INVALID` | 401 | Malformed or unknown token |
 | `TOKEN_REUSED` | 401 | Refresh reuse detected |
 | `TOKEN_REVOKED` | 401 | Session/token revoked |
-| `MFA_REQUIRED` | 403 | Login needs MFA challenge (future) |
+| `MFA_REQUIRED` | 403 | Login/OAuth/magic-link needs MFA; `details.mfaToken` continues the challenge |
 | `STEP_UP_REQUIRED` | 403 | Sensitive action needs step-up (future) |
 | `OAUTH_STATE_INVALID` | 400 | Bad OAuth state/PKCE |
 | `LAST_AUTH_METHOD` | 409 | Cannot unlink last viable method |
@@ -332,7 +332,7 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Response** `200` `data`: `AuthTokensData` including `user` + `Set-Cookie` refresh.
 
-**Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `403 MFA_REQUIRED` (future), `429`.
+**Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`, `403 MFA_REQUIRED` (`details.mfaToken`), `429`.
 
 ---
 
@@ -1091,30 +1091,32 @@ All require bearer + listed permission. Mutating actions should write `security_
 
 ---
 
-## 10. MFA, passkeys, step-up — P2 (future)
+## 10. MFA, passkeys, step-up — P2
 
-Contracts below are planning-level; WebAuthn payloads follow the chosen library.
+MFA (#77–#83) is implemented. Passkey/WebAuthn and step-up remain planned.
 
 ### 10.1 MFA status — #77
 
 `GET /api/v1/users/me/mfa` · **Auth:** bearer  
-**Response** `200` `data`: `{ enabled: boolean, factors: { id, type, label, verifiedAt }[] }`
+**Response** `200` `data`: `{ enabled: boolean, factors: { id, type, label, verifiedAt }[] }` — verified, non-disabled factors only.
 
 ### 10.2 Begin MFA enroll — #78
 
 `POST /api/v1/users/me/mfa/enroll` · **Auth:** bearer (+ step-up later)  
 **Body:** `{ "type": "totp" | "sms" | "email", "destination"?: string }`  
-**Response** `200` `data`: `{ factorId, secret?: string, otpauthUrl?: string }` (TOTP)
+**Response** `200` `data`: `{ factorId, secret?: string, otpauthUrl?: string }` (TOTP). SMS/email omit secret/otpauthUrl and send a 10-minute OTP (`destination` or the user's verified phone/email).
+
+**Errors:** `409 CONFLICT` if that type is already enabled, `422`.
 
 ### 10.3 Confirm MFA enroll — #79
 
 `POST /api/v1/users/me/mfa/enroll/confirm` · **Auth:** bearer  
 **Body:** `{ "factorId": string, "code": string }`  
-**Response** `200` `data`: `{ recoveryCodes: string[] }` — show once
+**Response** `200` `data`: `{ recoveryCodes: string[] }` — 10 codes, shown once on first verified factor; empty when adding another factor.
 
 ### 10.4 Disable MFA — #80
 
-`DELETE /api/v1/users/me/mfa` · **Auth:** bearer + step-up  
+`DELETE /api/v1/users/me/mfa` · **Auth:** bearer (step-up later; require `code` or `password` today)  
 **Body:** `{ "code"?: string, "password"?: string }`  
 **Response** `200` `data`: `null`
 
@@ -1127,12 +1129,12 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 ### 10.6 Verify MFA challenge — #82
 
 `POST /api/v1/auth/mfa/challenge/verify` · **Auth:** public  
-**Body:** `{ "challengeId": string, "code": string }`  
+**Body:** `{ "challengeId": string, "code": string }` — TOTP, SMS/email OTP, or a recovery code.  
 **Response** `200` `data`: `AuthTokensData`
 
 ### 10.7 Regenerate recovery codes — #83
 
-`POST /api/v1/users/me/mfa/recovery-codes/regenerate` · **Auth:** bearer + step-up  
+`POST /api/v1/users/me/mfa/recovery-codes/regenerate` · **Auth:** bearer (step-up later)  
 **Response** `200` `data`: `{ recoveryCodes: string[] }`
 
 ### 10.8 List passkeys — #84
@@ -1302,13 +1304,13 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 74  | GET    | `/api/v1/auth/config`                                     | P1       | Done                                           |
 | 75  | GET    | `/health`                                                 | P0       | Done                                           |
 | 76  | GET    | `/ready`                                                  | P1       | Done                                           |
-| 77  | GET    | `/api/v1/users/me/mfa`                                    | P2       |                                                |
-| 78  | POST   | `/api/v1/users/me/mfa/enroll`                             | P2       |                                                |
-| 79  | POST   | `/api/v1/users/me/mfa/enroll/confirm`                     | P2       |                                                |
-| 80  | DELETE | `/api/v1/users/me/mfa`                                    | P2       |                                                |
-| 81  | POST   | `/api/v1/auth/mfa/challenge`                              | P2       |                                                |
-| 82  | POST   | `/api/v1/auth/mfa/challenge/verify`                       | P2       |                                                |
-| 83  | POST   | `/api/v1/users/me/mfa/recovery-codes/regenerate`          | P2       |                                                |
+| 77  | GET    | `/api/v1/users/me/mfa`                                    | P2       | Done                                           |
+| 78  | POST   | `/api/v1/users/me/mfa/enroll`                             | P2       | Done                                           |
+| 79  | POST   | `/api/v1/users/me/mfa/enroll/confirm`                     | P2       | Done                                           |
+| 80  | DELETE | `/api/v1/users/me/mfa`                                    | P2       | Done                                           |
+| 81  | POST   | `/api/v1/auth/mfa/challenge`                              | P2       | Done                                           |
+| 82  | POST   | `/api/v1/auth/mfa/challenge/verify`                       | P2       | Done                                           |
+| 83  | POST   | `/api/v1/users/me/mfa/recovery-codes/regenerate`          | P2       | Done                                           |
 | 84  | GET    | `/api/v1/users/me/passkeys`                               | P2       |                                                |
 | 85  | POST   | `/api/v1/users/me/passkeys/register/options`              | P2       |                                                |
 | 86  | POST   | `/api/v1/users/me/passkeys/register/verify`               | P2       |                                                |
@@ -1322,5 +1324,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 79
-- Remaining: 13
+- Done: 83
+- Remaining: 9

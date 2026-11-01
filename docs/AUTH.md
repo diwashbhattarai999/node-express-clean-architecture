@@ -746,25 +746,23 @@ Authentication is provided through the access token.
 
 ---
 
-# 20. Future MFA
+# 20. MFA
 
-Planned:
+Normative paths: [AUTH_API.md](AUTH_API.md) §10.
 
 ```http
-POST   /api/v1/auth/mfa/setup
-POST   /api/v1/auth/mfa/verify
-DELETE /api/v1/auth/mfa
+GET    /api/v1/users/me/mfa
+POST   /api/v1/users/me/mfa/enroll
+POST   /api/v1/users/me/mfa/enroll/confirm
+DELETE /api/v1/users/me/mfa
+POST   /api/v1/auth/mfa/challenge
+POST   /api/v1/auth/mfa/challenge/verify
+POST   /api/v1/users/me/mfa/recovery-codes/regenerate
 ```
 
-Potential mechanisms:
+Mechanisms: TOTP, SMS/email OTP, recovery codes. Passkeys remain future (AUTH_API.md §10.8+).
 
-```text
-TOTP
-Recovery Codes
-WebAuthn / Passkeys
-```
-
-MFA must be completed before creating a fully authenticated session.
+Login, magic-link consume, and OAuth sign-in return `403 MFA_REQUIRED` with `details.mfaToken` when a verified factor exists. The session is issued only after challenge verify. TOTP secrets are encrypted at rest (`AUTH_MFA_ENCRYPTION_KEY`, else `AUTH_JWT_SECRET`).
 
 ---
 
@@ -868,10 +866,16 @@ GET    /api/v1/auth/config
 GET    /health
 GET    /ready
 
-OAUTH / AUTHZ / ADMIN
-…      (MFA / passkeys — AUTH_API.md §10)
+MFA
+GET    /api/v1/users/me/mfa
+POST   /api/v1/users/me/mfa/enroll
+POST   /api/v1/users/me/mfa/enroll/confirm
+DELETE /api/v1/users/me/mfa
+POST   /api/v1/auth/mfa/challenge
+POST   /api/v1/auth/mfa/challenge/verify
+POST   /api/v1/users/me/mfa/recovery-codes/regenerate
 
-MFA / PASSKEYS (future — AUTH_API.md §10)
+PASSKEYS (future — AUTH_API.md §10)
 ```
 
 ---

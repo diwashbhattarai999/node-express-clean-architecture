@@ -69,7 +69,11 @@ const mockIdentityRepository = {
   findAdminDetails: vi.fn(),
   setUserStatus: vi.fn(),
   hardDeleteById: vi.fn(),
+  hasVerifiedFactor: vi.fn(),
+  insertChallenge: vi.fn(),
+  findAuthUserById: vi.fn(),
 };
+
 
 vi.mock("@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository", () => ({
   PostgresIdentityRepository: vi.fn(function PostgresIdentityRepository() {
@@ -100,6 +104,13 @@ vi.mock("@/modules/auth/sessions/infrastructure/repositories/postgres-session.re
     return mockSessionRepository;
   }),
 }));
+
+vi.mock("@/modules/auth/mfa/infrastructure/repositories/postgres-mfa.repository", () => ({
+  PostgresMfaRepository: vi.fn(function PostgresMfaRepository() {
+    return mockIdentityRepository;
+  }),
+}));
+
 
 vi.mock(
   "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-authorization-state.repository",

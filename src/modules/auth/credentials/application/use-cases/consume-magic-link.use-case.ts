@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 import type { ConsumeMagicLinkDto } from "@/modules/auth/credentials/application/dto/consume-magic-link.dto";
 import { AuthForbiddenError } from "@/modules/auth/credentials/application/errors/auth-forbidden.error";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
+import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa-sign-in-guard";
+import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import { TokenExpiredError } from "@/modules/auth/shared/application/errors/token-expired.error";
 import { TokenInvalidError } from "@/modules/auth/shared/application/errors/token-invalid.error";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
@@ -31,7 +33,9 @@ export type ConsumeMagicLinkRequestMeta = {
 export class ConsumeMagicLinkUseCase {
   public constructor(
     private readonly credentialsRepository: ICredentialsRepository,
+    private readonly sessionRepository: ISessionRepository,
     private readonly accessTokenSigner: IAccessTokenSigner,
+    private readonly mfaSignInGuard: MfaSignInGuard,
     private readonly options: ConsumeMagicLinkUseCaseOptions,
   ) {}
 
@@ -45,19 +49,7 @@ export class ConsumeMagicLinkUseCase {
       throw new TokenInvalidError();
     }
 
-    const sessionId = randomUUID();
-    const familyId = randomUUID();
-    const refreshToken = generateRefreshToken();
-    const now = Date.now();
-
-    const result = await this.credentialsRepository.consumeMagicLinkByTokenHash(hashToken(token), {
-      id: sessionId,
-      familyId,
-      refreshTokenHash: hashToken(refreshToken),
-      expiresAt: new Date(now + this.options.refreshTokenTtlSeconds * 1000),
-      ipAddress: meta.ipAddress ?? null,
-      userAgent: meta.userAgent ?? null,
-    });
+    const result = await this.credentialsRepository.consumeMagicLinkByTokenHash(hashToken(token));
 
     switch (result.outcome) {
       case "invalid":
@@ -72,9 +64,25 @@ export class ConsumeMagicLinkUseCase {
         break;
     }
 
+    await this.mfaSignInGuard.assertNotRequired(result.user.id);
+
+    const sessionId = randomUUID();
+    const familyId = randomUUID();
+    const refreshToken = generateRefreshToken();
+    const now = Date.now();
+
+    await this.sessionRepository.createSession(result.user.id, {
+      id: sessionId,
+      familyId,
+      refreshTokenHash: hashToken(refreshToken),
+      expiresAt: new Date(now + this.options.refreshTokenTtlSeconds * 1000),
+      ipAddress: meta.ipAddress ?? null,
+      userAgent: meta.userAgent ?? null,
+    });
+
     const signed = await this.accessTokenSigner.sign({
       userId: result.user.id,
-      sessionId: result.sessionId,
+      sessionId,
     });
 
     return {
