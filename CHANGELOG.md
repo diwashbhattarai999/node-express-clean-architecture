@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-01
+
 ### Added
 
 - `GET /api/v1/authz/me/roles` — bearer-authenticated list of the current user's assigned roles (`Role[]`)
