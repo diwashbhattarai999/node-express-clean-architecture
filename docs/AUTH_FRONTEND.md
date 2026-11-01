@@ -143,6 +143,10 @@ Also under `/api/v1/admin` (bearer + permission):
 | `DELETE` | `/roles/:roleId/permissions/:permissionId` | bearer + `permissions.assign` |
 | `GET` | `/roles/:roleId/users` | bearer + `roles.read` |
 | `GET` | `/users/:userId/roles` | bearer + `roles.read` |
+| `POST` | `/users/:userId/roles` | bearer + `roles.assign` |
+| `DELETE` | `/users/:userId/roles/:roleId` | bearer + `roles.assign` |
+| `PUT` | `/users/:userId/roles` | bearer + `roles.assign` |
+| `GET` | `/users/:userId/permissions` | bearer + `permissions.read` |
 
 ---
 
@@ -758,6 +762,64 @@ Full replace. Empty array clears all. Duplicates are ignored. Unknown permission
 **Auth:** bearer + `roles.read`. `userId` must be a UUID.
 
 **Response** `200` `data`: `Role[]`. Newest assignments first, then `key`. Soft-deleted users are `404`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Assign role to user (admin)
+
+`POST /api/v1/admin/users/{userId}/roles`
+
+**Auth:** bearer + `roles.assign`. `userId` must be a UUID.
+
+```json
+{ "roleId": "550e8400-e29b-41d4-a716-446655440030" }
+```
+
+**Response** `201` `data`: `Role`.
+
+**Errors:** `404 NOT_FOUND` (user or role), `409 CONFLICT` if already assigned, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Remove role from user (admin)
+
+`DELETE /api/v1/admin/users/{userId}/roles/{roleId}`
+
+**Auth:** bearer + `roles.assign`. Both ids must be UUIDs.
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `404 NOT_FOUND` if the user, role, or assignment is missing, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Replace user roles (admin)
+
+`PUT /api/v1/admin/users/{userId}/roles`
+
+**Auth:** bearer + `roles.assign`. `userId` must be a UUID.
+
+```json
+{ "roleIds": ["550e8400-e29b-41d4-a716-446655440030"] }
+```
+
+Full replace. Empty array clears all. Duplicates are ignored. Unknown role ids are `422`.
+
+**Response** `200` `data`: `Role[]`. Newest assignments first, then `key`.
+
+**Errors:** `404 NOT_FOUND` (user), `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### User effective permissions (admin)
+
+`GET /api/v1/admin/users/{userId}/permissions`
+
+**Auth:** bearer + `permissions.read`. `userId` must be a UUID.
+
+**Response** `200` `data`: `{ "permissions": string[] }` — distinct keys from the user's roles, sorted ascending.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 

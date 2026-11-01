@@ -42,6 +42,29 @@ export type ListRoleUsersResult = {
   total: number;
 };
 
+export type AssignUserRoleInput = {
+  userId: string;
+  roleId: string;
+  assignedBy: string;
+};
+
+export type AssignUserRoleResult =
+  | { outcome: "assigned"; role: Role }
+  | { outcome: "role_not_found" }
+  | { outcome: "already_assigned" };
+
+export type RemoveUserRoleResult = "removed" | "role_not_found" | "assignment_not_found";
+
+export type ReplaceUserRolesInput = {
+  userId: string;
+  roleIds: string[];
+  assignedBy: string;
+};
+
+export type ReplaceUserRolesResult =
+  | { outcome: "replaced"; roles: Role[] }
+  | { outcome: "roles_not_found"; missingIds: string[] };
+
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
   list(query: ListRolesQuery): Promise<ListRolesResult>;
@@ -51,4 +74,7 @@ export interface IRoleRepository {
   update(roleId: string, data: UpdateRoleData): Promise<Role | null>;
   deleteById(roleId: string): Promise<DeleteRoleResult>;
   listUsersForRole(roleId: string, query: ListRoleUsersQuery): Promise<ListRoleUsersResult>;
+  assignToUser(input: AssignUserRoleInput): Promise<AssignUserRoleResult>;
+  removeFromUser(userId: string, roleId: string): Promise<RemoveUserRoleResult>;
+  replaceForUser(input: ReplaceUserRolesInput): Promise<ReplaceUserRolesResult>;
 }

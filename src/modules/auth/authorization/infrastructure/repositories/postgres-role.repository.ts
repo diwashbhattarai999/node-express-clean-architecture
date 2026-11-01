@@ -8,6 +8,8 @@ import { userRoles } from "@/infrastructure/database/drizzle/schema/authorizatio
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { RoleAlreadyExistsError } from "@/modules/auth/authorization/application/errors/role-already-exists.error";
 import type {
+  AssignUserRoleInput,
+  AssignUserRoleResult,
   CreateRoleData,
   DeleteRoleResult,
   IRoleRepository,
@@ -15,6 +17,9 @@ import type {
   ListRolesResult,
   ListRoleUsersQuery,
   ListRoleUsersResult,
+  RemoveUserRoleResult,
+  ReplaceUserRolesInput,
+  ReplaceUserRolesResult,
   Role,
   UpdateRoleData,
 } from "@/modules/auth/authorization/application/ports/role.repository";
@@ -219,6 +224,99 @@ export class PostgresRoleRepository implements IRoleRepository {
       total: totalResult?.value ?? 0,
       items: rows.map((row) => toAuthUser(row, identitiesByUser.get(row.id) ?? [])),
     };
+  }
+
+  public async assignToUser(input: AssignUserRoleInput): Promise<AssignUserRoleResult> {
+    return db.transaction(async (tx) => {
+      const [role] = await tx
+        .select(roleColumns)
+        .from(roles)
+        .where(eq(roles.id, input.roleId))
+        .limit(1);
+
+      if (!role) {
+        return { outcome: "role_not_found" };
+      }
+
+      const [existing] = await tx
+        .select({ userId: userRoles.userId })
+        .from(userRoles)
+        .where(and(eq(userRoles.userId, input.userId), eq(userRoles.roleId, input.roleId)))
+        .limit(1);
+
+      if (existing) {
+        return { outcome: "already_assigned" };
+      }
+
+      await tx.insert(userRoles).values({
+        userId: input.userId,
+        roleId: input.roleId,
+        assignedBy: input.assignedBy,
+      });
+
+      return { outcome: "assigned", role: toRole(role) };
+    });
+  }
+
+  public async removeFromUser(userId: string, roleId: string): Promise<RemoveUserRoleResult> {
+    return db.transaction(async (tx) => {
+      const [role] = await tx
+        .select({ id: roles.id })
+        .from(roles)
+        .where(eq(roles.id, roleId))
+        .limit(1);
+
+      if (!role) {
+        return "role_not_found";
+      }
+
+      const [deleted] = await tx
+        .delete(userRoles)
+        .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId)))
+        .returning({ userId: userRoles.userId });
+
+      return deleted ? "removed" : "assignment_not_found";
+    });
+  }
+
+  public async replaceForUser(input: ReplaceUserRolesInput): Promise<ReplaceUserRolesResult> {
+    return db.transaction(async (tx) => {
+      const uniqueIds = [...new Set(input.roleIds)];
+
+      if (uniqueIds.length > 0) {
+        const found = await tx
+          .select({ id: roles.id })
+          .from(roles)
+          .where(inArray(roles.id, uniqueIds));
+        const foundIds = new Set(found.map((row) => row.id));
+        const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+
+        if (missingIds.length > 0) {
+          return { outcome: "roles_not_found", missingIds };
+        }
+      }
+
+      await tx.delete(userRoles).where(eq(userRoles.userId, input.userId));
+
+      if (uniqueIds.length > 0) {
+        await tx.insert(userRoles).values(
+          uniqueIds.map((roleId) => ({
+            userId: input.userId,
+            roleId,
+            assignedBy: input.assignedBy,
+          })),
+        );
+      }
+
+      const rows = await tx
+        .select(roleColumns)
+        .from(userRoles)
+        .innerJoin(roles, eq(roles.id, userRoles.roleId))
+        .where(eq(userRoles.userId, input.userId))
+        .orderBy(desc(userRoles.assignedAt), asc(roles.key));
+
+      return { outcome: "replaced", roles: rows.map(toRole) };
+    });
   }
 }
 

@@ -872,6 +872,8 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 **Response** `201` `data`: `Role`
 
+**Errors:** `404 NOT_FOUND` (user or role), `409 CONFLICT` if already assigned, `403 PERMISSION_DENIED`
+
 ---
 
 ### 7.16 Remove role from user — P1
@@ -880,15 +882,19 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 **Response** `200` `data`: `null`
 
+**Errors:** `404 NOT_FOUND` (user, role, or assignment), `403 PERMISSION_DENIED`
+
 ---
 
 ### 7.17 Replace user roles — P2
 
 `PUT /api/v1/admin/users/{userId}/roles` · **Auth:** bearer + `roles.assign`
 
-**Body:** `{ "roleIds": string[] }`
+**Body:** `{ "roleIds": string[] }` — full replace. Empty array clears all. Duplicates are ignored.
 
-**Response** `200` `data`: `Role[]`
+**Response** `200` `data`: `Role[]` (sorted by assignment time descending, then `key`)
+
+**Errors:** `404 NOT_FOUND` (user), `422 VALIDATION_ERROR` (unknown role ids), `403 PERMISSION_DENIED`
 
 ---
 
@@ -896,7 +902,9 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `GET /api/v1/admin/users/{userId}/permissions` · **Auth:** bearer + `permissions.read`
 
-**Response** `200` `data`: `{ "permissions": string[] }`
+**Response** `200` `data`: `{ "permissions": string[] }` (distinct keys, sorted ascending)
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`
 
 ---
 
@@ -1263,10 +1271,10 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       | Done                                           |
 | 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       | Done                                           |
 | 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       | Done                                           |
-| 56  | POST   | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
-| 57  | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}`             | P1       |                                                |
-| 58  | PUT    | `/api/v1/admin/users/{userId}/roles`                      | P2       |                                                |
-| 59  | GET    | `/api/v1/admin/users/{userId}/permissions`                | P2       |                                                |
+| 56  | POST   | `/api/v1/admin/users/{userId}/roles`                      | P1       | Done                                           |
+| 57  | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}`             | P1       | Done                                           |
+| 58  | PUT    | `/api/v1/admin/users/{userId}/roles`                      | P2       | Done                                           |
+| 59  | GET    | `/api/v1/admin/users/{userId}/permissions`                | P2       | Done                                           |
 | 60  | GET    | `/api/v1/admin/users`                                     | P1       |                                                |
 | 61  | GET    | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
 | 62  | PATCH  | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
@@ -1304,5 +1312,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 52
-- Remaining: 40
+- Done: 56
+- Remaining: 36

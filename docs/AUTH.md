@@ -843,6 +843,10 @@ PUT    /api/v1/admin/roles/{roleId}/permissions
 DELETE /api/v1/admin/roles/{roleId}/permissions/{permissionId}
 GET    /api/v1/admin/roles/{roleId}/users
 GET    /api/v1/admin/users/{userId}/roles
+POST   /api/v1/admin/users/{userId}/roles
+DELETE /api/v1/admin/users/{userId}/roles/{roleId}
+PUT    /api/v1/admin/users/{userId}/roles
+GET    /api/v1/admin/users/{userId}/permissions
 
 OAUTH / AUTHZ / ADMIN
 …      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs
