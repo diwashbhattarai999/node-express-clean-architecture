@@ -115,6 +115,7 @@ Also under `/api/v1/users` (same bearer):
 | `GET` | `/me/oauth-accounts` | bearer |
 | `GET` | `/me/oauth-accounts/{provider}/authorize` | bearer |
 | `POST` | `/me/oauth-accounts/{provider}/link` | bearer |
+| `DELETE` | `/me/oauth-accounts/{provider}` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -397,6 +398,18 @@ Native clients that sent their own PKCE get a `302` to `redirectUri` with `code`
 **Response** `200` `data`: `OAuthAccount`.
 
 **Errors:** `400 OAUTH_STATE_INVALID`, `401 TOKEN_*`, `404 NOT_FOUND`, `409 CONFLICT` (subject linked elsewhere, or this provider already linked), `422 VALIDATION_ERROR`.
+
+---
+
+### Unlink OAuth
+
+`DELETE /api/v1/users/me/oauth-accounts/{provider}`
+
+**Auth:** bearer. Removes that provider link. Allowed when another sign-in method remains (another OAuth provider, or an email/phone/username login identity).
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `409 LAST_AUTH_METHOD`, `404 NOT_FOUND`, `422` (unknown provider), `401 TOKEN_*`.
 
 ---
 

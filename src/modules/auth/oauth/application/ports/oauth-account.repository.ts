@@ -20,6 +20,11 @@ export type CreateOAuthAccountEmail = {
   verifiedAt: Date;
 };
 
+export type UnlinkOAuthAccountResult =
+  | { outcome: "removed" }
+  | { outcome: "not_found" }
+  | { outcome: "last_auth_method" };
+
 export type LinkOAuthAccountInput = {
   userId: string;
   provider: TOauthProviderName;
@@ -58,4 +63,6 @@ export interface IOauthAccountRepository {
   recordSuccessfulLogin(externalIdentityId: string): Promise<AuthUser>;
 
   linkToUser(input: LinkOAuthAccountInput): Promise<OAuthAccount>;
+
+  unlinkFromUser(userId: string, provider: TOauthProviderName): Promise<UnlinkOAuthAccountResult>;
 }

@@ -815,6 +815,7 @@ PATCH  /api/v1/users/me/username
 GET    /api/v1/users/me/oauth-accounts
 GET    /api/v1/users/me/oauth-accounts/:provider/authorize
 POST   /api/v1/users/me/oauth-accounts/:provider/link
+DELETE /api/v1/users/me/oauth-accounts/:provider
 
 EMAIL / PHONE / PASSWORD
 POST   /api/v1/auth/email/verify

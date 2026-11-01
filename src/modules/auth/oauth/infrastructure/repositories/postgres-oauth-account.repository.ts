@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -14,6 +14,7 @@ import type {
   LinkOAuthAccountInput,
   OAuthAccount,
   OAuthLinkedAccount,
+  UnlinkOAuthAccountResult,
 } from "@/modules/auth/oauth/application/ports/oauth-account.repository";
 import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
 
@@ -203,6 +204,51 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
 
       throw error;
     }
+  }
+
+  public async unlinkFromUser(
+    userId: string,
+    provider: TOauthProviderName,
+  ): Promise<UnlinkOAuthAccountResult> {
+    return db.transaction(async (tx) => {
+      const [linked] = await tx
+        .select({ id: externalIdentities.id })
+        .from(externalIdentities)
+        .where(
+          and(eq(externalIdentities.userId, userId), eq(externalIdentities.provider, provider)),
+        )
+        .limit(1);
+
+      if (!linked) {
+        return { outcome: "not_found" };
+      }
+
+      const [otherOauth] = await tx
+        .select({ id: externalIdentities.id })
+        .from(externalIdentities)
+        .where(
+          and(eq(externalIdentities.userId, userId), ne(externalIdentities.provider, provider)),
+        )
+        .limit(1);
+
+      const [otherLogin] = await tx
+        .select({ id: loginIdentities.id })
+        .from(loginIdentities)
+        .where(eq(loginIdentities.userId, userId))
+        .limit(1);
+
+      if (!otherOauth && !otherLogin) {
+        return { outcome: "last_auth_method" };
+      }
+
+      await tx
+        .delete(externalIdentities)
+        .where(
+          and(eq(externalIdentities.userId, userId), eq(externalIdentities.provider, provider)),
+        );
+
+      return { outcome: "removed" };
+    });
   }
 
   public async recordSuccessfulLogin(externalIdentityId: string): Promise<AuthUser> {

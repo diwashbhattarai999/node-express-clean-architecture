@@ -33,6 +33,7 @@ describe("HandleOAuthCallbackUseCase", () => {
     createAccount: vi.fn(),
     recordSuccessfulLogin: vi.fn(),
     linkToUser: vi.fn(),
+    unlinkFromUser: vi.fn(),
   };
 
   const providerClient: IOauthProviderClient = {

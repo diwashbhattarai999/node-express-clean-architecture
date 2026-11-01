@@ -15,6 +15,7 @@ const mockOAuthAccountRepository = {
   createAccount: vi.fn(),
   recordSuccessfulLogin: vi.fn(),
   linkToUser: vi.fn(),
+  unlinkFromUser: vi.fn(),
 };
 
 const mockSessionRepository = {

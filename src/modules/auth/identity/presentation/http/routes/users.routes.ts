@@ -11,6 +11,7 @@ import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/htt
 import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { linkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http/validators/link-oauth-account.validator";
 import { startOAuthAuthorizationSchema } from "@/modules/auth/oauth/presentation/http/validators/start-oauth-authorization.validator";
+import { unlinkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http/validators/unlink-oauth-account.validator";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 /**
@@ -25,6 +26,7 @@ export function createUsersRouter(
       | "listOwnOAuthAccountsController"
       | "startOAuthLinkAuthorizationController"
       | "linkOAuthAccountController"
+      | "unlinkOAuthAccountController"
     > &
     Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
 ): IRouter {
@@ -48,6 +50,13 @@ export function createUsersRouter(
     validate(linkOAuthAccountSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.linkOAuthAccountController),
+  );
+
+  router.delete(
+    "/me/oauth-accounts/:provider",
+    validate(unlinkOAuthAccountSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.unlinkOAuthAccountController),
   );
 
   router.get(

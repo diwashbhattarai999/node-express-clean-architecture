@@ -7,6 +7,7 @@ import { LinkOAuthAccountUseCase } from "@/modules/auth/oauth/application/use-ca
 import { ListOwnOAuthAccountsUseCase } from "@/modules/auth/oauth/application/use-cases/list-own-oauth-accounts.use-case";
 import { StartOAuthAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-authorization.use-case";
 import { StartOAuthLinkAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-link-authorization.use-case";
+import { UnlinkOAuthAccountUseCase } from "@/modules/auth/oauth/application/use-cases/unlink-oauth-account.use-case";
 import { createOAuthProviderCatalog } from "@/modules/auth/oauth/infrastructure/create-oauth-provider-catalog";
 import { OauthProviderClient } from "@/modules/auth/oauth/infrastructure/oauth-provider-client";
 import { PostgresOAuthAccountRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-account.repository";
@@ -17,6 +18,7 @@ import { LinkOAuthAccountController } from "@/modules/auth/oauth/presentation/ht
 import { ListOwnOAuthAccountsController } from "@/modules/auth/oauth/presentation/http/controllers/list-own-oauth-accounts.controller";
 import { StartOAuthAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-authorization.controller";
 import { StartOAuthLinkAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-link-authorization.controller";
+import { UnlinkOAuthAccountController } from "@/modules/auth/oauth/presentation/http/controllers/unlink-oauth-account.controller";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type {
@@ -42,6 +44,7 @@ export type OAuthModule = {
   listOwnOAuthAccountsController: ListOwnOAuthAccountsController;
   startOAuthLinkAuthorizationController: StartOAuthLinkAuthorizationController;
   linkOAuthAccountController: LinkOAuthAccountController;
+  unlinkOAuthAccountController: UnlinkOAuthAccountController;
 };
 
 export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModule {
@@ -126,5 +129,8 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
     linkOAuthAccountController: new LinkOAuthAccountController(linkOAuthAccountUseCase, {
       secureCookies: options.cookieOptions.secureCookies,
     }),
+    unlinkOAuthAccountController: new UnlinkOAuthAccountController(
+      new UnlinkOAuthAccountUseCase(options.identityRepository, accountRepository),
+    ),
   };
 }

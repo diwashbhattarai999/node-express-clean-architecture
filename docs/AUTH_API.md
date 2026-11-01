@@ -694,7 +694,7 @@ Same query as 6.1 with `intent=link`.
 
 **Response** `200` `data`: `null`
 
-**Errors:** `409 LAST_AUTH_METHOD`
+**Errors:** `409 LAST_AUTH_METHOD`, `404 NOT_FOUND`
 
 ---
 
@@ -1221,7 +1221,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 37  | GET    | `/api/v1/users/me/oauth-accounts`                         | P1       | Done                                           |
 | 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       | Done                                           |
 | 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       | Done                                           |
-| 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       |                                                |
+| 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       | Done                                           |
 | 41  | GET    | `/api/v1/auth/providers`                                  | P1       |                                                |
 | 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       |                                                |
 | 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       |                                                |
