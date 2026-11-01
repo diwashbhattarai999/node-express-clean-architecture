@@ -837,6 +837,8 @@ GET    /api/v1/admin/roles/{roleId}
 POST   /api/v1/admin/roles
 PATCH  /api/v1/admin/roles/{roleId}
 DELETE /api/v1/admin/roles/{roleId}
+GET    /api/v1/admin/permissions
+GET    /api/v1/admin/permissions/{permissionId}
 
 OAUTH / AUTHZ / ADMIN
 …      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs

@@ -137,6 +137,8 @@ Also under `/api/v1/admin` (bearer + permission):
 | `POST` | `/roles` | bearer + `roles.create` |
 | `PATCH` | `/roles/:roleId` | bearer + `roles.update` |
 | `DELETE` | `/roles/:roleId` | bearer + `roles.delete` |
+| `GET` | `/permissions` | bearer + `permissions.read` |
+| `GET` | `/permissions/:permissionId` | bearer + `permissions.read` |
 
 ---
 
@@ -674,6 +676,30 @@ Cookies cleared.
 **Response** `200` `data`: `null`.
 
 **Errors:** `409 CONFLICT` if any user still has the role, `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### List permissions (admin)
+
+`GET /api/v1/admin/permissions`
+
+**Auth:** bearer + `permissions.read`. Query: `page`, `limit` (max 100), optional `search` (matches key, name, or description).
+
+**Response** `200` `data`: `Permission[]` + pagination `meta`, sorted by `key`. Empty page when none match.
+
+**Errors:** `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Get permission (admin)
+
+`GET /api/v1/admin/permissions/{permissionId}`
+
+**Auth:** bearer + `permissions.read`. `permissionId` must be a UUID.
+
+**Response** `200` `data`: `Permission`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

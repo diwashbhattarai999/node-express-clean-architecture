@@ -18,6 +18,8 @@ describe("ListRolesUseCase", () => {
     listKeysForUser: vi.fn(),
     hasKeyForUser: vi.fn(),
     listForRole: vi.fn(),
+    list: vi.fn(),
+    findById: vi.fn(),
   };
 
   const roleRepository: IRoleRepository = {

@@ -802,9 +802,11 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `GET /api/v1/admin/permissions` · **Auth:** bearer + `permissions.read`
 
-**Query:** pagination, `search?`
+**Query:** pagination (`page`, `limit`), `search?` (matches `key` / `name` / `description`)
 
-**Response** `200` `data`: `Permission[]` + `meta`
+**Response** `200` `data`: `Permission[]` + `meta` (sorted by `key` ascending)
+
+**Errors:** `403 PERMISSION_DENIED`
 
 ---
 
@@ -813,6 +815,8 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 `GET /api/v1/admin/permissions/{permissionId}` · **Auth:** bearer + `permissions.read`
 
 **Response** `200` `data`: `Permission`
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`
 
 ---
 
@@ -1245,8 +1249,8 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 47  | POST   | `/api/v1/admin/roles`                                     | P1       | Done                                           |
 | 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
 | 49  | DELETE | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
-| 50  | GET    | `/api/v1/admin/permissions`                               | P1       |                                                |
-| 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       |                                                |
+| 50  | GET    | `/api/v1/admin/permissions`                               | P1       | Done                                           |
+| 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       | Done                                           |
 | 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       |                                                |
 | 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       |                                                |
 | 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       |                                                |
@@ -1292,5 +1296,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 46
-- Remaining: 46
+- Done: 48
+- Remaining: 44

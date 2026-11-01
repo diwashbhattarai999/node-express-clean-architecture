@@ -3,9 +3,11 @@ import type { RequestHandler } from "express";
 import { CheckPermissionUseCase } from "@/modules/auth/authorization/application/use-cases/check-permission.use-case";
 import { CreateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/create-role.use-case";
 import { DeleteRoleUseCase } from "@/modules/auth/authorization/application/use-cases/delete-role.use-case";
+import { GetPermissionUseCase } from "@/modules/auth/authorization/application/use-cases/get-permission.use-case";
 import { GetRoleUseCase } from "@/modules/auth/authorization/application/use-cases/get-role.use-case";
 import { ListOwnPermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/list-own-permissions.use-case";
 import { ListOwnRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-own-roles.use-case";
+import { ListPermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/list-permissions.use-case";
 import { ListRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-roles.use-case";
 import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
 import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
@@ -13,9 +15,11 @@ import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastruct
 import { CheckPermissionController } from "@/modules/auth/authorization/presentation/http/controllers/check-permission.controller";
 import { CreateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/create-role.controller";
 import { DeleteRoleController } from "@/modules/auth/authorization/presentation/http/controllers/delete-role.controller";
+import { GetPermissionController } from "@/modules/auth/authorization/presentation/http/controllers/get-permission.controller";
 import { GetRoleController } from "@/modules/auth/authorization/presentation/http/controllers/get-role.controller";
 import { ListOwnPermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/list-own-permissions.controller";
 import { ListOwnRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-own-roles.controller";
+import { ListPermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/list-permissions.controller";
 import { ListRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-roles.controller";
 import { UpdateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/update-role.controller";
 import { createRequirePermission } from "@/modules/auth/authorization/presentation/http/middleware/require-permission.middleware";
@@ -34,6 +38,8 @@ export type AuthorizationModule = {
   createRoleController: CreateRoleController;
   updateRoleController: UpdateRoleController;
   deleteRoleController: DeleteRoleController;
+  listPermissionsController: ListPermissionsController;
+  getPermissionController: GetPermissionController;
   requirePermission: (permission: string) => RequestHandler;
 };
 
@@ -67,6 +73,12 @@ export function createAuthorizationModule(
     ),
     deleteRoleController: new DeleteRoleController(
       new DeleteRoleUseCase(options.identityRepository, permissionRepository, roleRepository),
+    ),
+    listPermissionsController: new ListPermissionsController(
+      new ListPermissionsUseCase(options.identityRepository, permissionRepository),
+    ),
+    getPermissionController: new GetPermissionController(
+      new GetPermissionUseCase(options.identityRepository, permissionRepository),
     ),
     requirePermission: createRequirePermission(permissionRepository),
   };
