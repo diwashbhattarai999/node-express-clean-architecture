@@ -794,6 +794,7 @@ High-level surface (see AUTH_API.md for full detail, including RBAC/admin/audit/
 ```text
 REGISTRATION / LOGIN
 POST   /api/v1/auth/register
+POST   /api/v1/auth/identifiers/check
 POST   /api/v1/auth/login
 POST   /api/v1/auth/magic-link/request
 POST   /api/v1/auth/magic-link/consume
@@ -813,6 +814,8 @@ CURRENT USER / PROFILE
 GET    /api/v1/auth/me
 GET    /api/v1/users/me
 PATCH  /api/v1/users/me/username
+POST   /api/v1/users/me/phones
+DELETE /api/v1/users/me/phones/{identityId}
 GET    /api/v1/users/me/oauth-accounts
 GET    /api/v1/users/me/oauth-accounts/:provider/authorize
 POST   /api/v1/users/me/oauth-accounts/:provider/link

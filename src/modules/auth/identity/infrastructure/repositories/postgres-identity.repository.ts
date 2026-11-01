@@ -28,6 +28,7 @@ import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/errors/identity-already-exists.error";
 import type {
   AddEmailIdentityInput,
+  AddPhoneIdentityInput,
   AdminUserDetails,
   ApplyDueAccountDeletionsInput,
   CancelAccountDeletionResult,
@@ -39,6 +40,8 @@ import type {
   RegisterAccountInput,
   RemoveEmailIdentityInput,
   RemoveEmailIdentityResult,
+  RemovePhoneIdentityInput,
+  RemovePhoneIdentityResult,
   ScheduleAccountDeletionInput,
   ScheduleAccountDeletionResult,
   SetUserStatusInput,
@@ -441,60 +444,11 @@ export class PostgresIdentityRepository implements IIdentityRepository {
   }
 
   public async addEmailIdentity(input: AddEmailIdentityInput): Promise<AuthLoginIdentity> {
-    try {
-      return await db.transaction(async (tx) => {
-        const [primaryEmail] = await tx
-          .select({ id: loginIdentities.id })
-          .from(loginIdentities)
-          .where(
-            and(
-              eq(loginIdentities.userId, input.userId),
-              eq(loginIdentities.type, "email"),
-              eq(loginIdentities.isPrimary, true),
-            ),
-          )
-          .limit(1);
+    return this.addUnverifiedIdentity("email", "email_verification", input);
+  }
 
-        const [created] = await tx
-          .insert(loginIdentities)
-          .values({
-            userId: input.userId,
-            type: "email",
-            identifier: input.identifier,
-            normalizedIdentifier: input.normalizedIdentifier,
-            isPrimary: !primaryEmail,
-            verifiedAt: null,
-          })
-          .returning();
-
-        if (!created) {
-          throw new Error("Failed to add email identity.");
-        }
-
-        await tx.insert(authTokens).values({
-          userId: input.userId,
-          identityId: created.id,
-          type: "email_verification",
-          tokenHash: input.tokenHash,
-          expiresAt: input.expiresAt,
-        });
-
-        return {
-          id: created.id,
-          type: created.type,
-          identifier: created.identifier,
-          verifiedAt: created.verifiedAt,
-          isPrimary: created.isPrimary,
-          createdAt: created.createdAt,
-        };
-      });
-    } catch (error) {
-      if (isUniqueViolation(error)) {
-        throw new IdentityAlreadyExistsError();
-      }
-
-      throw error;
-    }
+  public async addPhoneIdentity(input: AddPhoneIdentityInput): Promise<AuthLoginIdentity> {
+    return this.addUnverifiedIdentity("phone", "phone_verification", input);
   }
 
   public async verifyAddedEmailByTokenHash(
@@ -593,69 +547,13 @@ export class PostgresIdentityRepository implements IIdentityRepository {
   public async removeEmailIdentity(
     input: RemoveEmailIdentityInput,
   ): Promise<RemoveEmailIdentityResult> {
-    return db.transaction(async (tx) => {
-      const [identity] = await tx
-        .select({
-          id: loginIdentities.id,
-          isPrimary: loginIdentities.isPrimary,
-        })
-        .from(loginIdentities)
-        .where(
-          and(
-            eq(loginIdentities.id, input.identityId),
-            eq(loginIdentities.userId, input.userId),
-            eq(loginIdentities.type, "email"),
-          ),
-        )
-        .limit(1);
+    return this.removeLoginIdentity("email", input);
+  }
 
-      if (!identity) {
-        return { outcome: "not_found" as const };
-      }
-
-      const [other] = await tx
-        .select({ id: loginIdentities.id })
-        .from(loginIdentities)
-        .where(and(eq(loginIdentities.userId, input.userId), ne(loginIdentities.id, identity.id)))
-        .limit(1);
-
-      if (!other) {
-        return { outcome: "last_auth_method" as const };
-      }
-
-      const now = new Date();
-
-      await tx
-        .update(authTokens)
-        .set({ revokedAt: now })
-        .where(
-          and(
-            eq(authTokens.identityId, identity.id),
-            isNull(authTokens.consumedAt),
-            isNull(authTokens.revokedAt),
-          ),
-        );
-
-      await tx.delete(loginIdentities).where(eq(loginIdentities.id, identity.id));
-
-      if (identity.isPrimary) {
-        const [nextEmail] = await tx
-          .select({ id: loginIdentities.id })
-          .from(loginIdentities)
-          .where(and(eq(loginIdentities.userId, input.userId), eq(loginIdentities.type, "email")))
-          .orderBy(asc(loginIdentities.createdAt))
-          .limit(1);
-
-        if (nextEmail) {
-          await tx
-            .update(loginIdentities)
-            .set({ isPrimary: true, updatedAt: now })
-            .where(eq(loginIdentities.id, nextEmail.id));
-        }
-      }
-
-      return { outcome: "removed" as const };
-    });
+  public async removePhoneIdentity(
+    input: RemovePhoneIdentityInput,
+  ): Promise<RemovePhoneIdentityResult> {
+    return this.removeLoginIdentity("phone", input);
   }
 
   public async scheduleAccountDeletion(
@@ -1046,6 +944,136 @@ export class PostgresIdentityRepository implements IIdentityRepository {
       .returning({ id: users.id });
 
     return deleted ? "deleted" : "not_found";
+  }
+
+  private async addUnverifiedIdentity(
+    type: Extract<TLoginIdentityType, "email" | "phone">,
+    tokenType: "email_verification" | "phone_verification",
+    input: AddEmailIdentityInput,
+  ): Promise<AuthLoginIdentity> {
+    try {
+      return await db.transaction(async (tx) => {
+        const [primaryOfType] = await tx
+          .select({ id: loginIdentities.id })
+          .from(loginIdentities)
+          .where(
+            and(
+              eq(loginIdentities.userId, input.userId),
+              eq(loginIdentities.type, type),
+              eq(loginIdentities.isPrimary, true),
+            ),
+          )
+          .limit(1);
+
+        const [created] = await tx
+          .insert(loginIdentities)
+          .values({
+            userId: input.userId,
+            type,
+            identifier: input.identifier,
+            normalizedIdentifier: input.normalizedIdentifier,
+            isPrimary: !primaryOfType,
+            verifiedAt: null,
+          })
+          .returning();
+
+        if (!created) {
+          throw new Error(`Failed to add ${type} identity.`);
+        }
+
+        await tx.insert(authTokens).values({
+          userId: input.userId,
+          identityId: created.id,
+          type: tokenType,
+          tokenHash: input.tokenHash,
+          expiresAt: input.expiresAt,
+        });
+
+        return {
+          id: created.id,
+          type: created.type,
+          identifier: created.identifier,
+          verifiedAt: created.verifiedAt,
+          isPrimary: created.isPrimary,
+          createdAt: created.createdAt,
+        };
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new IdentityAlreadyExistsError();
+      }
+
+      throw error;
+    }
+  }
+
+  private async removeLoginIdentity(
+    type: Extract<TLoginIdentityType, "email" | "phone">,
+    input: RemoveEmailIdentityInput,
+  ): Promise<RemoveEmailIdentityResult> {
+    return db.transaction(async (tx) => {
+      const [identity] = await tx
+        .select({
+          id: loginIdentities.id,
+          isPrimary: loginIdentities.isPrimary,
+        })
+        .from(loginIdentities)
+        .where(
+          and(
+            eq(loginIdentities.id, input.identityId),
+            eq(loginIdentities.userId, input.userId),
+            eq(loginIdentities.type, type),
+          ),
+        )
+        .limit(1);
+
+      if (!identity) {
+        return { outcome: "not_found" as const };
+      }
+
+      const [other] = await tx
+        .select({ id: loginIdentities.id })
+        .from(loginIdentities)
+        .where(and(eq(loginIdentities.userId, input.userId), ne(loginIdentities.id, identity.id)))
+        .limit(1);
+
+      if (!other) {
+        return { outcome: "last_auth_method" as const };
+      }
+
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.identityId, identity.id),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.delete(loginIdentities).where(eq(loginIdentities.id, identity.id));
+
+      if (identity.isPrimary) {
+        const [nextOfType] = await tx
+          .select({ id: loginIdentities.id })
+          .from(loginIdentities)
+          .where(and(eq(loginIdentities.userId, input.userId), eq(loginIdentities.type, type)))
+          .orderBy(asc(loginIdentities.createdAt))
+          .limit(1);
+
+        if (nextOfType) {
+          await tx
+            .update(loginIdentities)
+            .set({ isPrimary: true, updatedAt: now })
+            .where(eq(loginIdentities.id, nextOfType.id));
+        }
+      }
+
+      return { outcome: "removed" as const };
+    });
   }
 }
 

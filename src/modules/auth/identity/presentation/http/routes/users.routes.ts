@@ -5,8 +5,10 @@ import type { AuditModule } from "@/modules/auth/audit/audit.module";
 import { listOwnSecurityEventsSchema } from "@/modules/auth/audit/presentation/http/validators/list-own-security-events.validator";
 import type { IdentityModule } from "@/modules/auth/identity/identity.module";
 import { addEmailSchema } from "@/modules/auth/identity/presentation/http/validators/add-email.validator";
+import { addPhoneSchema } from "@/modules/auth/identity/presentation/http/validators/add-phone.validator";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
 import { removeEmailSchema } from "@/modules/auth/identity/presentation/http/validators/remove-email.validator";
+import { removePhoneSchema } from "@/modules/auth/identity/presentation/http/validators/remove-phone.validator";
 import { requestAccountDeletionSchema } from "@/modules/auth/identity/presentation/http/validators/request-account-deletion.validator";
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
@@ -94,6 +96,20 @@ export function createUsersRouter(
     validate(removeEmailSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.removeEmailController),
+  );
+
+  router.post(
+    "/me/phones",
+    validate(addPhoneSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.addPhoneController),
+  );
+
+  router.delete(
+    "/me/phones/:identityId",
+    validate(removePhoneSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.removePhoneController),
   );
 
   router.post(

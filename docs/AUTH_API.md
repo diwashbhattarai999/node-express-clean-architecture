@@ -380,7 +380,7 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Body:** `{ "type": "email" | "phone" | "username", "identifier": string }`
 
-**Response** `200` `data`: `{ "available": boolean }` — may always return `available: true` publicly and rely on register conflict; prefer generic response under anti-enumeration policy.
+**Response** `200` `data`: `{ "available": boolean }` — email/phone/username always `true` after format validation (anti-enumeration; rely on register/`PATCH username` conflict). Reserved usernames return `false`.
 
 ---
 
@@ -574,7 +574,7 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Body:** `{ "phone": string }`
 
-**Response** `201` `data`: `LoginIdentity`
+**Response** `201` `data`: `LoginIdentity` (`verifiedAt: null`). Verify with `POST /api/v1/auth/phone/verify`.
 
 ---
 
@@ -584,7 +584,7 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Response** `200` `data`: `null`
 
-**Errors:** `409 LAST_AUTH_METHOD`
+**Errors:** `409 LAST_AUTH_METHOD`, `404`
 
 ---
 
@@ -1230,7 +1230,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 8   | POST   | `/api/v1/auth/logout`                                     | P0       | Done                                           |
 | 9   | POST   | `/api/v1/auth/logout-all`                                 | P1       | Done                                           |
 | 10  | GET    | `/api/v1/auth/me`                                         | P0       | Done                                           |
-| 11  | POST   | `/api/v1/auth/identifiers/check`                          | P2       |                                                |
+| 11  | POST   | `/api/v1/auth/identifiers/check`                          | P2       | Done                                           |
 | 12  | POST   | `/api/v1/auth/password/forgot`                            | P0       | Done                                           |
 | 13  | POST   | `/api/v1/auth/password/reset/validate`                    | P1       | Done                                           |
 | 14  | POST   | `/api/v1/auth/password/reset`                             | P0       | Done                                           |
@@ -1249,8 +1249,8 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 27  | POST   | `/api/v1/users/me/emails`                                 | P1       | Done                                           |
 | 28  | POST   | `/api/v1/users/me/emails/verify`                          | P1       | Done                                           |
 | 29  | DELETE | `/api/v1/users/me/emails/{identityId}`                    | P1       | Done                                           |
-| 30  | POST   | `/api/v1/users/me/phones`                                 | P2       |                                                |
-| 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       |                                                |
+| 30  | POST   | `/api/v1/users/me/phones`                                 | P2       | Done                                           |
+| 31  | DELETE | `/api/v1/users/me/phones/{identityId}`                    | P2       | Done                                           |
 | 32  | POST   | `/api/v1/users/me/deletion-request`                       | P1       | Done                                           |
 | 33  | POST   | `/api/v1/users/me/deletion-request/cancel`                | P1       | Done                                           |
 | 34  | GET    | `/api/v1/auth/oauth/{provider}/authorize`                 | P1       | Done                                           |
@@ -1316,5 +1316,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 73
-- Remaining: 19
+- Done: 76
+- Remaining: 16

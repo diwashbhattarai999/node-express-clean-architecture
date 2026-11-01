@@ -75,6 +75,8 @@ export type AddEmailIdentityInput = {
   expiresAt: Date;
 };
 
+export type AddPhoneIdentityInput = AddEmailIdentityInput;
+
 export type VerifyAddedEmailByTokenHashResult =
   | { outcome: "invalid" }
   | { outcome: "expired" }
@@ -89,6 +91,9 @@ export type RemoveEmailIdentityResult =
   | { outcome: "removed" }
   | { outcome: "not_found" }
   | { outcome: "last_auth_method" };
+
+export type RemovePhoneIdentityInput = RemoveEmailIdentityInput;
+export type RemovePhoneIdentityResult = RemoveEmailIdentityResult;
 
 export type ScheduleAccountDeletionInput = {
   userId: string;
@@ -155,9 +160,13 @@ export interface IIdentityRepository {
 
   addEmailIdentity(input: AddEmailIdentityInput): Promise<AuthLoginIdentity>;
 
+  addPhoneIdentity(input: AddPhoneIdentityInput): Promise<AuthLoginIdentity>;
+
   verifyAddedEmailByTokenHash(tokenHash: string): Promise<VerifyAddedEmailByTokenHashResult>;
 
   removeEmailIdentity(input: RemoveEmailIdentityInput): Promise<RemoveEmailIdentityResult>;
+
+  removePhoneIdentity(input: RemovePhoneIdentityInput): Promise<RemovePhoneIdentityResult>;
 
   scheduleAccountDeletion(
     input: ScheduleAccountDeletionInput,

@@ -80,6 +80,7 @@ Frontend deep links from emails:
 | Method | Path | Auth |
 | --- | --- | --- |
 | `POST` | `/register` | public |
+| `POST` | `/identifiers/check` | public |
 | `POST` | `/email/verify` | public |
 | `POST` | `/email/verification/resend` | public |
 | `POST` | `/phone/verify` | public |
@@ -113,6 +114,8 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/emails` | bearer |
 | `POST` | `/me/emails/verify` | public (or matching bearer) |
 | `DELETE` | `/me/emails/{identityId}` | bearer |
+| `POST` | `/me/phones` | bearer |
+| `DELETE` | `/me/phones/{identityId}` | bearer |
 | `POST` | `/me/deletion-request` | bearer |
 | `POST` | `/me/deletion-request/cancel` | bearer |
 | `GET` | `/me/oauth-accounts` | bearer |
@@ -312,6 +315,24 @@ Refresh returns the same fields **without** `user`.
   "data": { "user": { "...": "UserPublic" } }
 }
 ```
+
+---
+
+### Check identifier availability
+
+`POST /api/v1/auth/identifiers/check`
+
+**Auth:** public. Validates format only; does **not** reveal whether an email, phone, or username is taken (`available: true`). Reserved usernames (`admin`, `root`, …) return `available: false`. Use register / `PATCH /users/me/username` `409 CONFLICT` for real uniqueness.
+
+```json
+{ "type": "email", "identifier": "ada@example.com" }
+```
+
+`type`: `email` | `phone` | `username`. Phone must be E.164.
+
+**Response** `200` `data`: `{ "available": boolean }`.
+
+**Errors:** `422 VALIDATION_ERROR`.
 
 ---
 
@@ -1154,6 +1175,34 @@ Unlike `GET /auth/me`, this does **not** include `roles` / `permissions`.
 `DELETE /api/v1/users/me/emails/{identityId}`
 
 **Auth:** bearer. Unlinks that email identity. Remaining emails keep a primary (oldest remaining email is promoted when the removed one was primary). Blocked when it is the last login identity (email, phone, or username).
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `409 LAST_AUTH_METHOD`, `404 NOT_FOUND`, `422` (invalid UUID), `401 TOKEN_*`.
+
+---
+
+### Add phone
+
+`POST /api/v1/users/me/phones`
+
+**Auth:** bearer. Adds an unverified phone identity. Primary only if the user has no other primary phone. SMS is not wired yet (OTP is logged like registration). Confirm with `POST /api/v1/auth/phone/verify`.
+
+```json
+{ "phone": "+9779812345678" }
+```
+
+**Response** `201` `data`: `LoginIdentity` (`verifiedAt: null`).
+
+**Errors:** `409 CONFLICT` (phone already used), `422`, `401 TOKEN_*`.
+
+---
+
+### Remove phone
+
+`DELETE /api/v1/users/me/phones/{identityId}`
+
+**Auth:** bearer. Unlinks that phone identity. Remaining phones keep a primary (oldest remaining phone is promoted when the removed one was primary). Blocked when it is the last login identity (email, phone, or username).
 
 **Response** `200` `data`: `null`.
 
