@@ -10,6 +10,7 @@ import { ListOwnPermissionsUseCase } from "@/modules/auth/authorization/applicat
 import { ListOwnRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-own-roles.use-case";
 import { ListPermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/list-permissions.use-case";
 import { ListRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-roles.use-case";
+import { RemoveRolePermissionUseCase } from "@/modules/auth/authorization/application/use-cases/remove-role-permission.use-case";
 import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
 import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
 import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
@@ -23,6 +24,7 @@ import { ListOwnPermissionsController } from "@/modules/auth/authorization/prese
 import { ListOwnRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-own-roles.controller";
 import { ListPermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/list-permissions.controller";
 import { ListRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-roles.controller";
+import { RemoveRolePermissionController } from "@/modules/auth/authorization/presentation/http/controllers/remove-role-permission.controller";
 import { UpdateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/update-role.controller";
 import { createRequirePermission } from "@/modules/auth/authorization/presentation/http/middleware/require-permission.middleware";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
@@ -43,6 +45,7 @@ export type AuthorizationModule = {
   listPermissionsController: ListPermissionsController;
   getPermissionController: GetPermissionController;
   assignRolePermissionsController: AssignRolePermissionsController;
+  removeRolePermissionController: RemoveRolePermissionController;
   requirePermission: (permission: string) => RequestHandler;
 };
 
@@ -85,6 +88,9 @@ export function createAuthorizationModule(
     ),
     assignRolePermissionsController: new AssignRolePermissionsController(
       new AssignRolePermissionsUseCase(options.identityRepository, permissionRepository),
+    ),
+    removeRolePermissionController: new RemoveRolePermissionController(
+      new RemoveRolePermissionUseCase(options.identityRepository, permissionRepository),
     ),
     requirePermission: createRequirePermission(permissionRepository),
   };

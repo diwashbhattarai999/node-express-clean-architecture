@@ -12,7 +12,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Done — `pnpm docker:up` |
 | P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; core auth + sessions + password + username + `/users/me` + emails + deletion request/cancel + OAuth authorize/callback/exchange + list/link/unlink + public providers list landed; session label still pending |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Sample users CRUD removed; `/users/me` is bearer-protected |
-| P2 | Authorization / RBAC | 14 | Tables + `/authz/me/*` + `/authz/check` + admin role CRUD + admin permission list/get/assign + `requirePermission` + `pnpm db:seed`; remaining admin RBAC APIs pending |
+| P2 | Authorization / RBAC | 14 | Tables + `/authz/me/*` + `/authz/check` + admin role CRUD + admin permission list/get/assign/unassign + `requirePermission` + `pnpm db:seed`; remaining admin RBAC APIs pending |
 | P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Done — shared 401/403/409 errors; email conflict is 409 |
 | P2 | OpenAPI / Swagger UI synced with routes | 19 | Not started |
 | P3 | Coverage thresholds in Vitest + CI coverage gate | 3 / 23 | Coverage configured, no thresholds |

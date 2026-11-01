@@ -27,6 +27,8 @@ export type ReplaceRolePermissionsResult =
   | { outcome: "role_not_found" }
   | { outcome: "permissions_not_found"; missingIds: string[] };
 
+export type RemoveRolePermissionResult = "removed" | "role_not_found" | "assignment_not_found";
+
 export interface IPermissionRepository {
   listKeysForUser(userId: string): Promise<string[]>;
   hasKeyForUser(userId: string, key: string): Promise<boolean>;
@@ -34,4 +36,5 @@ export interface IPermissionRepository {
   list(query: ListPermissionsQuery): Promise<ListPermissionsResult>;
   findById(permissionId: string): Promise<Permission | null>;
   replaceForRole(input: ReplaceRolePermissionsInput): Promise<ReplaceRolePermissionsResult>;
+  removeFromRole(roleId: string, permissionId: string): Promise<RemoveRolePermissionResult>;
 }

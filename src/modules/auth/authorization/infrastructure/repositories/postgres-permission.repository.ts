@@ -10,6 +10,7 @@ import type {
   ListPermissionsQuery,
   ListPermissionsResult,
   Permission,
+  RemoveRolePermissionResult,
   ReplaceRolePermissionsInput,
   ReplaceRolePermissionsResult,
 } from "@/modules/auth/authorization/application/ports/permission.repository";
@@ -153,6 +154,32 @@ export class PostgresPermissionRepository implements IPermissionRepository {
         .orderBy(asc(permissions.key));
 
       return { outcome: "replaced", permissions: rows.map(toPermission) };
+    });
+  }
+
+  public async removeFromRole(
+    roleId: string,
+    permissionId: string,
+  ): Promise<RemoveRolePermissionResult> {
+    return db.transaction(async (tx) => {
+      const [role] = await tx
+        .select({ id: roles.id })
+        .from(roles)
+        .where(eq(roles.id, roleId))
+        .limit(1);
+
+      if (!role) {
+        return "role_not_found";
+      }
+
+      const [deleted] = await tx
+        .delete(rolePermissions)
+        .where(
+          and(eq(rolePermissions.roleId, roleId), eq(rolePermissions.permissionId, permissionId)),
+        )
+        .returning({ permissionId: rolePermissions.permissionId });
+
+      return deleted ? "removed" : "assignment_not_found";
     });
   }
 }

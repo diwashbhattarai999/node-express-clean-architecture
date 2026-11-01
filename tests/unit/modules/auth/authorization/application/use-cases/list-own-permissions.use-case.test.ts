@@ -19,6 +19,7 @@ describe("ListOwnPermissionsUseCase", () => {
     list: vi.fn(),
     findById: vi.fn(),
     replaceForRole: vi.fn(),
+    removeFromRole: vi.fn(),
   };
 
   const useCase = new ListOwnPermissionsUseCase(identityRepository, permissionRepository);

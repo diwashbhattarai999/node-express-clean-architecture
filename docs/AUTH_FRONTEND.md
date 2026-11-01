@@ -140,6 +140,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | `GET` | `/permissions` | bearer + `permissions.read` |
 | `GET` | `/permissions/:permissionId` | bearer + `permissions.read` |
 | `PUT` | `/roles/:roleId/permissions` | bearer + `permissions.assign` |
+| `DELETE` | `/roles/:roleId/permissions/:permissionId` | bearer + `permissions.assign` |
 
 ---
 
@@ -719,6 +720,18 @@ Full replace. Empty array clears all. Duplicates are ignored. Unknown permission
 **Response** `200` `data`: `Permission[]`, sorted by `key`.
 
 **Errors:** `404 NOT_FOUND` (role), `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Remove permission from role (admin)
+
+`DELETE /api/v1/admin/roles/{roleId}/permissions/{permissionId}`
+
+**Auth:** bearer + `permissions.assign`. Both ids must be UUIDs.
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `404 NOT_FOUND` if the role is missing or the permission is not assigned, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

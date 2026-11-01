@@ -21,6 +21,7 @@ describe("GetPermissionUseCase", () => {
     list: vi.fn(),
     findById: vi.fn(),
     replaceForRole: vi.fn(),
+    removeFromRole: vi.fn(),
   };
 
   const useCase = new GetPermissionUseCase(identityRepository, permissionRepository);

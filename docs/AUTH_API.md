@@ -838,6 +838,8 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 **Response** `200` `data`: `null`
 
+**Errors:** `404 NOT_FOUND` (role or assignment), `403 PERMISSION_DENIED`
+
 ---
 
 ### 7.13 List users for role — P2
@@ -1254,7 +1256,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 50  | GET    | `/api/v1/admin/permissions`                               | P1       | Done                                           |
 | 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       | Done                                           |
 | 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       | Done                                           |
-| 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       |                                                |
+| 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       | Done                                           |
 | 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       |                                                |
 | 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
 | 56  | POST   | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
@@ -1298,5 +1300,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 49
-- Remaining: 43
+- Done: 50
+- Remaining: 42
