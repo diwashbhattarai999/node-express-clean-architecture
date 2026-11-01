@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `GET /api/v1/users/me/oauth-accounts` — bearer-authenticated list of linked OAuth accounts
+- `GET /api/v1/users/me/oauth-accounts/{provider}/authorize` — start linking an OAuth provider to the current account (`intent=link`, stores `userId`)
 
 ## [1.3.0] - 2026-10-31
 

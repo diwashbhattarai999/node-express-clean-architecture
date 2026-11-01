@@ -112,6 +112,24 @@ describe("StartOAuthAuthorizationUseCase", () => {
     expect(authorizationStateRepository.save).not.toHaveBeenCalled();
   });
 
+  it("persists userId when linking", async () => {
+    await useCase.execute({
+      provider: OAuthProviderName.GOOGLE,
+      redirectUri: "http://localhost:5173/auth/callback",
+      state: "client-csrf",
+      intent: OAuthIntent.LINK,
+      responseMode: OAuthResponseMode.JSON,
+      userId: "user-1",
+    });
+
+    expect(authorizationStateRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        intent: "link",
+        userId: "user-1",
+      }),
+    );
+  });
+
   it("throws when the provider is not configured", async () => {
     vi.mocked(providerCatalog.findByName).mockReturnValue(null);
 

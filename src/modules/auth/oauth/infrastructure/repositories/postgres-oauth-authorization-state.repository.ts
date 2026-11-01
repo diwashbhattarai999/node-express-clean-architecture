@@ -65,6 +65,7 @@ export class PostgresOAuthAuthorizationStateRepository
       ...(input.codeChallengeMethod !== undefined
         ? { codeChallengeMethod: input.codeChallengeMethod }
         : {}),
+      ...(input.userId !== undefined ? { userId: input.userId } : {}),
     });
   }
 

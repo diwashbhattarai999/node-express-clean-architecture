@@ -11,6 +11,7 @@ export type SaveOAuthAuthorizationStateInput = {
   clientState: string;
   codeChallenge?: string;
   codeChallengeMethod?: "S256";
+  userId?: string;
   expiresAt: Date;
 };
 

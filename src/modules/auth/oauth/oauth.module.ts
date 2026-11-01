@@ -5,6 +5,7 @@ import { ExchangeOAuthCodeUseCase } from "@/modules/auth/oauth/application/use-c
 import { HandleOAuthCallbackUseCase } from "@/modules/auth/oauth/application/use-cases/handle-oauth-callback.use-case";
 import { ListOwnOAuthAccountsUseCase } from "@/modules/auth/oauth/application/use-cases/list-own-oauth-accounts.use-case";
 import { StartOAuthAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-authorization.use-case";
+import { StartOAuthLinkAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-link-authorization.use-case";
 import { createOAuthProviderCatalog } from "@/modules/auth/oauth/infrastructure/create-oauth-provider-catalog";
 import { OauthProviderClient } from "@/modules/auth/oauth/infrastructure/oauth-provider-client";
 import { PostgresOAuthAccountRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-account.repository";
@@ -13,6 +14,7 @@ import { ExchangeOAuthCodeController } from "@/modules/auth/oauth/presentation/h
 import { HandleOAuthCallbackController } from "@/modules/auth/oauth/presentation/http/controllers/handle-oauth-callback.controller";
 import { ListOwnOAuthAccountsController } from "@/modules/auth/oauth/presentation/http/controllers/list-own-oauth-accounts.controller";
 import { StartOAuthAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-authorization.controller";
+import { StartOAuthLinkAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-link-authorization.controller";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type {
@@ -36,6 +38,7 @@ export type OAuthModule = {
   handleOAuthCallbackController: HandleOAuthCallbackController;
   exchangeOAuthCodeController: ExchangeOAuthCodeController;
   listOwnOAuthAccountsController: ListOwnOAuthAccountsController;
+  startOAuthLinkAuthorizationController: StartOAuthLinkAuthorizationController;
 };
 
 export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModule {
@@ -63,6 +66,10 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
       allowedRedirectUris: options.env.OAUTH_REDIRECT_URIS,
       stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
     },
+  );
+  const startOAuthLinkAuthorizationUseCase = new StartOAuthLinkAuthorizationUseCase(
+    options.identityRepository,
+    startOAuthAuthorizationUseCase,
   );
 
   const handleOAuthCallbackUseCase = new HandleOAuthCallbackUseCase(
@@ -98,5 +105,12 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
       secureCookies: options.cookieOptions.secureCookies,
     }),
     listOwnOAuthAccountsController: new ListOwnOAuthAccountsController(listOwnOAuthAccountsUseCase),
+    startOAuthLinkAuthorizationController: new StartOAuthLinkAuthorizationController(
+      startOAuthLinkAuthorizationUseCase,
+      {
+        secureCookies: options.cookieOptions.secureCookies,
+        stateTtlSeconds: options.env.AUTH_OAUTH_STATE_TTL_SECONDS,
+      },
+    ),
   };
 }

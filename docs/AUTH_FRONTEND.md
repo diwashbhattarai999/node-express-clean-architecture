@@ -113,6 +113,7 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/deletion-request` | bearer |
 | `POST` | `/me/deletion-request/cancel` | bearer |
 | `GET` | `/me/oauth-accounts` | bearer |
+| `GET` | `/me/oauth-accounts/{provider}/authorize` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
 ---
@@ -360,6 +361,18 @@ Native clients that sent their own PKCE get a `302` to `redirectUri` with `code`
 **Auth:** bearer.
 
 **Response** `200` `data`: `OAuthAccount[]` (newest `linkedAt` first). Empty list when none are linked.
+
+---
+
+### Start linking OAuth
+
+`GET /api/v1/users/me/oauth-accounts/{provider}/authorize`
+
+**Auth:** bearer. Same query as start OAuth (`redirectUri`, `state`, optional `response=json` and PKCE). Always stored as `intent=link` with the current user id — complete later with `POST .../link` (not the login callback).
+
+**Response** `302` to the IdP, or `200` `{ "authorizationUrl": "…" }`.
+
+**Errors:** `401 TOKEN_*`, `404 NOT_FOUND`, `422 VALIDATION_ERROR`.
 
 ---
 

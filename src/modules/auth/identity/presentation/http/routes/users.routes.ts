@@ -9,6 +9,7 @@ import { requestAccountDeletionSchema } from "@/modules/auth/identity/presentati
 import { updateOwnProfileSchema } from "@/modules/auth/identity/presentation/http/validators/update-own-profile.validator";
 import { verifyAddedEmailSchema } from "@/modules/auth/identity/presentation/http/validators/verify-added-email.validator";
 import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
+import { startOAuthAuthorizationSchema } from "@/modules/auth/oauth/presentation/http/validators/start-oauth-authorization.validator";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 /**
@@ -18,7 +19,7 @@ import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/aut
  */
 export function createUsersRouter(
   authModule: IdentityModule &
-    Pick<OAuthModule, "listOwnOAuthAccountsController"> &
+    Pick<OAuthModule, "listOwnOAuthAccountsController" | "startOAuthLinkAuthorizationController"> &
     Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
 ): IRouter {
   const router = Router();
@@ -27,6 +28,13 @@ export function createUsersRouter(
     "/me/identities",
     authModule.requireBearerAuth,
     asRequestHandler(authModule.listOwnIdentitiesController),
+  );
+
+  router.get(
+    "/me/oauth-accounts/:provider/authorize",
+    validate(startOAuthAuthorizationSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.startOAuthLinkAuthorizationController),
   );
 
   router.get(

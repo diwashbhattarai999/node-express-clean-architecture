@@ -111,6 +111,7 @@ export class StartOAuthAuthorizationUseCase {
       codeChallenge,
       codeChallengeMethod: "S256",
       expiresAt,
+      ...(input.userId !== undefined ? { userId: input.userId } : {}),
     });
 
     const authorizationUrl = buildAuthorizationUrl(provider, {

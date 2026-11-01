@@ -12,4 +12,5 @@ export type StartOAuthAuthorizationDto = {
   responseMode: TOauthResponseMode;
   codeChallenge?: string;
   codeChallengeMethod?: "S256";
+  userId?: string;
 };
