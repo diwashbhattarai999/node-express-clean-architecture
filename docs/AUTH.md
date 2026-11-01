@@ -833,6 +833,7 @@ POST   /api/v1/authz/check
 
 ADMIN
 GET    /api/v1/admin/roles
+GET    /api/v1/admin/roles/{roleId}
 
 OAUTH / AUTHZ / ADMIN
 …      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs

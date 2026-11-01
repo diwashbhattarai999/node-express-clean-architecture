@@ -20,4 +20,5 @@ export type ListRolesResult = {
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
   list(query: ListRolesQuery): Promise<ListRolesResult>;
+  findById(roleId: string): Promise<Role | null>;
 }

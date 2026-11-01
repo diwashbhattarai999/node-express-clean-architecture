@@ -133,6 +133,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | Method | Path | Auth |
 | --- | --- | --- |
 | `GET` | `/roles` | bearer + `roles.read` |
+| `GET` | `/roles/:roleId` | bearer + `roles.read` |
 
 ---
 
@@ -210,6 +211,19 @@ Also under `/api/v1/admin` (bearer + permission):
 ```
 
 `description` may be `null`.
+
+### `Permission`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440040",
+  "key": "roles.read",
+  "name": "Read roles",
+  "description": "List and view roles"
+}
+```
+
+`description` may be `null`. No `createdAt`.
 
 ### Session tokens (`data` after login / verify)
 
@@ -597,6 +611,18 @@ Cookies cleared.
 **Response** `200` `data`: `Role[]` + pagination `meta`, sorted by `key`. Empty page when none match.
 
 **Errors:** `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Get role (admin)
+
+`GET /api/v1/admin/roles/{roleId}`
+
+**Auth:** bearer + `roles.read`. `roleId` must be a UUID.
+
+**Response** `200` `data`: `{ "role": Role, "permissions": Permission[] }`, permissions sorted by `key`. Empty `permissions` when the role has none.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

@@ -15,6 +15,7 @@ describe("CheckPermissionUseCase", () => {
   const permissionRepository: IPermissionRepository = {
     listKeysForUser: vi.fn(),
     hasKeyForUser: vi.fn(),
+    listForRole: vi.fn(),
   };
 
   const useCase = new CheckPermissionUseCase(identityRepository, permissionRepository);

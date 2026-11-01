@@ -66,6 +66,12 @@ export class PostgresRoleRepository implements IRoleRepository {
       items: rows.map(toRole),
     };
   }
+
+  public async findById(roleId: string): Promise<Role | null> {
+    const [row] = await db.select(roleColumns).from(roles).where(eq(roles.id, roleId)).limit(1);
+
+    return row ? toRole(row) : null;
+  }
 }
 
 const toRole = (row: {

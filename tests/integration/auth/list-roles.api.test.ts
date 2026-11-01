@@ -4,11 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockRoleRepository = {
   listForUser: vi.fn(),
   list: vi.fn(),
+  findById: vi.fn(),
 };
 
 const mockPermissionRepository = {
   listKeysForUser: vi.fn(),
   hasKeyForUser: vi.fn(),
+  listForRole: vi.fn(),
 };
 
 const mockSessionRepository = {

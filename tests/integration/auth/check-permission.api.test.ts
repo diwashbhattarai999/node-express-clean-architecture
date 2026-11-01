@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockPermissionRepository = {
   listKeysForUser: vi.fn(),
   hasKeyForUser: vi.fn(),
+  listForRole: vi.fn(),
 };
 
 const mockSessionRepository = {
