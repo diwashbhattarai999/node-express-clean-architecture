@@ -716,7 +716,7 @@ Suggested permission keys: `users.read`, `users.update`, `users.suspend`, `users
 
 `GET /api/v1/authz/me/roles` · **Auth:** bearer
 
-**Response** `200` `data`: `Role[]` (or `{ key, name }[]`)
+**Response** `200` `data`: `Role[]` (newest assignment first). Empty list when none are assigned.
 
 ---
 
@@ -1225,7 +1225,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       | Done                                           |
 | 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       | Done                                           |
 | 41  | GET    | `/api/v1/auth/providers`                                  | P1       | Done                                           |
-| 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       |                                                |
+| 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       | Done                                           |
 | 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       |                                                |
 | 44  | POST   | `/api/v1/authz/check`                                     | P1       |                                                |
 | 45  | GET    | `/api/v1/admin/roles`                                     | P1       |                                                |
@@ -1280,5 +1280,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 38
-- Remaining: 54
+- Done: 39
+- Remaining: 53

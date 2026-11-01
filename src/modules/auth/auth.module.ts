@@ -1,6 +1,10 @@
 import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
 import {
+  type AuthorizationModule,
+  createAuthorizationModule,
+} from "@/modules/auth/authorization/authorization.module";
+import {
   type CredentialsModule,
   createCredentialsModule,
 } from "@/modules/auth/credentials/credentials.module";
@@ -39,6 +43,7 @@ export type AuthModule = IdentityModule &
   VerificationModule &
   SessionsModule &
   OAuthModule &
+  AuthorizationModule &
   AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
@@ -112,6 +117,9 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       accessTokenSigner,
       sessionOptions,
       cookieOptions,
+    }),
+    ...createAuthorizationModule({
+      identityRepository,
     }),
     ...createAuthHttpGuards(accessTokenSigner),
   };

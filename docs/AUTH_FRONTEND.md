@@ -119,6 +119,12 @@ Also under `/api/v1/users` (same bearer):
 | `DELETE` | `/me/oauth-accounts/{provider}` | bearer |
 | `PATCH` | `/me/username` | bearer |
 
+Also under `/api/v1/authz` (same bearer):
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| `GET` | `/me/roles` | bearer |
+
 ---
 
 ## Shared shapes
@@ -181,6 +187,20 @@ Also under `/api/v1/users` (same bearer):
 ```
 
 `type`: `oauth` | `oidc` | `password` | `magic_link`. Hide providers with `enabled: false`.
+
+### `Role`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440030",
+  "key": "member",
+  "name": "Member",
+  "description": "Default member role",
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+`description` may be `null`.
 
 ### Session tokens (`data` after login / verify)
 
@@ -521,7 +541,17 @@ Cookies cleared.
 }
 ```
 
-`permissions` is empty until RBAC lands.
+`roles` here are keys only. Use `GET /authz/me/roles` for full `Role` objects. `permissions` is empty until the permissions API lands.
+
+---
+
+### List own roles
+
+`GET /api/v1/authz/me/roles`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `Role[]` (newest assignment first). Empty list when none are assigned.
 
 ---
 
