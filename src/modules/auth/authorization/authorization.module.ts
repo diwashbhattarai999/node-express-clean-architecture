@@ -11,6 +11,7 @@ import { ListOwnRolesUseCase } from "@/modules/auth/authorization/application/us
 import { ListPermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/list-permissions.use-case";
 import { ListRoleUsersUseCase } from "@/modules/auth/authorization/application/use-cases/list-role-users.use-case";
 import { ListRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-roles.use-case";
+import { ListUserRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-user-roles.use-case";
 import { RemoveRolePermissionUseCase } from "@/modules/auth/authorization/application/use-cases/remove-role-permission.use-case";
 import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
 import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
@@ -26,13 +27,14 @@ import { ListOwnRolesController } from "@/modules/auth/authorization/presentatio
 import { ListPermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/list-permissions.controller";
 import { ListRoleUsersController } from "@/modules/auth/authorization/presentation/http/controllers/list-role-users.controller";
 import { ListRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-roles.controller";
+import { ListUserRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-user-roles.controller";
 import { RemoveRolePermissionController } from "@/modules/auth/authorization/presentation/http/controllers/remove-role-permission.controller";
 import { UpdateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/update-role.controller";
 import { createRequirePermission } from "@/modules/auth/authorization/presentation/http/middleware/require-permission.middleware";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 
 export type CreateAuthorizationModuleOptions = {
-  identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal">;
+  identityRepository: Pick<IIdentityRepository, "existsById" | "findAuthenticatedPrincipal">;
 };
 
 export type AuthorizationModule = {
@@ -49,6 +51,7 @@ export type AuthorizationModule = {
   assignRolePermissionsController: AssignRolePermissionsController;
   removeRolePermissionController: RemoveRolePermissionController;
   listRoleUsersController: ListRoleUsersController;
+  listUserRolesController: ListUserRolesController;
   requirePermission: (permission: string) => RequestHandler;
 };
 
@@ -97,6 +100,9 @@ export function createAuthorizationModule(
     ),
     listRoleUsersController: new ListRoleUsersController(
       new ListRoleUsersUseCase(options.identityRepository, permissionRepository, roleRepository),
+    ),
+    listUserRolesController: new ListUserRolesController(
+      new ListUserRolesUseCase(options.identityRepository, permissionRepository, roleRepository),
     ),
     requirePermission: createRequirePermission(permissionRepository),
   };

@@ -114,6 +114,8 @@ export interface IIdentityRepository {
 
   register(input: RegisterAccountInput): Promise<AuthUser>;
 
+  existsById(userId: string): Promise<boolean>;
+
   findAuthenticatedPrincipal(
     userId: string,
     sessionId: string,

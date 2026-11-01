@@ -145,6 +145,16 @@ export class PostgresIdentityRepository implements IIdentityRepository {
     }
   }
 
+  public async existsById(userId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    return Boolean(row);
+  }
+
   public async findAuthenticatedPrincipal(
     userId: string,
     sessionId: string,

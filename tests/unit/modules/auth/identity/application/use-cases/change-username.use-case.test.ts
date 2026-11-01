@@ -9,6 +9,7 @@ describe("ChangeUsernameUseCase", () => {
   const identityRepository: IIdentityRepository = {
     findIdentityByNormalized: vi.fn(),
     register: vi.fn(),
+    existsById: vi.fn(),
     findAuthenticatedPrincipal: vi.fn(),
     findOwnProfile: vi.fn(),
     updateOwnProfile: vi.fn(),

@@ -842,6 +842,7 @@ GET    /api/v1/admin/permissions/{permissionId}
 PUT    /api/v1/admin/roles/{roleId}/permissions
 DELETE /api/v1/admin/roles/{roleId}/permissions/{permissionId}
 GET    /api/v1/admin/roles/{roleId}/users
+GET    /api/v1/admin/users/{userId}/roles
 
 OAUTH / AUTHZ / ADMIN
 …      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs

@@ -858,7 +858,9 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `GET /api/v1/admin/users/{userId}/roles` · **Auth:** bearer + `roles.read`
 
-**Response** `200` `data`: `Role[]`
+**Response** `200` `data`: `Role[]` (sorted by assignment time descending, then `key`)
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`
 
 ---
 
@@ -1260,7 +1262,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       | Done                                           |
 | 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       | Done                                           |
 | 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       | Done                                           |
-| 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
+| 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       | Done                                           |
 | 56  | POST   | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
 | 57  | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}`             | P1       |                                                |
 | 58  | PUT    | `/api/v1/admin/users/{userId}/roles`                      | P2       |                                                |
@@ -1302,5 +1304,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 51
-- Remaining: 41
+- Done: 52
+- Remaining: 40
