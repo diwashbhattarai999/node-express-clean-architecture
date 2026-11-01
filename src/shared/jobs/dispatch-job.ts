@@ -30,6 +30,9 @@ const runJobHandler = async <K extends TJobName>(
         parseJobPayload(JobName.APPLY_DUE_ACCOUNT_DELETIONS, data),
       );
       return;
+    case JobName.EXPORT_AUDIT_LOGS:
+      await handlers[JobName.EXPORT_AUDIT_LOGS](parseJobPayload(JobName.EXPORT_AUDIT_LOGS, data));
+      return;
     default: {
       const exhaustive: never = name;
       throw new Error(`Unknown job name: ${String(exhaustive)}`);

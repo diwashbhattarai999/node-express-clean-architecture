@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `GET /api/v1/users/me/security-events` — paginated own security activity (optional `eventType`, `from`, `to`)
+- `GET /api/v1/admin/audit-logs` — paginated admin audit log list (`audit_logs.read`)
+- `GET /api/v1/admin/audit-logs/{eventId}` — audit log detail (`audit_logs.read`)
+- `POST /api/v1/admin/audit-logs/exports` — queue a CSV/JSON audit export (`audit_logs.export`; `202` pending job)
+- `GET /api/v1/admin/audit-logs/exports/{exportId}` — download a completed audit export (`audit_logs.export`; `404` while pending)
+- `GET /api/v1/auth/config` — public password policy, feature flags, and provider catalog
+
 ## [1.6.0] - 2026-11-01
 
 ### Added

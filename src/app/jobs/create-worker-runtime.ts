@@ -2,6 +2,9 @@ import type { TEnv } from "@/config/env-schema";
 import { JobsProvider } from "@/config/jobs-provider";
 import { createBullMqWorker } from "@/infrastructure/jobs/bullmq/create-bullmq-worker";
 import { closeJobQueue, createJobQueue } from "@/infrastructure/jobs/create-job-queue";
+import { createObjectStorage } from "@/infrastructure/storage";
+import { ProcessAuditLogExportUseCase } from "@/modules/auth/audit/application/use-cases/process-audit-log-export.use-case";
+import { PostgresAuditLogRepository } from "@/modules/auth/audit/infrastructure/repositories/postgres-audit-log.repository";
 import { ApplyAccountDeletionsUseCase } from "@/modules/auth/identity/application/use-cases/apply-account-deletions.use-case";
 import { PostgresIdentityRepository } from "@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository";
 import { JobName } from "@/shared/jobs/job-names";
@@ -21,7 +24,14 @@ export const createWorkerRuntime = async (env: TEnv): Promise<WorkerRuntime> => 
 
   const identityRepository = new PostgresIdentityRepository();
   const applyAccountDeletionsUseCase = new ApplyAccountDeletionsUseCase(identityRepository);
-  const handlers = createJobHandlers({ applyAccountDeletionsUseCase });
+  const processAuditLogExportUseCase = new ProcessAuditLogExportUseCase(
+    new PostgresAuditLogRepository(),
+    createObjectStorage(env),
+  );
+  const handlers = createJobHandlers({
+    applyAccountDeletionsUseCase,
+    processAuditLogExportUseCase,
+  });
   const queue = createJobQueue(env);
   const worker = createBullMqWorker({
     url: env.REDIS_URL,

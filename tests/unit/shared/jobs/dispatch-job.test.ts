@@ -8,6 +8,7 @@ describe("dispatchJob", () => {
   const handlers: JobHandlerMap = {
     [JobName.APPLY_ACCOUNT_DELETION]: vi.fn(),
     [JobName.APPLY_DUE_ACCOUNT_DELETIONS]: vi.fn(),
+    [JobName.EXPORT_AUDIT_LOGS]: vi.fn(),
   };
 
   it("dispatches a typed account deletion job", async () => {

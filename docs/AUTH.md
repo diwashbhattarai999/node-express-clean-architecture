@@ -857,9 +857,17 @@ POST   /api/v1/admin/users/{userId}/roles
 DELETE /api/v1/admin/users/{userId}/roles/{roleId}
 PUT    /api/v1/admin/users/{userId}/roles
 GET    /api/v1/admin/users/{userId}/permissions
+GET    /api/v1/users/me/security-events
+GET    /api/v1/admin/audit-logs
+GET    /api/v1/admin/audit-logs/{eventId}
+POST   /api/v1/admin/audit-logs/exports
+GET    /api/v1/admin/audit-logs/exports/{exportId}
+GET    /api/v1/auth/config
+GET    /health
+GET    /ready
 
 OAUTH / AUTHZ / ADMIN
-…      /api/v1/admin/audit-logs
+…      (MFA / passkeys — AUTH_API.md §10)
 
 MFA / PASSKEYS (future — AUTH_API.md §10)
 ```

@@ -92,6 +92,7 @@ Frontend deep links from emails:
 | `GET` | `/oauth/{provider}/callback` | public (IdP redirect) |
 | `POST` | `/oauth/{provider}/exchange` | public (native PKCE) |
 | `GET` | `/providers` | public |
+| `GET` | `/config` | public |
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
 | `POST` | `/password/reset/validate` | public |
@@ -119,6 +120,7 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/oauth-accounts/{provider}/link` | bearer |
 | `DELETE` | `/me/oauth-accounts/{provider}` | bearer |
 | `PATCH` | `/me/username` | bearer |
+| `GET` | `/me/security-events` | bearer |
 
 Also under `/api/v1/authz` (same bearer):
 
@@ -157,6 +159,10 @@ Also under `/api/v1/admin` (bearer + permission):
 | `POST` | `/users/:userId/sessions/revoke-all` | bearer + `sessions.revoke` |
 | `POST` | `/users/:userId/password-reset` | bearer + `users.update` |
 | `DELETE` | `/users/:userId` | bearer + `users.delete` |
+| `GET` | `/audit-logs` | bearer + `audit_logs.read` |
+| `GET` | `/audit-logs/:eventId` | bearer + `audit_logs.read` |
+| `POST` | `/audit-logs/exports` | bearer + `audit_logs.export` |
+| `GET` | `/audit-logs/exports/:exportId` | bearer + `audit_logs.export` |
 
 ---
 
@@ -220,6 +226,22 @@ Also under `/api/v1/admin` (bearer + permission):
 ```
 
 `type`: `oauth` | `oidc` | `password` | `magic_link`. Hide providers with `enabled: false`.
+
+### `SecurityEvent`
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440080",
+  "eventType": "login_success",
+  "outcome": "success",
+  "ipAddress": "127.0.0.1",
+  "userAgent": "Mozilla/5.0",
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "metadata": { "method": "password" }
+}
+```
+
+`outcome`: `success` | `failure` | `blocked`. `metadata` is optional and never includes secrets.
 
 ### `Role`
 
@@ -378,6 +400,37 @@ Refresh returns the same fields **without** `user`.
 **Auth:** public. Use this to render sign-in buttons.
 
 **Response** `200` `data`: `AuthProviderPublic[]` — `password` is always enabled; OAuth/OIDC keys are enabled when configured in env; `magic_link` is listed but disabled.
+
+---
+
+### Auth config
+
+`GET /api/v1/auth/config`
+
+**Auth:** public. Password policy, feature flags, and the same provider catalog as `/auth/providers`.
+
+**Response** `200` `data`:
+
+```json
+{
+  "passwordPolicy": {
+    "minLength": 8,
+    "requireUppercase": true,
+    "requireLowercase": true,
+    "requireDigit": true,
+    "requireSpecial": true
+  },
+  "features": {
+    "registration": true,
+    "oauth": true,
+    "magicLink": false,
+    "mfa": false,
+    "passkeys": false,
+    "phoneAuth": true
+  },
+  "providers": []
+}
+```
 
 ---
 
@@ -948,6 +1001,56 @@ Full replace. Empty array clears all. Duplicates are ignored. Unknown role ids a
 **Response** `200` `data`: `null`.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR` (missing `hard=true`).
+
+---
+
+### Own security events
+
+`GET /api/v1/users/me/security-events`
+
+**Auth:** bearer.
+
+**Query:** pagination; `eventType?`; `from?` / `to?` ISO dates.
+
+**Response** `200` `data`: `SecurityEvent[]` + `meta`. Metadata is sanitized.
+
+---
+
+### Admin audit logs
+
+`GET /api/v1/admin/audit-logs`
+
+**Auth:** bearer + `audit_logs.read`.
+
+**Query:** pagination; `userId?`; `eventType?`; `outcome?`; `from?`; `to?`.
+
+**Response** `200` `data`: `SecurityEvent[]` + `meta`.
+
+---
+
+### Audit log detail
+
+`GET /api/v1/admin/audit-logs/{eventId}`
+
+**Auth:** bearer + `audit_logs.read`.
+
+**Response** `200` `data`: `SecurityEvent`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Export audit logs
+
+`POST /api/v1/admin/audit-logs/exports`
+
+**Auth:** bearer + `audit_logs.export`.
+
+**Body:** `{ "from": string, "to": string, "format": "csv" | "json", "filters"?: { "userId"?, "eventType"?, "outcome"? } }`
+
+**Response** `202` `data`: `{ "exportId": string, "status": "pending" }`. The worker writes the file to object storage at `audit-exports/{exportId}.{format}`.
+
+Poll `GET /api/v1/admin/audit-logs/exports/{exportId}` (same permission) until the file is ready. Ready responses are the raw CSV/JSON attachment (`Content-Disposition: attachment`). `404 NOT_FOUND` means the job is still pending or the id is unknown.
 
 ---
 

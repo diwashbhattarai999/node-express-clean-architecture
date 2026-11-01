@@ -23,6 +23,7 @@ export function createApplicationModules() {
       passwordHasher: new Argon2PasswordHasher(),
       httpClient,
       jobQueue,
+      objectStorage,
       env,
     }),
     uploads: createUploadsModule({ objectStorage }),

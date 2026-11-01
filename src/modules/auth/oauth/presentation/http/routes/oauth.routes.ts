@@ -11,6 +11,8 @@ export function createOAuthRouter(authModule: OAuthModule): IRouter {
 
   router.get("/providers", asRequestHandler(authModule.listAuthProvidersController));
 
+  router.get("/config", asRequestHandler(authModule.getAuthConfigController));
+
   router.get(
     "/oauth/:provider/authorize",
     validate(startOAuthAuthorizationSchema),

@@ -1040,6 +1040,10 @@ All require bearer + listed permission. Mutating actions should write `security_
 
 **Response** `202` `data`: `{ "exportId": string, "status": "pending" }` — async job pattern.
 
+`GET /api/v1/admin/audit-logs/exports/{exportId}` · **Auth:** bearer + `audit_logs.export`
+
+**Response** `200` file download (`text/csv` or `application/json`) with `Content-Disposition: attachment` when the worker has written the file. **Errors:** `404 NOT_FOUND` if the export id is unknown or the job is still pending.
+
 ---
 
 ### 9.5 Auth config / capabilities — P1
@@ -1285,13 +1289,13 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 67  | POST   | `/api/v1/admin/users/{userId}/sessions/revoke-all`        | P1       | Done                                           |
 | 68  | POST   | `/api/v1/admin/users/{userId}/password-reset`             | P2       | Done                                           |
 | 69  | DELETE | `/api/v1/admin/users/{userId}`                            | P2       | Done                                           |
-| 70  | GET    | `/api/v1/users/me/security-events`                        | P1       |                                                |
-| 71  | GET    | `/api/v1/admin/audit-logs`                                | P1       |                                                |
-| 72  | GET    | `/api/v1/admin/audit-logs/{eventId}`                      | P2       |                                                |
-| 73  | POST   | `/api/v1/admin/audit-logs/exports`                        | P2       |                                                |
-| 74  | GET    | `/api/v1/auth/config`                                     | P1       |                                                |
-| 75  | GET    | `/health`                                                 | P0       |                                                |
-| 76  | GET    | `/ready`                                                  | P1       |                                                |
+| 70  | GET    | `/api/v1/users/me/security-events`                        | P1       | Done                                           |
+| 71  | GET    | `/api/v1/admin/audit-logs`                                | P1       | Done                                           |
+| 72  | GET    | `/api/v1/admin/audit-logs/{eventId}`                      | P2       | Done                                           |
+| 73  | POST   | `/api/v1/admin/audit-logs/exports`                        | P2       | Done                                           |
+| 74  | GET    | `/api/v1/auth/config`                                     | P1       | Done                                           |
+| 75  | GET    | `/health`                                                 | P0       | Done                                           |
+| 76  | GET    | `/ready`                                                  | P1       | Done                                           |
 | 77  | GET    | `/api/v1/users/me/mfa`                                    | P2       |                                                |
 | 78  | POST   | `/api/v1/users/me/mfa/enroll`                             | P2       |                                                |
 | 79  | POST   | `/api/v1/users/me/mfa/enroll/confirm`                     | P2       |                                                |
@@ -1312,5 +1316,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 66
-- Remaining: 26
+- Done: 73
+- Remaining: 19

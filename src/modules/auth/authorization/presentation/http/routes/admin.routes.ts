@@ -1,6 +1,11 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, validate } from "@/app/middleware/validation";
+import type { AuditModule } from "@/modules/auth/audit/audit.module";
+import { exportAdminAuditLogsSchema } from "@/modules/auth/audit/presentation/http/validators/export-admin-audit-logs.validator";
+import { getAdminAuditExportSchema } from "@/modules/auth/audit/presentation/http/validators/get-admin-audit-export.validator";
+import { getAdminAuditLogSchema } from "@/modules/auth/audit/presentation/http/validators/get-admin-audit-log.validator";
+import { listAdminAuditLogsSchema } from "@/modules/auth/audit/presentation/http/validators/list-admin-audit-logs.validator";
 import { PermissionKey } from "@/modules/auth/authorization/application/constants/permission-keys";
 import type { AuthorizationModule } from "@/modules/auth/authorization/authorization.module";
 import { assignRolePermissionsSchema } from "@/modules/auth/authorization/presentation/http/validators/assign-role-permissions.validator";
@@ -33,6 +38,7 @@ export function createAdminRouter(
     IdentityModule &
     SessionsModule &
     CredentialsModule &
+    AuditModule &
     Pick<AuthHttpGuards, "requireBearerAuth">,
 ): IRouter {
   const router = Router();
@@ -235,6 +241,38 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.USERS_DELETE),
     asHandler(authModule.deleteAdminUserController),
+  );
+
+  router.get(
+    "/audit-logs",
+    validate(listAdminAuditLogsSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.AUDIT_LOGS_READ),
+    asHandler(authModule.listAdminAuditLogsController),
+  );
+
+  router.post(
+    "/audit-logs/exports",
+    validate(exportAdminAuditLogsSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.AUDIT_LOGS_EXPORT),
+    asHandler(authModule.exportAdminAuditLogsController),
+  );
+
+  router.get(
+    "/audit-logs/exports/:exportId",
+    validate(getAdminAuditExportSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.AUDIT_LOGS_EXPORT),
+    asHandler(authModule.getAdminAuditExportController),
+  );
+
+  router.get(
+    "/audit-logs/:eventId",
+    validate(getAdminAuditLogSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.AUDIT_LOGS_READ),
+    asHandler(authModule.getAdminAuditLogController),
   );
 
   return router;

@@ -1,6 +1,8 @@
 import { type IRouter, Router } from "express";
 
 import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
+import type { AuditModule } from "@/modules/auth/audit/audit.module";
+import { listOwnSecurityEventsSchema } from "@/modules/auth/audit/presentation/http/validators/list-own-security-events.validator";
 import type { IdentityModule } from "@/modules/auth/identity/identity.module";
 import { addEmailSchema } from "@/modules/auth/identity/presentation/http/validators/add-email.validator";
 import { changeUsernameSchema } from "@/modules/auth/identity/presentation/http/validators/change-username.validator";
@@ -21,6 +23,7 @@ import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/aut
  */
 export function createUsersRouter(
   authModule: IdentityModule &
+    Pick<AuditModule, "listOwnSecurityEventsController"> &
     Pick<
       OAuthModule,
       | "listOwnOAuthAccountsController"
@@ -31,6 +34,13 @@ export function createUsersRouter(
     Pick<AuthHttpGuards, "requireBearerAuth" | "optionalBearerAuth">,
 ): IRouter {
   const router = Router();
+
+  router.get(
+    "/me/security-events",
+    validate(listOwnSecurityEventsSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.listOwnSecurityEventsController),
+  );
 
   router.get(
     "/me/identities",

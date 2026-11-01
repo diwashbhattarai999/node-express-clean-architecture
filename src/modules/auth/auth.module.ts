@@ -1,5 +1,6 @@
 import type { TEnv } from "@/config/env-schema";
 import { Environment } from "@/config/environment";
+import { type AuditModule, createAuditModule } from "@/modules/auth/audit/audit.module";
 import {
   type AuthorizationModule,
   createAuthorizationModule,
@@ -28,6 +29,7 @@ import {
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 import type { IHttpClient } from "@/shared/http-client/http-client.port";
 import type { IJobQueue } from "@/shared/jobs/job-queue.port";
+import type { IObjectStorage } from "@/shared/storage/object-storage.port";
 
 export type CreateAuthModuleOptions = {
   emailSender: IEmailSender;
@@ -35,6 +37,7 @@ export type CreateAuthModuleOptions = {
   accessTokenSigner?: IAccessTokenSigner;
   httpClient: IHttpClient;
   jobQueue: IJobQueue;
+  objectStorage: IObjectStorage;
   env: TEnv;
 };
 
@@ -44,6 +47,7 @@ export type AuthModule = IdentityModule &
   SessionsModule &
   OAuthModule &
   AuthorizationModule &
+  AuditModule &
   AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
@@ -123,6 +127,11 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     ...createAuthorizationModule({
       identityRepository,
+    }),
+    ...createAuditModule({
+      identityRepository,
+      jobQueue: options.jobQueue,
+      objectStorage: options.objectStorage,
     }),
     ...createAuthHttpGuards(accessTokenSigner),
   };

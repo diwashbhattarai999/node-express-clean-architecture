@@ -1,6 +1,7 @@
 export const JobName = {
   APPLY_ACCOUNT_DELETION: "apply-account-deletion",
   APPLY_DUE_ACCOUNT_DELETIONS: "apply-due-account-deletions",
+  EXPORT_AUDIT_LOGS: "export-audit-logs",
 } as const;
 
 export type TJobName = (typeof JobName)[keyof typeof JobName];

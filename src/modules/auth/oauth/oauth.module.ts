@@ -2,6 +2,7 @@ import type { TEnv } from "@/config/env-schema";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import { CompleteOAuthSignIn } from "@/modules/auth/oauth/application/services/complete-oauth-sign-in";
 import { ExchangeOAuthCodeUseCase } from "@/modules/auth/oauth/application/use-cases/exchange-oauth-code.use-case";
+import { GetAuthConfigUseCase } from "@/modules/auth/oauth/application/use-cases/get-auth-config.use-case";
 import { HandleOAuthCallbackUseCase } from "@/modules/auth/oauth/application/use-cases/handle-oauth-callback.use-case";
 import { LinkOAuthAccountUseCase } from "@/modules/auth/oauth/application/use-cases/link-oauth-account.use-case";
 import { ListAuthProvidersUseCase } from "@/modules/auth/oauth/application/use-cases/list-auth-providers.use-case";
@@ -14,6 +15,7 @@ import { OauthProviderClient } from "@/modules/auth/oauth/infrastructure/oauth-p
 import { PostgresOAuthAccountRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-account.repository";
 import { PostgresOAuthAuthorizationStateRepository } from "@/modules/auth/oauth/infrastructure/repositories/postgres-oauth-authorization-state.repository";
 import { ExchangeOAuthCodeController } from "@/modules/auth/oauth/presentation/http/controllers/exchange-oauth-code.controller";
+import { GetAuthConfigController } from "@/modules/auth/oauth/presentation/http/controllers/get-auth-config.controller";
 import { HandleOAuthCallbackController } from "@/modules/auth/oauth/presentation/http/controllers/handle-oauth-callback.controller";
 import { LinkOAuthAccountController } from "@/modules/auth/oauth/presentation/http/controllers/link-oauth-account.controller";
 import { ListAuthProvidersController } from "@/modules/auth/oauth/presentation/http/controllers/list-auth-providers.controller";
@@ -48,10 +50,12 @@ export type OAuthModule = {
   linkOAuthAccountController: LinkOAuthAccountController;
   unlinkOAuthAccountController: UnlinkOAuthAccountController;
   listAuthProvidersController: ListAuthProvidersController;
+  getAuthConfigController: GetAuthConfigController;
 };
 
 export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModule {
   const providerCatalog = createOAuthProviderCatalog(options.env);
+  const listAuthProvidersUseCase = new ListAuthProvidersUseCase(providerCatalog);
   const authorizationStateRepository = new PostgresOAuthAuthorizationStateRepository();
   const accountRepository = new PostgresOAuthAccountRepository();
   const providerClient = new OauthProviderClient(options.httpClient);
@@ -135,8 +139,9 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
     unlinkOAuthAccountController: new UnlinkOAuthAccountController(
       new UnlinkOAuthAccountUseCase(options.identityRepository, accountRepository),
     ),
-    listAuthProvidersController: new ListAuthProvidersController(
-      new ListAuthProvidersUseCase(providerCatalog),
+    listAuthProvidersController: new ListAuthProvidersController(listAuthProvidersUseCase),
+    getAuthConfigController: new GetAuthConfigController(
+      new GetAuthConfigUseCase(listAuthProvidersUseCase),
     ),
   };
 }

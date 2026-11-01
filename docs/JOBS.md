@@ -48,6 +48,10 @@ Applying a due deletion:
 
 Until the worker (or sweep) runs, the account stays usable. `POST /api/v1/users/me/deletion-request/cancel` clears markers and removes the delayed job. Apply re-checks that markers are still present so a concurrent cancel wins.
 
+## Audit log export
+
+`POST /api/v1/admin/audit-logs/exports` returns `202` with `{ exportId, status: "pending" }` and enqueues `export-audit-logs`. The worker queries `security_audit_logs` for the requested range (optional `userId` / `eventType` / `outcome` filters), sanitizes metadata, and writes CSV or JSON to object storage at `audit-exports/{exportId}.{format}` (capped at 10,000 rows). Download the file with `GET /api/v1/admin/audit-logs/exports/{exportId}` (`audit_logs.export`); it returns `404` until the worker has written the object.
+
 ## Adding a job
 
 1. Add a name to `JobName` and a payload in `JobPayloadMap` / `parseJobPayload`.
