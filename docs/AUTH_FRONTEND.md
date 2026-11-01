@@ -37,6 +37,7 @@ For the full planned contract (unimplemented routes), see [AUTH_API.md](AUTH_API
 | 401 | `TOKEN_INVALID` / `TOKEN_EXPIRED` / `TOKEN_REVOKED` / `TOKEN_REUSED` | Bad/missing/expired JWT or refresh |
 | 401 | `INVALID_CREDENTIALS` | Wrong login password/identifier |
 | 403 | `EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` | Account not allowed to sign in |
+| 403 | `PERMISSION_DENIED` | Missing required permission (admin routes) |
 | 409 | `CONFLICT` | Identity already registered |
 | 422 | `VALIDATION_ERROR` | Bad body/query (`details` has field errors) |
 
@@ -126,6 +127,12 @@ Also under `/api/v1/authz` (same bearer):
 | `GET` | `/me/roles` | bearer |
 | `GET` | `/me/permissions` | bearer |
 | `POST` | `/check` | bearer |
+
+Also under `/api/v1/admin` (bearer + permission):
+
+| Method | Path | Auth |
+| --- | --- | --- |
+| `GET` | `/roles` | bearer + `roles.read` |
 
 ---
 
@@ -578,6 +585,18 @@ Cookies cleared.
 ```
 
 **Response** `200` `data`: `{ "allowed": true }` if any assigned role grants that key. `resourceId` is accepted but not scoped yet. Missing permission is `allowed: false` (not `403`).
+
+---
+
+### List roles (admin)
+
+`GET /api/v1/admin/roles`
+
+**Auth:** bearer + `roles.read`. Query: `page`, `limit` (max 100), optional `search` (matches key, name, or description).
+
+**Response** `200` `data`: `Role[]` + pagination `meta`, sorted by `key`. Empty page when none match.
+
+**Errors:** `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

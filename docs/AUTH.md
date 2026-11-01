@@ -831,8 +831,11 @@ GET    /api/v1/authz/me/roles
 GET    /api/v1/authz/me/permissions
 POST   /api/v1/authz/check
 
+ADMIN
+GET    /api/v1/admin/roles
+
 OAUTH / AUTHZ / ADMIN
-…      /api/v1/admin/roles, /api/v1/admin/users, /api/v1/admin/audit-logs
+…      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs
 
 MFA / PASSKEYS (future — AUTH_API.md §10)
 ```

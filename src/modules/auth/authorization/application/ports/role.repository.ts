@@ -6,6 +6,18 @@ export type Role = {
   createdAt: Date;
 };
 
+export type ListRolesQuery = {
+  page: number;
+  limit: number;
+  search?: string;
+};
+
+export type ListRolesResult = {
+  items: Role[];
+  total: number;
+};
+
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
+  list(query: ListRolesQuery): Promise<ListRolesResult>;
 }

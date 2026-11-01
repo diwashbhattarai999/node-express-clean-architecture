@@ -746,9 +746,11 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `GET /api/v1/admin/roles` · **Auth:** bearer + `roles.read`
 
-**Query:** pagination, `search?`
+**Query:** pagination (`page`, `limit`), `search?` (matches `key` / `name` / `description`)
 
-**Response** `200` `data`: `Role[]` + `meta`
+**Response** `200` `data`: `Role[]` + `meta` (sorted by `key` ascending)
+
+**Errors:** `403 PERMISSION_DENIED`
 
 ---
 
@@ -1232,7 +1234,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       | Done                                           |
 | 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       | Done                                           |
 | 44  | POST   | `/api/v1/authz/check`                                     | P1       | Done                                           |
-| 45  | GET    | `/api/v1/admin/roles`                                     | P1       |                                                |
+| 45  | GET    | `/api/v1/admin/roles`                                     | P1       | Done                                           |
 | 46  | GET    | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
 | 47  | POST   | `/api/v1/admin/roles`                                     | P1       |                                                |
 | 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
@@ -1284,5 +1286,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 41
-- Remaining: 51
+- Done: 42
+- Remaining: 50
