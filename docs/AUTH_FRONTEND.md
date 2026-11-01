@@ -101,6 +101,7 @@ Frontend deep links from emails:
 | `POST` | `/password/change` | bearer |
 | `GET` | `/sessions` | bearer |
 | `GET` | `/sessions/{sessionId}` | bearer |
+| `PATCH` | `/sessions/{sessionId}` | bearer |
 | `DELETE` | `/sessions/{sessionId}` | bearer |
 | `POST` | `/sessions/revoke-others` | bearer |
 
@@ -1442,6 +1443,22 @@ Rules: 3–30 chars; starts with a letter; letters, digits, `.`, `_`, `-` only; 
 ```
 
 **Errors:** `404 NOT_FOUND` (missing or not owned), `401 TOKEN_*`, `422` (invalid UUID).
+
+---
+
+### Update session label
+
+`PATCH /api/v1/auth/sessions/{sessionId}`
+
+**Auth:** bearer (own sessions only). Sets `deviceName` (1–255 characters after trim).
+
+```json
+{ "deviceName": "MacBook Pro" }
+```
+
+**Response** `200` `data`: `SessionSummary` with the new `deviceName`.
+
+**Errors:** `404 NOT_FOUND` (missing or not owned), `401 TOKEN_*`, `422` (invalid UUID / empty or too-long name).
 
 ---
 

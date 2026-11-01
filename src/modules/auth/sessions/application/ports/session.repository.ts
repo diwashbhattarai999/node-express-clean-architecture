@@ -70,6 +70,14 @@ export interface ISessionRepository {
     currentSessionId: string;
   }): Promise<AuthSessionSummary | null>;
 
+  /** Own session only (userId scoped). Returns null when missing. */
+  updateSessionLabelForUser(input: {
+    userId: string;
+    sessionId: string;
+    currentSessionId: string;
+    deviceName: string;
+  }): Promise<AuthSessionSummary | null>;
+
   /**
    * Revokes an active session owned by the user.
    * `already_revoked` is idempotent success; `not_found` includes other users' sessions.

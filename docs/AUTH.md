@@ -808,6 +808,7 @@ POST   /api/v1/auth/refresh
 POST   /api/v1/auth/logout
 POST   /api/v1/auth/logout-all
 GET    /api/v1/auth/sessions
+PATCH  /api/v1/auth/sessions/:sessionId
 DELETE /api/v1/auth/sessions/:sessionId
 
 CURRENT USER / PROFILE

@@ -303,6 +303,42 @@ export class PostgresSessionRepository implements ISessionRepository {
     };
   }
 
+  public async updateSessionLabelForUser(input: {
+    userId: string;
+    sessionId: string;
+    currentSessionId: string;
+    deviceName: string;
+  }): Promise<AuthSessionSummary | null> {
+    const [row] = await db
+      .update(sessions)
+      .set({ deviceName: input.deviceName })
+      .where(and(eq(sessions.userId, input.userId), eq(sessions.id, input.sessionId)))
+      .returning({
+        id: sessions.id,
+        createdAt: sessions.createdAt,
+        lastUsedAt: sessions.lastUsedAt,
+        expiresAt: sessions.expiresAt,
+        ipAddress: sessions.ipAddress,
+        userAgent: sessions.userAgent,
+        deviceName: sessions.deviceName,
+      });
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      id: row.id,
+      createdAt: row.createdAt,
+      lastUsedAt: row.lastUsedAt,
+      expiresAt: row.expiresAt,
+      ipAddress: row.ipAddress ?? null,
+      userAgent: row.userAgent ?? null,
+      deviceName: row.deviceName ?? null,
+      isCurrent: row.id === input.currentSessionId,
+    };
+  }
+
   public async revokeSessionForUser(input: {
     userId: string;
     sessionId: string;

@@ -506,6 +506,8 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Response** `200` `data`: `SessionSummary`
 
+**Errors:** `404 NOT_FOUND` (missing or not owned), `422`.
+
 ---
 
 ## 5. User profile & login identities
@@ -1242,7 +1244,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 20  | GET    | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
 | 21  | DELETE | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
 | 22  | POST   | `/api/v1/auth/sessions/revoke-others`                     | P1       | Done                                           |
-| 23  | PATCH  | `/api/v1/auth/sessions/{sessionId}`                       | P2       |                                                |
+| 23  | PATCH  | `/api/v1/auth/sessions/{sessionId}`                       | P2       | Done                                           |
 | 24  | GET    | `/api/v1/users/me`                                        | P0       | Done                                           |
 | 25  | PATCH  | `/api/v1/users/me`                                        | P1       | Done                                           |
 | 26  | GET    | `/api/v1/users/me/identities`                             | P1       | Done                                           |
@@ -1316,5 +1318,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 76
-- Remaining: 16
+- Done: 77
+- Remaining: 15

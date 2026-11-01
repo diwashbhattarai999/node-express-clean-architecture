@@ -9,6 +9,7 @@ import { RefreshUseCase } from "@/modules/auth/sessions/application/use-cases/re
 import { RevokeAdminUserSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-admin-user-sessions.use-case";
 import { RevokeOtherSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-other-sessions.use-case";
 import { RevokeSessionUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-session.use-case";
+import { UpdateSessionLabelUseCase } from "@/modules/auth/sessions/application/use-cases/update-session-label.use-case";
 import { GetSessionController } from "@/modules/auth/sessions/presentation/http/controllers/get-session.controller";
 import { ListSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/list-sessions.controller";
 import { LogoutController } from "@/modules/auth/sessions/presentation/http/controllers/logout.controller";
@@ -17,6 +18,7 @@ import { RefreshController } from "@/modules/auth/sessions/presentation/http/con
 import { RevokeAdminUserSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-admin-user-sessions.controller";
 import { RevokeOtherSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-other-sessions.controller";
 import { RevokeSessionController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-session.controller";
+import { UpdateSessionLabelController } from "@/modules/auth/sessions/presentation/http/controllers/update-session-label.controller";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type {
   AuthCookieOptions,
@@ -37,6 +39,7 @@ export type SessionsModule = {
   logoutAllController: LogoutAllController;
   listSessionsController: ListSessionsController;
   getSessionController: GetSessionController;
+  updateSessionLabelController: UpdateSessionLabelController;
   revokeSessionController: RevokeSessionController;
   revokeOtherSessionsController: RevokeOtherSessionsController;
   revokeAdminUserSessionsController: RevokeAdminUserSessionsController;
@@ -65,6 +68,9 @@ export function createSessionsModule(options: CreateSessionsModuleOptions): Sess
     ),
     getSessionController: new GetSessionController(
       new GetSessionUseCase(options.sessionRepository),
+    ),
+    updateSessionLabelController: new UpdateSessionLabelController(
+      new UpdateSessionLabelUseCase(options.sessionRepository),
     ),
     revokeSessionController: new RevokeSessionController(
       new RevokeSessionUseCase(options.sessionRepository),

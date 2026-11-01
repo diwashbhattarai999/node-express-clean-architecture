@@ -6,6 +6,7 @@ import { listSessionsSchema } from "@/modules/auth/sessions/presentation/http/va
 import { logoutSchema } from "@/modules/auth/sessions/presentation/http/validators/logout.validator";
 import { refreshSchema } from "@/modules/auth/sessions/presentation/http/validators/refresh.validator";
 import { revokeSessionSchema } from "@/modules/auth/sessions/presentation/http/validators/revoke-session.validator";
+import { updateSessionLabelSchema } from "@/modules/auth/sessions/presentation/http/validators/update-session-label.validator";
 import type { SessionsModule } from "@/modules/auth/sessions/sessions.module";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
@@ -46,6 +47,12 @@ export function createSessionsRouter(authModule: SessionsModule & AuthHttpGuards
     validate(getSessionSchema),
     authModule.requireBearerAuth,
     asHandler(authModule.getSessionController),
+  );
+  router.patch(
+    "/sessions/:sessionId",
+    validate(updateSessionLabelSchema),
+    authModule.requireBearerAuth,
+    asHandler(authModule.updateSessionLabelController),
   );
   router.delete(
     "/sessions/:sessionId",

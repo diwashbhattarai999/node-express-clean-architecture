@@ -13,6 +13,7 @@ describe("RevokeOtherSessionsUseCase", () => {
     revokeOtherSessionsForUser: vi.fn(),
     listSessionsForUser: vi.fn(),
     findSessionForUser: vi.fn(),
+    updateSessionLabelForUser: vi.fn(),
     revokeSessionForUser: vi.fn(),
   };
 

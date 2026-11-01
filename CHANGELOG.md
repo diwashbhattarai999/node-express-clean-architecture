@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/identifiers/check` — public identifier format check (`available` does not reveal taken email/phone/username)
 - `POST /api/v1/users/me/phones` — add an unverified phone identity (verify via existing `POST /auth/phone/verify`)
 - `DELETE /api/v1/users/me/phones/{identityId}` — remove a phone identity (`409 LAST_AUTH_METHOD` if last sign-in method)
+- `PATCH /api/v1/auth/sessions/{sessionId}` — set a session device label (`deviceName`, max 255)
 
 ## [1.6.0] - 2026-11-01
 
