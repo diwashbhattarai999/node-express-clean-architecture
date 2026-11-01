@@ -35,6 +35,9 @@ pnpm db:up
 # Apply migrations
 pnpm db:migrate
 
+# Seed default roles/permissions (set SEED_SUPERADMIN_* in .env to create a superadmin)
+pnpm db:seed
+
 # Dev server (default http://localhost:3000)
 pnpm dev
 
@@ -71,6 +74,7 @@ curl http://localhost:3000/ready
 | `pnpm db:logs` | Tail Postgres logs |
 | `pnpm db:generate` | Generate Drizzle migrations |
 | `pnpm db:migrate` | Run migrations (host) |
+| `pnpm db:seed` | Upsert RBAC catalog; create superadmin when `SEED_SUPERADMIN_*` is set |
 | `pnpm db:studio` | Drizzle Studio |
 | `pnpm docker:build` | Build the API and worker images |
 | `pnpm docker:up` | Build and start API + worker + Postgres + Redis |
@@ -214,6 +218,7 @@ pnpm db:up
 # edit schema under src/infrastructure/database/drizzle/schema/
 pnpm db:generate
 pnpm db:migrate
+pnpm db:seed
 ```
 
 ## Docker

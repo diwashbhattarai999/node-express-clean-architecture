@@ -24,6 +24,7 @@
 		"db:logs": "docker compose logs -f postgres",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
+		"db:seed": "tsx src/scripts/seed.ts",
 		"db:studio": "drizzle-kit studio",
 		"docker:build": "docker compose build api worker",
 		"docker:up": "docker compose up -d --build",

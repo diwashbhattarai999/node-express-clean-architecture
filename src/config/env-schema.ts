@@ -317,6 +317,13 @@ export const envSchema = z
       .int("Jobs dashboard port must be an integer")
       .positive("Jobs dashboard port must be a positive number")
       .default(3010),
+
+    SEED_SUPERADMIN_EMAIL: z.preprocess(emptyToUndefined, z.email().optional()),
+    SEED_SUPERADMIN_PASSWORD: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+    SEED_SUPERADMIN_DISPLAY_NAME: z.preprocess(
+      emptyToUndefined,
+      z.string().min(1).max(100).optional(),
+    ),
   })
   .superRefine((env, context) => {
     if (env.HTTP_SERVER_HEADERS_TIMEOUT_MS <= env.HTTP_SERVER_KEEP_ALIVE_TIMEOUT_MS) {
@@ -351,6 +358,14 @@ export const envSchema = z
         code: "custom",
         path: ["OAUTH_OIDC_AUTHORIZATION_URL"],
         message: "OAUTH_OIDC_AUTHORIZATION_URL is required when OAUTH_OIDC_CLIENT_ID is set.",
+      });
+    }
+
+    if (Boolean(env.SEED_SUPERADMIN_EMAIL) !== Boolean(env.SEED_SUPERADMIN_PASSWORD)) {
+      context.addIssue({
+        code: "custom",
+        path: env.SEED_SUPERADMIN_EMAIL ? ["SEED_SUPERADMIN_PASSWORD"] : ["SEED_SUPERADMIN_EMAIL"],
+        message: "SEED_SUPERADMIN_EMAIL and SEED_SUPERADMIN_PASSWORD must be set together.",
       });
     }
 

@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/authz/check` — bearer-authenticated permission check (`{ allowed }`; `resourceId` accepted but not scoped yet)
 - `GET /api/v1/admin/roles` — paginated role catalog (`roles.read`; optional `search`)
 - `403 PERMISSION_DENIED` plus `requirePermission` middleware for admin routes
-- `permissions` and `role_permissions` tables for RBAC (no seed data)
+- `permissions` and `role_permissions` tables for RBAC
+- `pnpm db:seed` — upsert default permissions/roles (`member`, `admin`, `superadmin`) and optionally create a superadmin from `SEED_SUPERADMIN_*`
 
 ## [1.4.0] - 2026-11-01
 

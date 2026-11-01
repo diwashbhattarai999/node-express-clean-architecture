@@ -16,5 +16,5 @@ alwaysApply: true
 ## Commands
 
 - `pnpm dev` / `pnpm worker` / `pnpm jobs:ui` / `pnpm build` / `pnpm test` / `pnpm lint` / `pnpm typecheck`
-- DB: `pnpm db:up`, `pnpm db:migrate`
+- DB: `pnpm db:up`, `pnpm db:migrate`, `pnpm db:seed`
 - Docker: `pnpm docker:up` (service names are `api` and `worker`, not `app`)

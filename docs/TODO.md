@@ -12,7 +12,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P1 | App Dockerfile (multi-stage, non-root, `.dockerignore`) | 22 | Done — `pnpm docker:up` |
 | P1 | Authentication module (per `docs/AUTH.md`) | 13 | DDL + AUTH_API.md; core auth + sessions + password + username + `/users/me` + emails + deletion request/cancel + OAuth authorize/callback/exchange + list/link/unlink + public providers list landed; session label still pending |
 | P1 | Protect users (and future) routes with auth middleware | 13 / 8 | Sample users CRUD removed; `/users/me` is bearer-protected |
-| P2 | Authorization / RBAC | 14 | `roles` / `permissions` tables + `/authz/me/*` + `/authz/check` + `GET /admin/roles` + `requirePermission` landed; remaining admin RBAC APIs pending |
+| P2 | Authorization / RBAC | 14 | Tables + `/authz/me/*` + `/authz/check` + `GET /admin/roles` + `requirePermission` + `pnpm db:seed`; remaining admin RBAC APIs pending |
 | P2 | Unauthorized / Forbidden / Conflict error conventions | 11 | Done — shared 401/403/409 errors; email conflict is 409 |
 | P2 | OpenAPI / Swagger UI synced with routes | 19 | Not started |
 | P3 | Coverage thresholds in Vitest + CI coverage gate | 3 / 23 | Coverage configured, no thresholds |
@@ -21,7 +21,7 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 | P3 | Include `tests/**` in Biome | 2 | Biome currently scopes to `src/**` only |
 | P4 | HTTP server timeouts + keep-alive | 4 / 7 | Done — `HTTP_SERVER_*` on `createServer` |
 | P4 | Transaction abstraction for multi-step writes | 6 / 9 | Not needed yet for simple CRUD |
-| P4 | Database seeding | 9 | — |
+| P4 | Database seeding | 9 | Done for RBAC (`pnpm db:seed`: permissions, roles, optional superadmin) |
 | P4 | Dependency audit / vulnerability scanning in CI | 15 / 23 / 25 | Dependabot present; no audit step |
 | P5 | Redis / caching layer (if required) | 16 | Client + readiness done; cache port/abstraction later |
 | P5 | Email / HTTP / storage external ports | 17 | Done — wire email into auth when Phase 13 lands |

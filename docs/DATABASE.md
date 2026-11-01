@@ -319,7 +319,7 @@ Durable login analytics (not the sole rate limiter). File: [`auth/login-attempts
 
 ## `roles` / `user_roles` / `permissions` / `role_permissions`
 
-Authorization tables (no seeded rows). Files under [`authorization/`](../src/infrastructure/database/drizzle/schema/authorization/).
+Authorization tables. Catalog + optional superadmin: `pnpm db:seed` (see [`.env.example`](../.env.example)). Files under [`authorization/`](../src/infrastructure/database/drizzle/schema/authorization/).
 
 ### `roles`
 

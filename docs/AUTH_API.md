@@ -116,7 +116,7 @@ Shared: `UNAUTHORIZED` (401), `FORBIDDEN` (403), `CONFLICT` (409), `NOT_FOUND` (
 
 ### 1.8 Schema prerequisites (RBAC)
 
-Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md / AUTH.md). Permission **keys** below are normative for the API. Tables are not seeded.
+Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md / AUTH.md). Permission **keys** below are normative for the API. Seed them with `pnpm db:seed`.
 
 ---
 
