@@ -3,6 +3,7 @@ import { type IRouter, Router } from "express";
 import { asHandler, validate } from "@/app/middleware/validation";
 import { PermissionKey } from "@/modules/auth/authorization/application/constants/permission-keys";
 import type { AuthorizationModule } from "@/modules/auth/authorization/authorization.module";
+import { assignRolePermissionsSchema } from "@/modules/auth/authorization/presentation/http/validators/assign-role-permissions.validator";
 import { createRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/create-role.validator";
 import { deleteRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/delete-role.validator";
 import { getPermissionSchema } from "@/modules/auth/authorization/presentation/http/validators/get-permission.validator";
@@ -71,6 +72,14 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.PERMISSIONS_READ),
     asHandler(authModule.getPermissionController),
+  );
+
+  router.put(
+    "/roles/:roleId/permissions",
+    validate(assignRolePermissionsSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.PERMISSIONS_ASSIGN),
+    asHandler(authModule.assignRolePermissionsController),
   );
 
   return router;

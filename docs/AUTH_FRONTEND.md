@@ -139,6 +139,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | `DELETE` | `/roles/:roleId` | bearer + `roles.delete` |
 | `GET` | `/permissions` | bearer + `permissions.read` |
 | `GET` | `/permissions/:permissionId` | bearer + `permissions.read` |
+| `PUT` | `/roles/:roleId/permissions` | bearer + `permissions.assign` |
 
 ---
 
@@ -700,6 +701,24 @@ Cookies cleared.
 **Response** `200` `data`: `Permission`.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Assign permissions to role (admin)
+
+`PUT /api/v1/admin/roles/{roleId}/permissions`
+
+**Auth:** bearer + `permissions.assign`. `roleId` must be a UUID.
+
+```json
+{ "permissionIds": ["550e8400-e29b-41d4-a716-446655440040"] }
+```
+
+Full replace. Empty array clears all. Duplicates are ignored. Unknown permission ids are `422`.
+
+**Response** `200` `data`: `Permission[]`, sorted by `key`.
+
+**Errors:** `404 NOT_FOUND` (role), `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

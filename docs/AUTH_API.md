@@ -824,9 +824,11 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `PUT /api/v1/admin/roles/{roleId}/permissions` · **Auth:** bearer + `permissions.assign`
 
-**Body:** `{ "permissionIds": string[] }` — full replace set.
+**Body:** `{ "permissionIds": string[] }` — full replace set (empty array clears all). Duplicates are ignored.
 
-**Response** `200` `data`: `Permission[]`
+**Response** `200` `data`: `Permission[]` (sorted by `key`)
+
+**Errors:** `404 NOT_FOUND` (role), `422 VALIDATION_ERROR` (unknown permission ids), `403 PERMISSION_DENIED`
 
 ---
 
@@ -1251,7 +1253,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 49  | DELETE | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
 | 50  | GET    | `/api/v1/admin/permissions`                               | P1       | Done                                           |
 | 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       | Done                                           |
-| 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       |                                                |
+| 52  | PUT    | `/api/v1/admin/roles/{roleId}/permissions`                | P1       | Done                                           |
 | 53  | DELETE | `/api/v1/admin/roles/{roleId}/permissions/{permissionId}` | P1       |                                                |
 | 54  | GET    | `/api/v1/admin/roles/{roleId}/users`                      | P2       |                                                |
 | 55  | GET    | `/api/v1/admin/users/{userId}/roles`                      | P1       |                                                |
@@ -1296,5 +1298,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 48
-- Remaining: 44
+- Done: 49
+- Remaining: 43

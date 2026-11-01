@@ -21,6 +21,7 @@ describe("GetRoleUseCase", () => {
     listForRole: vi.fn(),
     list: vi.fn(),
     findById: vi.fn(),
+    replaceForRole: vi.fn(),
   };
 
   const roleRepository: IRoleRepository = {

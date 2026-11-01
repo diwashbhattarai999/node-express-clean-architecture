@@ -19,6 +19,7 @@ describe("ListPermissionsUseCase", () => {
     listForRole: vi.fn(),
     list: vi.fn(),
     findById: vi.fn(),
+    replaceForRole: vi.fn(),
   };
 
   const useCase = new ListPermissionsUseCase(identityRepository, permissionRepository);

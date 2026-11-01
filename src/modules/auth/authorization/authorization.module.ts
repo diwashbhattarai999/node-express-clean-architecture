@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { AssignRolePermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/assign-role-permissions.use-case";
 import { CheckPermissionUseCase } from "@/modules/auth/authorization/application/use-cases/check-permission.use-case";
 import { CreateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/create-role.use-case";
 import { DeleteRoleUseCase } from "@/modules/auth/authorization/application/use-cases/delete-role.use-case";
@@ -12,6 +13,7 @@ import { ListRolesUseCase } from "@/modules/auth/authorization/application/use-c
 import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
 import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
 import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
+import { AssignRolePermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/assign-role-permissions.controller";
 import { CheckPermissionController } from "@/modules/auth/authorization/presentation/http/controllers/check-permission.controller";
 import { CreateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/create-role.controller";
 import { DeleteRoleController } from "@/modules/auth/authorization/presentation/http/controllers/delete-role.controller";
@@ -40,6 +42,7 @@ export type AuthorizationModule = {
   deleteRoleController: DeleteRoleController;
   listPermissionsController: ListPermissionsController;
   getPermissionController: GetPermissionController;
+  assignRolePermissionsController: AssignRolePermissionsController;
   requirePermission: (permission: string) => RequestHandler;
 };
 
@@ -79,6 +82,9 @@ export function createAuthorizationModule(
     ),
     getPermissionController: new GetPermissionController(
       new GetPermissionUseCase(options.identityRepository, permissionRepository),
+    ),
+    assignRolePermissionsController: new AssignRolePermissionsController(
+      new AssignRolePermissionsUseCase(options.identityRepository, permissionRepository),
     ),
     requirePermission: createRequirePermission(permissionRepository),
   };

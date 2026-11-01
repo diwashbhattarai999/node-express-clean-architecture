@@ -1,14 +1,17 @@
-import { and, asc, count, eq, ilike, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { permissions } from "@/infrastructure/database/drizzle/schema/authorization/permissions.schema";
 import { rolePermissions } from "@/infrastructure/database/drizzle/schema/authorization/role-permissions.schema";
+import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
 import { userRoles } from "@/infrastructure/database/drizzle/schema/authorization/user-roles.schema";
 import type {
   IPermissionRepository,
   ListPermissionsQuery,
   ListPermissionsResult,
   Permission,
+  ReplaceRolePermissionsInput,
+  ReplaceRolePermissionsResult,
 } from "@/modules/auth/authorization/application/ports/permission.repository";
 import { getPaginationOffset } from "@/shared/http/pagination";
 
@@ -99,6 +102,58 @@ export class PostgresPermissionRepository implements IPermissionRepository {
       .limit(1);
 
     return row ? toPermission(row) : null;
+  }
+
+  public async replaceForRole(
+    input: ReplaceRolePermissionsInput,
+  ): Promise<ReplaceRolePermissionsResult> {
+    return db.transaction(async (tx) => {
+      const [role] = await tx
+        .select({ id: roles.id })
+        .from(roles)
+        .where(eq(roles.id, input.roleId))
+        .limit(1);
+
+      if (!role) {
+        return { outcome: "role_not_found" };
+      }
+
+      const uniqueIds = [...new Set(input.permissionIds)];
+
+      if (uniqueIds.length > 0) {
+        const found = await tx
+          .select({ id: permissions.id })
+          .from(permissions)
+          .where(inArray(permissions.id, uniqueIds));
+        const foundIds = new Set(found.map((row) => row.id));
+        const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+
+        if (missingIds.length > 0) {
+          return { outcome: "permissions_not_found", missingIds };
+        }
+      }
+
+      await tx.delete(rolePermissions).where(eq(rolePermissions.roleId, input.roleId));
+
+      if (uniqueIds.length > 0) {
+        await tx.insert(rolePermissions).values(
+          uniqueIds.map((permissionId) => ({
+            roleId: input.roleId,
+            permissionId,
+            assignedBy: input.assignedBy,
+          })),
+        );
+      }
+
+      const rows = await tx
+        .select(permissionColumns)
+        .from(rolePermissions)
+        .innerJoin(permissions, eq(permissions.id, rolePermissions.permissionId))
+        .where(eq(rolePermissions.roleId, input.roleId))
+        .orderBy(asc(permissions.key));
+
+      return { outcome: "replaced", permissions: rows.map(toPermission) };
+    });
   }
 }
 
