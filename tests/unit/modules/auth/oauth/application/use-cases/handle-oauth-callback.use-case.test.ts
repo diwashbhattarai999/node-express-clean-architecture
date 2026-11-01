@@ -17,6 +17,7 @@ import { ErrorCode } from "@/shared/errors/error-code";
 describe("HandleOAuthCallbackUseCase", () => {
   const providerCatalog: IOauthProviderCatalog = {
     findByName: vi.fn(),
+    list: vi.fn(),
   };
 
   const authorizationStateRepository: IOauthAuthorizationStateRepository = {

@@ -90,6 +90,7 @@ Frontend deep links from emails:
 | `GET` | `/oauth/{provider}/authorize` | public |
 | `GET` | `/oauth/{provider}/callback` | public (IdP redirect) |
 | `POST` | `/oauth/{provider}/exchange` | public (native PKCE) |
+| `GET` | `/providers` | public |
 | `GET` | `/me` | bearer |
 | `POST` | `/password/forgot` | public |
 | `POST` | `/password/reset/validate` | public |
@@ -167,6 +168,19 @@ Also under `/api/v1/users` (same bearer):
 ```
 
 `provider`: `google` | `github` | `apple` | `microsoft` | `oidc`. `providerEmail` and `lastUsedAt` may be `null`.
+
+### `AuthProviderPublic`
+
+```json
+{
+  "id": "google",
+  "name": "Google",
+  "type": "oauth",
+  "enabled": true
+}
+```
+
+`type`: `oauth` | `oidc` | `password` | `magic_link`. Hide providers with `enabled: false`.
 
 ### Session tokens (`data` after login / verify)
 
@@ -288,6 +302,16 @@ Refresh returns the same fields **without** `user`.
 **Response** `200` — session tokens + cookies.
 
 **Errors:** `401 INVALID_CREDENTIALS`, `403 EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED`.
+
+---
+
+### List auth providers
+
+`GET /api/v1/auth/providers`
+
+**Auth:** public. Use this to render sign-in buttons.
+
+**Response** `200` `data`: `AuthProviderPublic[]` — `password` is always enabled; OAuth/OIDC keys are enabled when configured in env; `magic_link` is listed but disabled.
 
 ---
 

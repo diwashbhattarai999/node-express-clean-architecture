@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /api/v1/users/me/oauth-accounts/{provider}/authorize` — start linking an OAuth provider to the current account (`intent=link`, stores `userId`)
 - `POST /api/v1/users/me/oauth-accounts/{provider}/link` — complete OAuth link for the current account (`OAuthAccount`; PKCE from body or link cookie)
 - `DELETE /api/v1/users/me/oauth-accounts/{provider}` — unlink a provider (`409 LAST_AUTH_METHOD` if it is the last sign-in method)
+- `GET /api/v1/auth/providers` — public catalog of password, OAuth/OIDC, and magic-link providers (`enabled` from env; magic link listed but disabled)
 
 ### Changed
 

@@ -1,6 +1,6 @@
 import { type IRouter, Router } from "express";
 
-import { asHandler, validate } from "@/app/middleware/validation";
+import { asHandler, asRequestHandler, validate } from "@/app/middleware/validation";
 import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { exchangeOAuthCodeSchema } from "@/modules/auth/oauth/presentation/http/validators/exchange-oauth-code.validator";
 import { handleOAuthCallbackSchema } from "@/modules/auth/oauth/presentation/http/validators/handle-oauth-callback.validator";
@@ -8,6 +8,8 @@ import { startOAuthAuthorizationSchema } from "@/modules/auth/oauth/presentation
 
 export function createOAuthRouter(authModule: OAuthModule): IRouter {
   const router = Router();
+
+  router.get("/providers", asRequestHandler(authModule.listAuthProvidersController));
 
   router.get(
     "/oauth/:provider/authorize",

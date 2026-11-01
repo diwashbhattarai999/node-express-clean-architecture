@@ -10,6 +10,7 @@ import { ValidationError } from "@/shared/errors/validation-error";
 describe("StartOAuthAuthorizationUseCase", () => {
   const providerCatalog: IOauthProviderCatalog = {
     findByName: vi.fn(),
+    list: vi.fn(),
   };
 
   const authorizationStateRepository: IOauthAuthorizationStateRepository = {

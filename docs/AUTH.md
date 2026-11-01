@@ -800,6 +800,7 @@ POST   /api/v1/auth/magic-link/consume
 GET    /api/v1/auth/oauth/:provider/authorize
 GET    /api/v1/auth/oauth/:provider/callback
 POST   /api/v1/auth/oauth/:provider/exchange
+GET    /api/v1/auth/providers
 
 SESSION
 POST   /api/v1/auth/refresh
@@ -826,7 +827,6 @@ POST   /api/v1/auth/password/reset
 POST   /api/v1/auth/password/change
 
 OAUTH / AUTHZ / ADMIN
-GET    /api/v1/auth/providers
 GET    /api/v1/authz/me/roles
 GET    /api/v1/authz/me/permissions
 …      /api/v1/admin/roles, /api/v1/admin/users, /api/v1/admin/audit-logs

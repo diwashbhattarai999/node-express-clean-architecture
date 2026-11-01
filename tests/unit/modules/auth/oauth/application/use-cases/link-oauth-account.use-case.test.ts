@@ -18,6 +18,7 @@ describe("LinkOAuthAccountUseCase", () => {
 
   const providerCatalog: IOauthProviderCatalog = {
     findByName: vi.fn(),
+    list: vi.fn(),
   };
 
   const authorizationStateRepository: IOauthAuthorizationStateRepository = {

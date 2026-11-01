@@ -4,6 +4,7 @@ import { CompleteOAuthSignIn } from "@/modules/auth/oauth/application/services/c
 import { ExchangeOAuthCodeUseCase } from "@/modules/auth/oauth/application/use-cases/exchange-oauth-code.use-case";
 import { HandleOAuthCallbackUseCase } from "@/modules/auth/oauth/application/use-cases/handle-oauth-callback.use-case";
 import { LinkOAuthAccountUseCase } from "@/modules/auth/oauth/application/use-cases/link-oauth-account.use-case";
+import { ListAuthProvidersUseCase } from "@/modules/auth/oauth/application/use-cases/list-auth-providers.use-case";
 import { ListOwnOAuthAccountsUseCase } from "@/modules/auth/oauth/application/use-cases/list-own-oauth-accounts.use-case";
 import { StartOAuthAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-authorization.use-case";
 import { StartOAuthLinkAuthorizationUseCase } from "@/modules/auth/oauth/application/use-cases/start-oauth-link-authorization.use-case";
@@ -15,6 +16,7 @@ import { PostgresOAuthAuthorizationStateRepository } from "@/modules/auth/oauth/
 import { ExchangeOAuthCodeController } from "@/modules/auth/oauth/presentation/http/controllers/exchange-oauth-code.controller";
 import { HandleOAuthCallbackController } from "@/modules/auth/oauth/presentation/http/controllers/handle-oauth-callback.controller";
 import { LinkOAuthAccountController } from "@/modules/auth/oauth/presentation/http/controllers/link-oauth-account.controller";
+import { ListAuthProvidersController } from "@/modules/auth/oauth/presentation/http/controllers/list-auth-providers.controller";
 import { ListOwnOAuthAccountsController } from "@/modules/auth/oauth/presentation/http/controllers/list-own-oauth-accounts.controller";
 import { StartOAuthAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-authorization.controller";
 import { StartOAuthLinkAuthorizationController } from "@/modules/auth/oauth/presentation/http/controllers/start-oauth-link-authorization.controller";
@@ -45,6 +47,7 @@ export type OAuthModule = {
   startOAuthLinkAuthorizationController: StartOAuthLinkAuthorizationController;
   linkOAuthAccountController: LinkOAuthAccountController;
   unlinkOAuthAccountController: UnlinkOAuthAccountController;
+  listAuthProvidersController: ListAuthProvidersController;
 };
 
 export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModule {
@@ -131,6 +134,9 @@ export function createOAuthModule(options: CreateOAuthModuleOptions): OAuthModul
     }),
     unlinkOAuthAccountController: new UnlinkOAuthAccountController(
       new UnlinkOAuthAccountUseCase(options.identityRepository, accountRepository),
+    ),
+    listAuthProvidersController: new ListAuthProvidersController(
+      new ListAuthProvidersUseCase(providerCatalog),
     ),
   };
 }

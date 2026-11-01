@@ -704,6 +704,8 @@ Same query as 6.1 with `intent=link`.
 
 **Response** `200` `data`: `AuthProviderPublic[]`
 
+Always includes `password` (`enabled: true`) and the known OAuth/OIDC keys (`google`, `github`, `apple`, `microsoft`, `oidc`). OAuth/OIDC `enabled` is true when that provider has a client id in env. `magic_link` is listed but `enabled: false` until implemented. Clients should hide disabled providers.
+
 ---
 
 ## 7. RBAC — roles & permissions
@@ -1222,7 +1224,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 38  | GET    | `/api/v1/users/me/oauth-accounts/{provider}/authorize`    | P1       | Done                                           |
 | 39  | POST   | `/api/v1/users/me/oauth-accounts/{provider}/link`         | P1       | Done                                           |
 | 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       | Done                                           |
-| 41  | GET    | `/api/v1/auth/providers`                                  | P1       |                                                |
+| 41  | GET    | `/api/v1/auth/providers`                                  | P1       | Done                                           |
 | 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       |                                                |
 | 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       |                                                |
 | 44  | POST   | `/api/v1/authz/check`                                     | P1       |                                                |
@@ -1278,5 +1280,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 37
-- Remaining: 55
+- Done: 38
+- Remaining: 54

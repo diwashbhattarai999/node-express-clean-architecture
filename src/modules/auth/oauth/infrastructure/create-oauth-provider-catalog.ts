@@ -88,5 +88,6 @@ export const createOAuthProviderCatalog = (env: TEnv): IOauthProviderCatalog => 
 
   return {
     findByName: (name) => providers.get(name) ?? null,
+    list: () => [...providers.values()],
   };
 };

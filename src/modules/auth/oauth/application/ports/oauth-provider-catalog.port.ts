@@ -15,4 +15,5 @@ export type OAuthProviderDefinition = {
 
 export interface IOauthProviderCatalog {
   findByName(name: TOauthProviderName): OAuthProviderDefinition | null;
+  list(): OAuthProviderDefinition[];
 }
