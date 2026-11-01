@@ -134,6 +134,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | --- | --- | --- |
 | `GET` | `/roles` | bearer + `roles.read` |
 | `GET` | `/roles/:roleId` | bearer + `roles.read` |
+| `POST` | `/roles` | bearer + `roles.create` |
 
 ---
 
@@ -623,6 +624,24 @@ Cookies cleared.
 **Response** `200` `data`: `{ "role": Role, "permissions": Permission[] }`, permissions sorted by `key`. Empty `permissions` when the role has none.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Create role (admin)
+
+`POST /api/v1/admin/roles`
+
+**Auth:** bearer + `roles.create`.
+
+```json
+{ "key": "editor", "name": "Editor", "description": "Can edit content" }
+```
+
+`key` is stored lowercase and must be unique. `description` is optional (`null` when omitted or blank).
+
+**Response** `201` `data`: `Role`.
+
+**Errors:** `409 CONFLICT`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

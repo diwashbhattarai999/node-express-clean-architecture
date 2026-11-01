@@ -17,8 +17,16 @@ export type ListRolesResult = {
   total: number;
 };
 
+export type CreateRoleData = {
+  key: string;
+  name: string;
+  description: string | null;
+};
+
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
   list(query: ListRolesQuery): Promise<ListRolesResult>;
   findById(roleId: string): Promise<Role | null>;
+  findByKey(key: string): Promise<Role | null>;
+  create(data: CreateRoleData): Promise<Role>;
 }

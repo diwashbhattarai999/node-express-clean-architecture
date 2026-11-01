@@ -24,6 +24,8 @@ describe("ListRolesUseCase", () => {
     listForUser: vi.fn(),
     list: vi.fn(),
     findById: vi.fn(),
+    findByKey: vi.fn(),
+    create: vi.fn(),
   };
 
   const useCase = new ListRolesUseCase(identityRepository, permissionRepository, roleRepository);

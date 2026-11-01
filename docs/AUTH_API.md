@@ -770,7 +770,9 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 **Body:** `{ "key": string, "name": string, "description"?: string }`
 
-**Response** `201` `data`: `Role`
+**Response** `201` `data`: `Role` (`key` stored lowercase; unique)
+
+**Errors:** `409 CONFLICT`, `403 PERMISSION_DENIED`
 
 ---
 
@@ -1238,7 +1240,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 44  | POST   | `/api/v1/authz/check`                                     | P1       | Done                                           |
 | 45  | GET    | `/api/v1/admin/roles`                                     | P1       | Done                                           |
 | 46  | GET    | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
-| 47  | POST   | `/api/v1/admin/roles`                                     | P1       |                                                |
+| 47  | POST   | `/api/v1/admin/roles`                                     | P1       | Done                                           |
 | 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
 | 49  | DELETE | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
 | 50  | GET    | `/api/v1/admin/permissions`                               | P1       |                                                |
@@ -1288,5 +1290,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 43
-- Remaining: 49
+- Done: 44
+- Remaining: 48

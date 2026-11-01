@@ -1,9 +1,12 @@
 import { and, asc, count, desc, eq, ilike, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
+import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
 import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
 import { userRoles } from "@/infrastructure/database/drizzle/schema/authorization/user-roles.schema";
+import { RoleAlreadyExistsError } from "@/modules/auth/authorization/application/errors/role-already-exists.error";
 import type {
+  CreateRoleData,
   IRoleRepository,
   ListRolesQuery,
   ListRolesResult,
@@ -71,6 +74,30 @@ export class PostgresRoleRepository implements IRoleRepository {
     const [row] = await db.select(roleColumns).from(roles).where(eq(roles.id, roleId)).limit(1);
 
     return row ? toRole(row) : null;
+  }
+
+  public async findByKey(key: string): Promise<Role | null> {
+    const [row] = await db.select(roleColumns).from(roles).where(eq(roles.key, key)).limit(1);
+
+    return row ? toRole(row) : null;
+  }
+
+  public async create(data: CreateRoleData): Promise<Role> {
+    try {
+      const [row] = await db.insert(roles).values(data).returning(roleColumns);
+
+      if (!row) {
+        throw new Error("Role insert did not return a row.");
+      }
+
+      return toRole(row);
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new RoleAlreadyExistsError();
+      }
+
+      throw error;
+    }
   }
 }
 
