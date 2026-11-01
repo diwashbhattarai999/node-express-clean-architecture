@@ -11,6 +11,7 @@ import type {
   ListRolesQuery,
   ListRolesResult,
   Role,
+  UpdateRoleData,
 } from "@/modules/auth/authorization/application/ports/role.repository";
 import { getPaginationOffset } from "@/shared/http/pagination";
 
@@ -98,6 +99,26 @@ export class PostgresRoleRepository implements IRoleRepository {
 
       throw error;
     }
+  }
+
+  public async update(roleId: string, data: UpdateRoleData): Promise<Role | null> {
+    const patch: UpdateRoleData = {};
+
+    if (data.name !== undefined) {
+      patch.name = data.name;
+    }
+
+    if (data.description !== undefined) {
+      patch.description = data.description;
+    }
+
+    const [row] = await db
+      .update(roles)
+      .set(patch)
+      .where(eq(roles.id, roleId))
+      .returning(roleColumns);
+
+    return row ? toRole(row) : null;
   }
 }
 

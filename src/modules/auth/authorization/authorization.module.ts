@@ -6,6 +6,7 @@ import { GetRoleUseCase } from "@/modules/auth/authorization/application/use-cas
 import { ListOwnPermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/list-own-permissions.use-case";
 import { ListOwnRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-own-roles.use-case";
 import { ListRolesUseCase } from "@/modules/auth/authorization/application/use-cases/list-roles.use-case";
+import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
 import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
 import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
 import { CheckPermissionController } from "@/modules/auth/authorization/presentation/http/controllers/check-permission.controller";
@@ -14,6 +15,7 @@ import { GetRoleController } from "@/modules/auth/authorization/presentation/htt
 import { ListOwnPermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/list-own-permissions.controller";
 import { ListOwnRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-own-roles.controller";
 import { ListRolesController } from "@/modules/auth/authorization/presentation/http/controllers/list-roles.controller";
+import { UpdateRoleController } from "@/modules/auth/authorization/presentation/http/controllers/update-role.controller";
 import { createRequirePermission } from "@/modules/auth/authorization/presentation/http/middleware/require-permission.middleware";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 
@@ -28,6 +30,7 @@ export type AuthorizationModule = {
   listRolesController: ListRolesController;
   getRoleController: GetRoleController;
   createRoleController: CreateRoleController;
+  updateRoleController: UpdateRoleController;
   requirePermission: (permission: string) => RequestHandler;
 };
 
@@ -55,6 +58,9 @@ export function createAuthorizationModule(
     ),
     createRoleController: new CreateRoleController(
       new CreateRoleUseCase(options.identityRepository, permissionRepository, roleRepository),
+    ),
+    updateRoleController: new UpdateRoleController(
+      new UpdateRoleUseCase(options.identityRepository, permissionRepository, roleRepository),
     ),
     requirePermission: createRequirePermission(permissionRepository),
   };

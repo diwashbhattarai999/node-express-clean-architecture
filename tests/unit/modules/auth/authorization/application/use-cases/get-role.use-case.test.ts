@@ -27,6 +27,7 @@ describe("GetRoleUseCase", () => {
     findById: vi.fn(),
     findByKey: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
   };
 
   const useCase = new GetRoleUseCase(identityRepository, permissionRepository, roleRepository);

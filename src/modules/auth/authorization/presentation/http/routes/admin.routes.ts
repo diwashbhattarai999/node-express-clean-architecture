@@ -6,6 +6,7 @@ import type { AuthorizationModule } from "@/modules/auth/authorization/authoriza
 import { createRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/create-role.validator";
 import { getRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/get-role.validator";
 import { listRolesSchema } from "@/modules/auth/authorization/presentation/http/validators/list-roles.validator";
+import { updateRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/update-role.validator";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 export function createAdminRouter(
@@ -35,6 +36,14 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.ROLES_CREATE),
     asHandler(authModule.createRoleController),
+  );
+
+  router.patch(
+    "/roles/:roleId",
+    validate(updateRoleSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.ROLES_UPDATE),
+    asHandler(authModule.updateRoleController),
   );
 
   return router;

@@ -7,6 +7,7 @@ const mockRoleRepository = {
   findById: vi.fn(),
   findByKey: vi.fn(),
   create: vi.fn(),
+  update: vi.fn(),
 };
 
 const mockSessionRepository = {

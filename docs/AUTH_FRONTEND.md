@@ -135,6 +135,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | `GET` | `/roles` | bearer + `roles.read` |
 | `GET` | `/roles/:roleId` | bearer + `roles.read` |
 | `POST` | `/roles` | bearer + `roles.create` |
+| `PATCH` | `/roles/:roleId` | bearer + `roles.update` |
 
 ---
 
@@ -642,6 +643,24 @@ Cookies cleared.
 **Response** `201` `data`: `Role`.
 
 **Errors:** `409 CONFLICT`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Update role (admin)
+
+`PATCH /api/v1/admin/roles/{roleId}`
+
+**Auth:** bearer + `roles.update`. `roleId` must be a UUID.
+
+```json
+{ "name": "Lead editor", "description": "Reviews content" }
+```
+
+`key` is immutable (sending it is `422`). At least one of `name` or `description` is required. `description: null` or `""` clears it.
+
+**Response** `200` `data`: `Role`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

@@ -780,9 +780,11 @@ Distinct keys from the current user's roles, sorted ascending. Empty list when n
 
 `PATCH /api/v1/admin/roles/{roleId}` · **Auth:** bearer + `roles.update`
 
-**Body:** `{ "name"?: string, "description"?: string }` — `key` immutable.
+**Body:** `{ "name"?: string, "description"?: string | null }` — `key` immutable. At least one field required.
 
 **Response** `200` `data`: `Role`
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`
 
 ---
 
@@ -1241,7 +1243,7 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 45  | GET    | `/api/v1/admin/roles`                                     | P1       | Done                                           |
 | 46  | GET    | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
 | 47  | POST   | `/api/v1/admin/roles`                                     | P1       | Done                                           |
-| 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
+| 48  | PATCH  | `/api/v1/admin/roles/{roleId}`                            | P1       | Done                                           |
 | 49  | DELETE | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
 | 50  | GET    | `/api/v1/admin/permissions`                               | P1       |                                                |
 | 51  | GET    | `/api/v1/admin/permissions/{permissionId}`                | P2       |                                                |
@@ -1290,5 +1292,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 44
-- Remaining: 48
+- Done: 45
+- Remaining: 47
