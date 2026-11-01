@@ -27,7 +27,7 @@ describe("GetAuthConfigUseCase", () => {
     expect(result.features).toEqual({
       registration: true,
       oauth: true,
-      magicLink: false,
+      magicLink: true,
       mfa: false,
       passkeys: false,
       phoneAuth: true,

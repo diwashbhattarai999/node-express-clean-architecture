@@ -4,4 +4,6 @@ export const generateEmailVerificationToken = (): string => randomBytes(32).toSt
 
 export const generatePasswordResetToken = (): string => randomBytes(32).toString("base64url");
 
+export const generateMagicLinkToken = (): string => randomBytes(32).toString("base64url");
+
 export const generatePhoneOtp = (): string => String(randomInt(0, 1_000_000)).padStart(6, "0");

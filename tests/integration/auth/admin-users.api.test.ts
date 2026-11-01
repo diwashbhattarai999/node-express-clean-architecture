@@ -84,6 +84,9 @@ const mockCredentialsRepository = {
   resetPasswordByTokenHash: vi.fn(),
   findPasswordHashForUser: vi.fn(),
   changePasswordForUser: vi.fn(),
+  findMagicLinkTarget: vi.fn(),
+  replaceMagicLinkToken: vi.fn(),
+  consumeMagicLinkByTokenHash: vi.fn(),
 };
 
 vi.mock("@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository", () => ({

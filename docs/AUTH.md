@@ -236,15 +236,13 @@ Request:
 }
 ```
 
-If the account does not exist, successful verification may create it.
+Request is anti-enumeration: the API always returns success. A 15-minute single-use email is sent only when an existing `active` or `pending_verification` account has that email. Consume is **login-only** — missing accounts are not created.
 
 ```http
-POST /api/v1/auth/magic-link/verify
+POST /api/v1/auth/magic-link/consume
 ```
 
-The magic link is single-use and short-lived.
-
-Successful verification creates an authenticated session.
+The magic link is single-use and short-lived (15 minutes). Consume issues a session (same cookies as password login). `pending_verification` users are activated; suspended/disabled accounts are rejected without consuming the token.
 
 ---
 

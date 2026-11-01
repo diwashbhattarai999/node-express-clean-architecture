@@ -446,7 +446,9 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Body:** `{ "email": string }`
 
-**Response** `200` `data`: `null`
+**Response** `200` `data`: `null` — generic success whether or not the email exists (anti-enumeration). Emails a 15-minute single-use link to existing `active` or `pending_verification` accounts. Does not create accounts.
+
+**Errors:** `422`.
 
 ---
 
@@ -456,7 +458,9 @@ Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md 
 
 **Body:** `{ "token": string }`
 
-**Response** `200` `data`: `AuthTokensData` with `user`
+**Response** `200` `data`: `AuthTokensData` with `user` (same cookies as login). Activates `pending_verification` users. Does not create accounts.
+
+**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` (token not consumed), `422`.
 
 ---
 
@@ -706,7 +710,7 @@ Same query as 6.1 with `intent=link`.
 
 **Response** `200` `data`: `AuthProviderPublic[]`
 
-Always includes `password` (`enabled: true`) and the known OAuth/OIDC keys (`google`, `github`, `apple`, `microsoft`, `oidc`). OAuth/OIDC `enabled` is true when that provider has a client id in env. `magic_link` is listed but `enabled: false` until implemented. Clients should hide disabled providers.
+Always includes `password` (`enabled: true`) and the known OAuth/OIDC keys (`google`, `github`, `apple`, `microsoft`, `oidc`). OAuth/OIDC `enabled` is true when that provider has a client id in env. `magic_link` is listed and `enabled: true`. Clients should hide disabled providers.
 
 ---
 
@@ -1238,8 +1242,8 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 14  | POST   | `/api/v1/auth/password/reset`                             | P0       | Done                                           |
 | 15  | POST   | `/api/v1/auth/password/change`                            | P1       | Done                                           |
 | 16  | PATCH  | `/api/v1/users/me/username`                               | P1       | Done                                           |
-| 17  | POST   | `/api/v1/auth/magic-link/request`                         | P2       |                                                |
-| 18  | POST   | `/api/v1/auth/magic-link/consume`                         | P2       |                                                |
+| 17  | POST   | `/api/v1/auth/magic-link/request`                         | P2       | Done                                           |
+| 18  | POST   | `/api/v1/auth/magic-link/consume`                         | P2       | Done                                           |
 | 19  | GET    | `/api/v1/auth/sessions`                                   | P1       | Done                                           |
 | 20  | GET    | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
 | 21  | DELETE | `/api/v1/auth/sessions/{sessionId}`                       | P1       | Done                                           |
@@ -1318,5 +1322,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 77
-- Remaining: 15
+- Done: 79
+- Remaining: 13

@@ -2,14 +2,18 @@ import { PostgresPermissionRepository } from "@/modules/auth/authorization/infra
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import { AdminPasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/admin-password-reset.use-case";
 import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/use-cases/change-password.use-case";
+import { ConsumeMagicLinkUseCase } from "@/modules/auth/credentials/application/use-cases/consume-magic-link.use-case";
 import { ForgotPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/forgot-password.use-case";
 import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
+import { RequestMagicLinkUseCase } from "@/modules/auth/credentials/application/use-cases/request-magic-link.use-case";
 import { ResetPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/reset-password.use-case";
 import { ValidatePasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/validate-password-reset.use-case";
 import { AdminPasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/admin-password-reset.controller";
 import { ChangePasswordController } from "@/modules/auth/credentials/presentation/http/controllers/change-password.controller";
+import { ConsumeMagicLinkController } from "@/modules/auth/credentials/presentation/http/controllers/consume-magic-link.controller";
 import { ForgotPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/forgot-password.controller";
 import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
+import { RequestMagicLinkController } from "@/modules/auth/credentials/presentation/http/controllers/request-magic-link.controller";
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
 import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
@@ -37,6 +41,8 @@ export type CreateCredentialsModuleOptions = {
 
 export type CredentialsModule = {
   loginController: LoginController;
+  requestMagicLinkController: RequestMagicLinkController;
+  consumeMagicLinkController: ConsumeMagicLinkController;
   forgotPasswordController: ForgotPasswordController;
   validatePasswordResetController: ValidatePasswordResetController;
   resetPasswordController: ResetPasswordController;
@@ -55,6 +61,21 @@ export function createCredentialsModule(
         options.credentialsRepository,
         options.sessionRepository,
         options.passwordHasher,
+        options.accessTokenSigner,
+        options.sessionOptions,
+      ),
+      options.cookieOptions,
+    ),
+    requestMagicLinkController: new RequestMagicLinkController(
+      new RequestMagicLinkUseCase(
+        options.credentialsRepository,
+        options.emailSender,
+        options.emailOptions,
+      ),
+    ),
+    consumeMagicLinkController: new ConsumeMagicLinkController(
+      new ConsumeMagicLinkUseCase(
+        options.credentialsRepository,
         options.accessTokenSigner,
         options.sessionOptions,
       ),

@@ -5,6 +5,7 @@
 export const FrontendRoutes = {
   verifyEmail: "/verify-email",
   resetPassword: "/reset-password",
+  magicLink: "/magic-link",
 } as const;
 
 export type TFrontendRoute = (typeof FrontendRoutes)[keyof typeof FrontendRoutes];

@@ -72,6 +72,7 @@ Frontend deep links from emails:
 
 - Verify email: `{FRONTEND_BASE_URL}/verify-email?token=…`
 - Reset password: `{FRONTEND_BASE_URL}/reset-password?token=…`
+- Magic link: `{FRONTEND_BASE_URL}/magic-link?token=…`
 
 ---
 
@@ -86,6 +87,8 @@ Frontend deep links from emails:
 | `POST` | `/phone/verify` | public |
 | `POST` | `/phone/verification/resend` | public |
 | `POST` | `/login` | public |
+| `POST` | `/magic-link/request` | public |
+| `POST` | `/magic-link/consume` | public |
 | `POST` | `/refresh` | refresh (+ CSRF if cookie) |
 | `POST` | `/logout` | refresh and/or bearer (+ CSRF if cookie) |
 | `POST` | `/logout-all` | bearer (+ CSRF if cookie) |
@@ -415,13 +418,53 @@ Refresh returns the same fields **without** `user`.
 
 ---
 
+### Request magic link
+
+`POST /api/v1/auth/magic-link/request`
+
+**Auth:** public. Anti-enumeration: same `200` whether or not the email exists. Sends a 15-minute single-use link to existing `active` or `pending_verification` accounts. Does not create accounts.
+
+```json
+{ "email": "ada@example.com" }
+```
+
+**Response** `200` — always:
+
+```json
+{
+  "success": true,
+  "message": "If an account exists for that email, a sign-in link has been sent.",
+  "data": null
+}
+```
+
+Email deep link: `{FRONTEND_BASE_URL}/magic-link?token=…`. POST that token to consume.
+
+---
+
+### Consume magic link
+
+`POST /api/v1/auth/magic-link/consume`
+
+**Auth:** public. Login-only (no auto-signup). Activates `pending_verification` users and verifies the email identity on the token.
+
+```json
+{ "token": "token-from-email-link" }
+```
+
+**Response** `200` — same `AuthTokensData` + cookies as login (`message`: `Signed in.`).
+
+**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `403 ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` (token not consumed), `422`.
+
+---
+
 ### List auth providers
 
 `GET /api/v1/auth/providers`
 
 **Auth:** public. Use this to render sign-in buttons.
 
-**Response** `200` `data`: `AuthProviderPublic[]` — `password` is always enabled; OAuth/OIDC keys are enabled when configured in env; `magic_link` is listed but disabled.
+**Response** `200` `data`: `AuthProviderPublic[]` — `password` and `magic_link` are enabled; OAuth/OIDC keys are enabled when configured in env.
 
 ---
 
@@ -445,7 +488,7 @@ Refresh returns the same fields **without** `user`.
   "features": {
     "registration": true,
     "oauth": true,
-    "magicLink": false,
+    "magicLink": true,
     "mfa": false,
     "passkeys": false,
     "phoneAuth": true

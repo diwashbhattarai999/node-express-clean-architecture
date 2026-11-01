@@ -13,6 +13,9 @@ describe("ValidatePasswordResetUseCase", () => {
     resetPasswordByTokenHash: vi.fn(),
     findPasswordHashForUser: vi.fn(),
     changePasswordForUser: vi.fn(),
+    findMagicLinkTarget: vi.fn(),
+    replaceMagicLinkToken: vi.fn(),
+    consumeMagicLinkByTokenHash: vi.fn(),
   };
 
   const useCase = new ValidatePasswordResetUseCase(credentialsRepository);

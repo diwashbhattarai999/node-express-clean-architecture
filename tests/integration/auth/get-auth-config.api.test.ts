@@ -24,7 +24,7 @@ describe("Auth config API", () => {
         features: {
           registration: true,
           oauth: true,
-          magicLink: false,
+          magicLink: true,
           mfa: false,
           passkeys: false,
           phoneAuth: true,
@@ -34,7 +34,7 @@ describe("Auth config API", () => {
     expect(response.body.data.providers).toEqual(
       expect.arrayContaining([
         { id: "password", name: "Password", type: "password", enabled: true },
-        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: false },
+        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: true },
       ]),
     );
   });

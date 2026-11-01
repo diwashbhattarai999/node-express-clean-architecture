@@ -24,7 +24,7 @@ describe("ListAuthProvidersUseCase", () => {
     ]);
   });
 
-  it("enables password and configured OAuth providers; leaves magic link disabled", () => {
+  it("enables password, magic link, and configured OAuth providers", () => {
     expect(useCase.execute()).toEqual({
       providers: [
         { id: "password", name: "Password", type: "password", enabled: true },
@@ -33,7 +33,7 @@ describe("ListAuthProvidersUseCase", () => {
         { id: "apple", name: "Apple", type: "oauth", enabled: false },
         { id: "microsoft", name: "Microsoft", type: "oauth", enabled: false },
         { id: "oidc", name: "OIDC", type: "oidc", enabled: false },
-        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: false },
+        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: true },
       ],
     });
   });
@@ -50,6 +50,6 @@ describe("ListAuthProvidersUseCase", () => {
         expect.objectContaining({ id: "oidc", enabled: false }),
       ]),
     );
-    expect(providers.find((provider) => provider.id === "magic_link")?.enabled).toBe(false);
+    expect(providers.find((provider) => provider.id === "magic_link")?.enabled).toBe(true);
   });
 });

@@ -29,7 +29,7 @@ export class ListAuthProvidersUseCase {
       providers: [
         { id: "password", name: "Password", type: "password", enabled: true },
         ...oauthProviders,
-        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: false },
+        { id: "magic_link", name: "Magic link", type: "magic_link", enabled: true },
       ],
     };
   }

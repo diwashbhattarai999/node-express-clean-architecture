@@ -19,7 +19,7 @@ describe("Auth list providers API", () => {
       { id: "apple", name: "Apple", type: "oauth", enabled: false },
       { id: "microsoft", name: "Microsoft", type: "oauth", enabled: false },
       { id: "oidc", name: "OIDC", type: "oidc", enabled: false },
-      { id: "magic_link", name: "Magic link", type: "magic_link", enabled: false },
+      { id: "magic_link", name: "Magic link", type: "magic_link", enabled: true },
     ]);
   });
 });

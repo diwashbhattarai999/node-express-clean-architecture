@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, isNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { authTokens } from "@/infrastructure/database/drizzle/schema/auth/auth-tokens.schema";
@@ -7,14 +7,20 @@ import { passwordCredentials } from "@/infrastructure/database/drizzle/schema/au
 import { sessions } from "@/infrastructure/database/drizzle/schema/auth/sessions.schema";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import type {
+  ConsumeMagicLinkByTokenHashResult,
   ICredentialsRepository,
+  MagicLinkTarget,
   PasswordLoginCandidate,
   PasswordResetTarget,
+  ReplaceMagicLinkTokenInput,
   ReplacePasswordResetTokenInput,
   ResetPasswordByTokenHashResult,
   ValidatePasswordResetTokenResult,
 } from "@/modules/auth/credentials/application/ports/credentials.repository";
-import type { TLoginIdentityType } from "@/modules/auth/shared/application/types/auth.types";
+import type {
+  CreateSessionInput,
+  TLoginIdentityType,
+} from "@/modules/auth/shared/application/types/auth.types";
 
 export class PostgresCredentialsRepository implements ICredentialsRepository {
   public async findPasswordLoginCandidate(
@@ -385,6 +391,213 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
         );
 
       return true;
+    });
+  }
+
+  public async findMagicLinkTarget(normalizedEmail: string): Promise<MagicLinkTarget | null> {
+    const [row] = await db
+      .select({
+        userId: loginIdentities.userId,
+        identityId: loginIdentities.id,
+        email: loginIdentities.normalizedIdentifier,
+      })
+      .from(loginIdentities)
+      .innerJoin(users, eq(users.id, loginIdentities.userId))
+      .where(
+        and(
+          eq(loginIdentities.type, "email"),
+          eq(loginIdentities.normalizedIdentifier, normalizedEmail),
+          isNull(users.deletedAt),
+          inArray(users.status, ["active", "pending_verification"]),
+        ),
+      )
+      .orderBy(desc(loginIdentities.isPrimary), asc(loginIdentities.createdAt))
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      userId: row.userId,
+      identityId: row.identityId,
+      email: row.email,
+    };
+  }
+
+  public async replaceMagicLinkToken(input: ReplaceMagicLinkTokenInput): Promise<void> {
+    await db.transaction(async (tx) => {
+      const now = new Date();
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, input.userId),
+            eq(authTokens.type, "magic_link"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        );
+
+      await tx.insert(authTokens).values({
+        userId: input.userId,
+        identityId: input.identityId,
+        type: "magic_link",
+        tokenHash: input.tokenHash,
+        expiresAt: input.expiresAt,
+      });
+    });
+  }
+
+  public async consumeMagicLinkByTokenHash(
+    tokenHash: string,
+    session: CreateSessionInput,
+  ): Promise<ConsumeMagicLinkByTokenHashResult> {
+    const [token] = await db
+      .select()
+      .from(authTokens)
+      .where(
+        and(
+          eq(authTokens.tokenHash, tokenHash),
+          eq(authTokens.type, "magic_link"),
+          isNull(authTokens.consumedAt),
+          isNull(authTokens.revokedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!token) {
+      return { outcome: "invalid" };
+    }
+
+    if (token.expiresAt.getTime() <= Date.now()) {
+      return { outcome: "expired" };
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, token.userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return { outcome: "invalid" };
+    }
+
+    if (user.status === "suspended") {
+      return { outcome: "suspended" };
+    }
+
+    if (user.status === "disabled") {
+      return { outcome: "disabled" };
+    }
+
+    return db.transaction(async (tx) => {
+      const now = new Date();
+
+      const [consumed] = await tx
+        .update(authTokens)
+        .set({ consumedAt: now })
+        .where(
+          and(
+            eq(authTokens.id, token.id),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+          ),
+        )
+        .returning({ id: authTokens.id });
+
+      if (!consumed) {
+        return { outcome: "invalid" as const };
+      }
+
+      await tx
+        .update(authTokens)
+        .set({ revokedAt: now })
+        .where(
+          and(
+            eq(authTokens.userId, token.userId),
+            eq(authTokens.type, "magic_link"),
+            isNull(authTokens.consumedAt),
+            isNull(authTokens.revokedAt),
+            ne(authTokens.id, token.id),
+          ),
+        );
+
+      if (token.identityId) {
+        await tx
+          .update(loginIdentities)
+          .set({ verifiedAt: now, updatedAt: now })
+          .where(and(eq(loginIdentities.id, token.identityId), isNull(loginIdentities.verifiedAt)));
+      }
+
+      let status = user.status;
+      let updatedAt = user.updatedAt;
+
+      if (user.status === "pending_verification") {
+        const [activated] = await tx
+          .update(users)
+          .set({
+            status: "active",
+            activatedAt: now,
+            updatedAt: now,
+          })
+          .where(eq(users.id, user.id))
+          .returning();
+
+        if (activated) {
+          status = activated.status;
+          updatedAt = activated.updatedAt;
+        }
+      }
+
+      await tx.insert(sessions).values({
+        id: session.id,
+        userId: user.id,
+        familyId: session.familyId,
+        refreshTokenHash: session.refreshTokenHash,
+        expiresAt: session.expiresAt,
+        ipAddress: session.ipAddress ?? null,
+        userAgent: session.userAgent ?? null,
+      });
+
+      const identities = await tx
+        .select({
+          type: loginIdentities.type,
+          identifier: loginIdentities.normalizedIdentifier,
+          isPrimary: loginIdentities.isPrimary,
+          verifiedAt: loginIdentities.verifiedAt,
+        })
+        .from(loginIdentities)
+        .where(eq(loginIdentities.userId, user.id));
+
+      const email =
+        identities.find(
+          (identity) => identity.type === "email" && identity.isPrimary && identity.verifiedAt,
+        )?.identifier ??
+        identities.find((identity) => identity.type === "email" && identity.verifiedAt)
+          ?.identifier ??
+        null;
+
+      const username =
+        identities.find((identity) => identity.type === "username")?.identifier ?? null;
+
+      return {
+        outcome: "consumed" as const,
+        sessionId: session.id,
+        user: {
+          id: user.id,
+          status,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+          email,
+          username,
+          createdAt: user.createdAt,
+          updatedAt,
+        },
+      };
     });
   }
 }

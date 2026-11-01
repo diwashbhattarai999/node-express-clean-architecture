@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/users/me/phones` — add an unverified phone identity (verify via existing `POST /auth/phone/verify`)
 - `DELETE /api/v1/users/me/phones/{identityId}` — remove a phone identity (`409 LAST_AUTH_METHOD` if last sign-in method)
 - `PATCH /api/v1/auth/sessions/{sessionId}` — set a session device label (`deviceName`, max 255)
+- `POST /api/v1/auth/magic-link/request` — public passwordless sign-in email (anti-enumeration; 15-minute single-use token)
+- `POST /api/v1/auth/magic-link/consume` — consume a magic-link token and issue a session (activates `pending_verification`; no auto-signup)
+
+### Changed
+
+- Public `/auth/providers` and `/auth/config` now enable `magic_link` (`features.magicLink: true`)
 
 ## [1.6.0] - 2026-11-01
 
