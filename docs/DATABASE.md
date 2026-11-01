@@ -21,7 +21,7 @@ users
  ├── passkeys
  ├── security_audit_logs
  ├── login_attempts
- └── user_roles → roles
+ └── user_roles → roles → role_permissions → permissions
 ```
 
 Rules:
@@ -317,9 +317,9 @@ Durable login analytics (not the sole rate limiter). File: [`auth/login-attempts
 
 ---
 
-## `roles` / `user_roles`
+## `roles` / `user_roles` / `permissions` / `role_permissions`
 
-Authorization stubs (no seeded rows). Files under [`authorization/`](../src/infrastructure/database/drizzle/schema/authorization/).
+Authorization tables (no seeded rows). Files under [`authorization/`](../src/infrastructure/database/drizzle/schema/authorization/).
 
 ### `roles`
 
@@ -337,6 +337,25 @@ Authorization stubs (no seeded rows). Files under [`authorization/`](../src/infr
 | --- | --- | --- |
 | `user_id` | `uuid` FK → `users` | Composite PK with `role_id` |
 | `role_id` | `uuid` FK → `roles` | |
+| `assigned_at` | `timestamptz` | |
+| `assigned_by` | `uuid` FK → `users` | Nullable |
+
+### `permissions`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `uuid` PK | |
+| `key` | `varchar(64)` | Unique stable key (e.g. `users.read`) |
+| `name` | `varchar(100)` | |
+| `description` | `varchar(255)` | Nullable |
+| `created_at` | `timestamptz` | |
+
+### `role_permissions`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `role_id` | `uuid` FK → `roles` | Composite PK with `permission_id` |
+| `permission_id` | `uuid` FK → `permissions` | |
 | `assigned_at` | `timestamptz` | |
 | `assigned_by` | `uuid` FK → `users` | Nullable |
 
@@ -366,6 +385,8 @@ src/infrastructure/database/drizzle/schema/
   authorization/
     roles.schema.ts
     user-roles.schema.ts
+    permissions.schema.ts
+    role-permissions.schema.ts
 ```
 
 Drizzle Kit loads `enums.ts` plus `**/*.schema.ts` (see [`drizzle.config.ts`](../drizzle.config.ts)).

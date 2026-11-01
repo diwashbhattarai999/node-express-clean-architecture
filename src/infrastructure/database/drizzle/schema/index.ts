@@ -10,6 +10,8 @@ export * from "./auth/passkeys.schema";
 export * from "./auth/password-credentials.schema";
 export * from "./auth/security-audit-logs.schema";
 export * from "./auth/sessions.schema";
+export * from "./authorization/permissions.schema";
+export * from "./authorization/role-permissions.schema";
 export * from "./authorization/roles.schema";
 export * from "./authorization/user-roles.schema";
 export * from "./enums";

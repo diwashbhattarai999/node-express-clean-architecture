@@ -124,6 +124,8 @@ Also under `/api/v1/authz` (same bearer):
 | Method | Path | Auth |
 | --- | --- | --- |
 | `GET` | `/me/roles` | bearer |
+| `GET` | `/me/permissions` | bearer |
+| `POST` | `/check` | bearer |
 
 ---
 
@@ -541,7 +543,7 @@ Cookies cleared.
 }
 ```
 
-`roles` here are keys only. Use `GET /authz/me/roles` for full `Role` objects. `permissions` is empty until the permissions API lands.
+`roles` here are keys only. Use `GET /authz/me/roles` for full `Role` objects. `permissions` on this response is still empty; use `GET /authz/me/permissions` for effective keys.
 
 ---
 
@@ -552,6 +554,30 @@ Cookies cleared.
 **Auth:** bearer.
 
 **Response** `200` `data`: `Role[]` (newest assignment first). Empty list when none are assigned.
+
+---
+
+### List own permissions
+
+`GET /api/v1/authz/me/permissions`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `{ "permissions": string[] }` — distinct keys from assigned roles, sorted. Empty list when none are assigned.
+
+---
+
+### Check permission
+
+`POST /api/v1/authz/check`
+
+**Auth:** bearer.
+
+```json
+{ "permission": "users.read", "resourceId": "optional-resource-id" }
+```
+
+**Response** `200` `data`: `{ "allowed": true }` if any assigned role grants that key. `resourceId` is accepted but not scoped yet. Missing permission is `allowed: false` (not `403`).
 
 ---
 

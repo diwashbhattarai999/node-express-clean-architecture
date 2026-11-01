@@ -116,7 +116,7 @@ Shared: `UNAUTHORIZED` (401), `FORBIDDEN` (403), `CONFLICT` (409), `NOT_FOUND` (
 
 ### 1.8 Schema prerequisites (RBAC)
 
-Admin permission APIs require future tables `permissions` and `role_permissions` (see DATABASE.md / AUTH.md). Permission **keys** below are normative for the API.
+Admin permission APIs use `permissions` and `role_permissions` (see DATABASE.md / AUTH.md). Permission **keys** below are normative for the API. Tables are not seeded.
 
 ---
 
@@ -726,6 +726,8 @@ Suggested permission keys: `users.read`, `users.update`, `users.suspend`, `users
 
 **Response** `200` `data`: `{ "permissions": string[] }`
 
+Distinct keys from the current user's roles, sorted ascending. Empty list when none are assigned.
+
 ---
 
 ### 7.3 Check permission — P1
@@ -735,6 +737,8 @@ Suggested permission keys: `users.read`, `users.update`, `users.suspend`, `users
 **Body:** `{ "permission": string, "resourceId"?: string }`
 
 **Response** `200` `data`: `{ "allowed": boolean }`
+
+`allowed` is true when any of the current user's roles grants `permission`. `resourceId` is accepted but not evaluated yet (no resource ACL table). Unknown keys return `allowed: false`, not an error.
 
 ---
 
@@ -1226,8 +1230,8 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 40  | DELETE | `/api/v1/users/me/oauth-accounts/{provider}`              | P1       | Done                                           |
 | 41  | GET    | `/api/v1/auth/providers`                                  | P1       | Done                                           |
 | 42  | GET    | `/api/v1/authz/me/roles`                                  | P0       | Done                                           |
-| 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       |                                                |
-| 44  | POST   | `/api/v1/authz/check`                                     | P1       |                                                |
+| 43  | GET    | `/api/v1/authz/me/permissions`                            | P0       | Done                                           |
+| 44  | POST   | `/api/v1/authz/check`                                     | P1       | Done                                           |
 | 45  | GET    | `/api/v1/admin/roles`                                     | P1       |                                                |
 | 46  | GET    | `/api/v1/admin/roles/{roleId}`                            | P1       |                                                |
 | 47  | POST   | `/api/v1/admin/roles`                                     | P1       |                                                |
@@ -1280,5 +1284,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 39
-- Remaining: 53
+- Done: 41
+- Remaining: 51

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `GET /api/v1/authz/me/roles` — bearer-authenticated list of the current user's assigned roles (`Role[]`)
+- `GET /api/v1/authz/me/permissions` — bearer-authenticated distinct permission keys from the current user's roles
+- `POST /api/v1/authz/check` — bearer-authenticated permission check (`{ allowed }`; `resourceId` accepted but not scoped yet)
+- `permissions` and `role_permissions` tables for RBAC (no seed data)
 
 ## [1.4.0] - 2026-11-01
 
