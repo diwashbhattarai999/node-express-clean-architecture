@@ -25,11 +25,16 @@ describe("RequestAccountDeletionUseCase", () => {
     cancelAccountDeletion: vi.fn(),
     applyDueAccountDeletions: vi.fn(),
     upsertUsername: vi.fn(),
+    listUsers: vi.fn(),
+    findAdminDetails: vi.fn(),
+    setUserStatus: vi.fn(),
+    hardDeleteById: vi.fn(),
   };
 
   const credentialsRepository: ICredentialsRepository = {
     findPasswordLoginCandidate: vi.fn(),
     findPasswordResetTarget: vi.fn(),
+    findPasswordResetTargetByUserId: vi.fn(),
     replacePasswordResetToken: vi.fn(),
     validatePasswordResetTokenHash: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),

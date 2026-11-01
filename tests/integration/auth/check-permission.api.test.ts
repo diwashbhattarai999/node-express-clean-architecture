@@ -51,6 +51,10 @@ const mockIdentityRepository = {
   cancelAccountDeletion: vi.fn(),
   applyDueAccountDeletions: vi.fn(),
   upsertUsername: vi.fn(),
+  listUsers: vi.fn(),
+  findAdminDetails: vi.fn(),
+  setUserStatus: vi.fn(),
+  hardDeleteById: vi.fn(),
 };
 
 vi.mock("@/modules/auth/identity/infrastructure/repositories/postgres-identity.repository", () => ({

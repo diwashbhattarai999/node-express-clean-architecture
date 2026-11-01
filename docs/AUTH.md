@@ -842,6 +842,16 @@ GET    /api/v1/admin/permissions/{permissionId}
 PUT    /api/v1/admin/roles/{roleId}/permissions
 DELETE /api/v1/admin/roles/{roleId}/permissions/{permissionId}
 GET    /api/v1/admin/roles/{roleId}/users
+GET    /api/v1/admin/users
+GET    /api/v1/admin/users/{userId}
+PATCH  /api/v1/admin/users/{userId}
+POST   /api/v1/admin/users/{userId}/suspend
+POST   /api/v1/admin/users/{userId}/reactivate
+POST   /api/v1/admin/users/{userId}/disable
+POST   /api/v1/admin/users/{userId}/enable
+POST   /api/v1/admin/users/{userId}/sessions/revoke-all
+POST   /api/v1/admin/users/{userId}/password-reset
+DELETE /api/v1/admin/users/{userId}
 GET    /api/v1/admin/users/{userId}/roles
 POST   /api/v1/admin/users/{userId}/roles
 DELETE /api/v1/admin/users/{userId}/roles/{roleId}
@@ -849,7 +859,7 @@ PUT    /api/v1/admin/users/{userId}/roles
 GET    /api/v1/admin/users/{userId}/permissions
 
 OAUTH / AUTHZ / ADMIN
-…      /api/v1/admin/roles/{id}, /api/v1/admin/users, /api/v1/admin/audit-logs
+…      /api/v1/admin/audit-logs
 
 MFA / PASSKEYS (future — AUTH_API.md §10)
 ```

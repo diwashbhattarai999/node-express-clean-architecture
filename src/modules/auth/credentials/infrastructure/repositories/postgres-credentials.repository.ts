@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { authTokens } from "@/infrastructure/database/drizzle/schema/auth/auth-tokens.schema";
@@ -111,6 +111,40 @@ export class PostgresCredentialsRepository implements ICredentialsRepository {
           eq(users.status, "active"),
         ),
       )
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      userId: row.userId,
+      identityId: row.identityId,
+      email: row.email,
+    };
+  }
+
+  public async findPasswordResetTargetByUserId(
+    userId: string,
+  ): Promise<PasswordResetTarget | null> {
+    const [row] = await db
+      .select({
+        userId: loginIdentities.userId,
+        identityId: loginIdentities.id,
+        email: loginIdentities.normalizedIdentifier,
+      })
+      .from(loginIdentities)
+      .innerJoin(users, eq(users.id, loginIdentities.userId))
+      .innerJoin(passwordCredentials, eq(passwordCredentials.userId, users.id))
+      .where(
+        and(
+          eq(loginIdentities.userId, userId),
+          eq(loginIdentities.type, "email"),
+          isNotNull(loginIdentities.verifiedAt),
+          isNull(users.deletedAt),
+        ),
+      )
+      .orderBy(desc(loginIdentities.isPrimary), asc(loginIdentities.createdAt))
       .limit(1);
 
     if (!row) {

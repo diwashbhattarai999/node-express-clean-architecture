@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `GET /api/v1/admin/users` — paginated admin user list (`users.read`; search, status, sort)
+- `GET /api/v1/admin/users/{userId}` — admin user detail with profile, roles, and identities (`users.read`)
+- `PATCH /api/v1/admin/users/{userId}` — admin profile update (`users.update`)
+- `POST /api/v1/admin/users/{userId}/suspend` — set `status=suspended` and revoke sessions (`users.suspend`)
+- `POST /api/v1/admin/users/{userId}/reactivate` — set `status=active` (`users.suspend`)
+- `POST /api/v1/admin/users/{userId}/disable` — set `status=disabled` and revoke sessions (`users.suspend` until a dedicated permission is split)
+- `POST /api/v1/admin/users/{userId}/enable` — set `status=active` (`users.suspend`)
+- `POST /api/v1/admin/users/{userId}/sessions/revoke-all` — revoke every session for a user (`sessions.revoke`)
+- `POST /api/v1/admin/users/{userId}/password-reset` — email a password-reset link (`users.update`; no raw token)
+- `DELETE /api/v1/admin/users/{userId}?hard=true` — irreversible user delete (`users.delete`)
+
 ## [1.5.0] - 2026-11-01
 
 ### Added

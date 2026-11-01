@@ -1,4 +1,19 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  ne,
+  or,
+  type SQL,
+} from "drizzle-orm";
 
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
@@ -13,16 +28,20 @@ import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import { IdentityAlreadyExistsError } from "@/modules/auth/identity/application/errors/identity-already-exists.error";
 import type {
   AddEmailIdentityInput,
+  AdminUserDetails,
   ApplyDueAccountDeletionsInput,
   CancelAccountDeletionResult,
   FindAuthenticatedPrincipalResult,
   FindOwnProfileResult,
   IIdentityRepository,
+  ListUsersQuery,
+  ListUsersResult,
   RegisterAccountInput,
   RemoveEmailIdentityInput,
   RemoveEmailIdentityResult,
   ScheduleAccountDeletionInput,
   ScheduleAccountDeletionResult,
+  SetUserStatusInput,
   UpdateOwnProfileInput,
   UpdateOwnProfileResult,
   UpsertUsernameInput,
@@ -34,6 +53,7 @@ import {
   EMPTY_AUTH_USER_PROFILE,
   type TLoginIdentityType,
 } from "@/modules/auth/shared/application/types/auth.types";
+import { getPaginationOffset } from "@/shared/http/pagination";
 
 export class PostgresIdentityRepository implements IIdentityRepository {
   public async findIdentityByNormalized(
@@ -839,4 +859,248 @@ export class PostgresIdentityRepository implements IIdentityRepository {
       throw error;
     }
   }
+
+  public async listUsers(query: ListUsersQuery): Promise<ListUsersResult> {
+    const conditions: SQL[] = [isNull(users.deletedAt)];
+    const search = query.search?.trim();
+
+    if (search) {
+      const pattern = `%${search}%`;
+      const match = or(
+        ilike(users.displayName, pattern),
+        exists(
+          db
+            .select({ id: loginIdentities.id })
+            .from(loginIdentities)
+            .where(
+              and(
+                eq(loginIdentities.userId, users.id),
+                or(
+                  ilike(loginIdentities.identifier, pattern),
+                  ilike(loginIdentities.normalizedIdentifier, pattern),
+                ),
+              ),
+            ),
+        ),
+      );
+
+      if (match) {
+        conditions.push(match);
+      }
+    }
+
+    if (query.status) {
+      conditions.push(eq(users.status, query.status));
+    }
+
+    const whereClause = and(...conditions);
+    const offset = getPaginationOffset(query.page, query.limit);
+    const direction = query.sortOrder === "asc" ? asc : desc;
+    const orderColumn =
+      query.sortBy === "displayName"
+        ? users.displayName
+        : query.sortBy === "status"
+          ? users.status
+          : users.createdAt;
+
+    const [totalResult] = await db.select({ value: count() }).from(users).where(whereClause);
+
+    const rows = await db
+      .select({
+        id: users.id,
+        status: users.status,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(whereClause)
+      .orderBy(direction(orderColumn), asc(users.id))
+      .limit(query.limit)
+      .offset(offset);
+
+    if (rows.length === 0) {
+      return { total: totalResult?.value ?? 0, items: [] };
+    }
+
+    const identities = await db
+      .select({
+        userId: loginIdentities.userId,
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(
+        inArray(
+          loginIdentities.userId,
+          rows.map((row) => row.id),
+        ),
+      );
+
+    const identitiesByUser = groupIdentitiesByUser(identities);
+
+    return {
+      total: totalResult?.value ?? 0,
+      items: rows.map((row) => toAuthUser(row, identitiesByUser.get(row.id) ?? [])),
+    };
+  }
+
+  public async findAdminDetails(userId: string): Promise<AdminUserDetails | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .limit(1);
+
+    if (!user) {
+      return null;
+    }
+
+    const identities = await this.listIdentitiesForUser(user.id);
+    const identityHints = await db
+      .select({
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(eq(loginIdentities.userId, user.id));
+
+    const [profile] = await db
+      .select({
+        firstName: userProfiles.firstName,
+        lastName: userProfiles.lastName,
+        locale: userProfiles.locale,
+        timezone: userProfiles.timezone,
+        bio: userProfiles.bio,
+      })
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, user.id))
+      .limit(1);
+
+    return {
+      user: toAuthUser(user, identityHints),
+      profile: profile
+        ? {
+            firstName: profile.firstName ?? null,
+            lastName: profile.lastName ?? null,
+            locale: profile.locale ?? null,
+            timezone: profile.timezone ?? null,
+            bio: profile.bio ?? null,
+          }
+        : EMPTY_AUTH_USER_PROFILE,
+      identities,
+    };
+  }
+
+  public async setUserStatus(input: SetUserStatusInput): Promise<AuthUser | null> {
+    const now = new Date();
+    const patch: {
+      status: SetUserStatusInput["status"];
+      updatedAt: Date;
+      suspendedAt: Date | null;
+      disabledAt: Date | null;
+      activatedAt?: Date;
+    } = {
+      status: input.status,
+      updatedAt: now,
+      suspendedAt: input.status === "suspended" ? now : null,
+      disabledAt: input.status === "disabled" ? now : null,
+    };
+
+    if (input.status === "active") {
+      patch.activatedAt = now;
+    }
+
+    const [user] = await db
+      .update(users)
+      .set(patch)
+      .where(and(eq(users.id, input.userId), isNull(users.deletedAt)))
+      .returning();
+
+    if (!user) {
+      return null;
+    }
+
+    const identityHints = await db
+      .select({
+        type: loginIdentities.type,
+        identifier: loginIdentities.normalizedIdentifier,
+        isPrimary: loginIdentities.isPrimary,
+        verifiedAt: loginIdentities.verifiedAt,
+      })
+      .from(loginIdentities)
+      .where(eq(loginIdentities.userId, user.id));
+
+    return toAuthUser(user, identityHints);
+  }
+
+  public async hardDeleteById(userId: string): Promise<"deleted" | "not_found"> {
+    const [deleted] = await db
+      .delete(users)
+      .where(eq(users.id, userId))
+      .returning({ id: users.id });
+
+    return deleted ? "deleted" : "not_found";
+  }
 }
+
+type IdentityHint = {
+  type: string;
+  identifier: string;
+  isPrimary: boolean;
+  verifiedAt: Date | null;
+};
+
+const groupIdentitiesByUser = <T extends IdentityHint & { userId: string }>(
+  identities: T[],
+): Map<string, IdentityHint[]> => {
+  const identitiesByUser = new Map<string, IdentityHint[]>();
+
+  for (const identity of identities) {
+    const existing = identitiesByUser.get(identity.userId);
+
+    if (existing) {
+      existing.push(identity);
+    } else {
+      identitiesByUser.set(identity.userId, [identity]);
+    }
+  }
+
+  return identitiesByUser;
+};
+
+const toAuthUser = (
+  row: {
+    id: string;
+    status: AuthUser["status"];
+    displayName: string | null;
+    avatarUrl: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  },
+  identities: IdentityHint[],
+): AuthUser => {
+  const email =
+    identities.find(
+      (identity) => identity.type === "email" && identity.isPrimary && identity.verifiedAt !== null,
+    )?.identifier ??
+    identities.find((identity) => identity.type === "email" && identity.verifiedAt !== null)
+      ?.identifier ??
+    null;
+
+  return {
+    id: row.id,
+    status: row.status,
+    displayName: row.displayName,
+    avatarUrl: row.avatarUrl,
+    email,
+    username: identities.find((identity) => identity.type === "username")?.identifier ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+};

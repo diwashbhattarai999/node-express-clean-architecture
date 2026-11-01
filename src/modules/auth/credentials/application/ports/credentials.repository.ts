@@ -45,6 +45,8 @@ export interface ICredentialsRepository {
 
   findPasswordResetTarget(normalizedEmail: string): Promise<PasswordResetTarget | null>;
 
+  findPasswordResetTargetByUserId(userId: string): Promise<PasswordResetTarget | null>;
+
   replacePasswordResetToken(input: ReplacePasswordResetTokenInput): Promise<void>;
 
   validatePasswordResetTokenHash(tokenHash: string): Promise<ValidatePasswordResetTokenResult>;

@@ -18,10 +18,22 @@ import { removeRolePermissionSchema } from "@/modules/auth/authorization/present
 import { removeUserRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/remove-user-role.validator";
 import { replaceUserRolesSchema } from "@/modules/auth/authorization/presentation/http/validators/replace-user-roles.validator";
 import { updateRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/update-role.validator";
+import type { CredentialsModule } from "@/modules/auth/credentials/credentials.module";
+import type { IdentityModule } from "@/modules/auth/identity/identity.module";
+import { adminUserIdSchema } from "@/modules/auth/identity/presentation/http/validators/admin-user-id.validator";
+import { deleteAdminUserSchema } from "@/modules/auth/identity/presentation/http/validators/delete-admin-user.validator";
+import { listAdminUsersSchema } from "@/modules/auth/identity/presentation/http/validators/list-admin-users.validator";
+import { setAdminUserStatusSchema } from "@/modules/auth/identity/presentation/http/validators/set-admin-user-status.validator";
+import { updateAdminUserSchema } from "@/modules/auth/identity/presentation/http/validators/update-admin-user.validator";
+import type { SessionsModule } from "@/modules/auth/sessions/sessions.module";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 export function createAdminRouter(
-  authModule: AuthorizationModule & Pick<AuthHttpGuards, "requireBearerAuth">,
+  authModule: AuthorizationModule &
+    IdentityModule &
+    SessionsModule &
+    CredentialsModule &
+    Pick<AuthHttpGuards, "requireBearerAuth">,
 ): IRouter {
   const router = Router();
 
@@ -143,6 +155,86 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.PERMISSIONS_READ),
     asHandler(authModule.listUserPermissionsController),
+  );
+
+  router.get(
+    "/users",
+    validate(listAdminUsersSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_READ),
+    asHandler(authModule.listAdminUsersController),
+  );
+
+  router.get(
+    "/users/:userId",
+    validate(adminUserIdSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_READ),
+    asHandler(authModule.getAdminUserController),
+  );
+
+  router.patch(
+    "/users/:userId",
+    validate(updateAdminUserSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_UPDATE),
+    asHandler(authModule.updateAdminUserController),
+  );
+
+  router.post(
+    "/users/:userId/suspend",
+    validate(setAdminUserStatusSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_SUSPEND),
+    asHandler(authModule.suspendAdminUserController),
+  );
+
+  router.post(
+    "/users/:userId/reactivate",
+    validate(adminUserIdSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_SUSPEND),
+    asHandler(authModule.reactivateAdminUserController),
+  );
+
+  router.post(
+    "/users/:userId/disable",
+    validate(setAdminUserStatusSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_SUSPEND),
+    asHandler(authModule.disableAdminUserController),
+  );
+
+  router.post(
+    "/users/:userId/enable",
+    validate(adminUserIdSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_SUSPEND),
+    asHandler(authModule.enableAdminUserController),
+  );
+
+  router.post(
+    "/users/:userId/sessions/revoke-all",
+    validate(adminUserIdSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.SESSIONS_REVOKE),
+    asHandler(authModule.revokeAdminUserSessionsController),
+  );
+
+  router.post(
+    "/users/:userId/password-reset",
+    validate(adminUserIdSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_UPDATE),
+    asHandler(authModule.adminPasswordResetController),
+  );
+
+  router.delete(
+    "/users/:userId",
+    validate(deleteAdminUserSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.USERS_DELETE),
+    asHandler(authModule.deleteAdminUserController),
   );
 
   return router;

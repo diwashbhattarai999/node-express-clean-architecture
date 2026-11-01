@@ -147,6 +147,16 @@ Also under `/api/v1/admin` (bearer + permission):
 | `DELETE` | `/users/:userId/roles/:roleId` | bearer + `roles.assign` |
 | `PUT` | `/users/:userId/roles` | bearer + `roles.assign` |
 | `GET` | `/users/:userId/permissions` | bearer + `permissions.read` |
+| `GET` | `/users` | bearer + `users.read` |
+| `GET` | `/users/:userId` | bearer + `users.read` |
+| `PATCH` | `/users/:userId` | bearer + `users.update` |
+| `POST` | `/users/:userId/suspend` | bearer + `users.suspend` |
+| `POST` | `/users/:userId/reactivate` | bearer + `users.suspend` |
+| `POST` | `/users/:userId/disable` | bearer + `users.suspend` |
+| `POST` | `/users/:userId/enable` | bearer + `users.suspend` |
+| `POST` | `/users/:userId/sessions/revoke-all` | bearer + `sessions.revoke` |
+| `POST` | `/users/:userId/password-reset` | bearer + `users.update` |
+| `DELETE` | `/users/:userId` | bearer + `users.delete` |
 
 ---
 
@@ -822,6 +832,122 @@ Full replace. Empty array clears all. Duplicates are ignored. Unknown role ids a
 **Response** `200` `data`: `{ "permissions": string[] }` — distinct keys from the user's roles, sorted ascending.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### List users (admin)
+
+`GET /api/v1/admin/users`
+
+**Auth:** bearer + `users.read`.
+
+**Query:** pagination; `search?`; `status?` (`pending_verification` | `active` | `suspended` | `disabled`); `sortBy` (`createdAt` | `displayName` | `status`, default `createdAt`); `sortOrder`.
+
+**Response** `200` `data`: `UserPublic[]` + `meta`. Soft-deleted users are omitted.
+
+---
+
+### Get user (admin)
+
+`GET /api/v1/admin/users/{userId}`
+
+**Auth:** bearer + `users.read`. `userId` must be a UUID.
+
+**Response** `200` `data`: `{ user: UserPublic, profile: UserProfile, roles: Role[], identities: LoginIdentity[] }`.
+
+**Errors:** `404 NOT_FOUND` (user), `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Update user (admin)
+
+`PATCH /api/v1/admin/users/{userId}`
+
+**Auth:** bearer + `users.update`.
+
+**Body (at least one):** `displayName`, `avatarUrl`, `firstName`, `lastName`, `locale`, `timezone`, `bio` — same field rules as `PATCH /users/me`.
+
+**Response** `200` `data`: `{ user: UserPublic, profile: UserProfile }`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Suspend user (admin)
+
+`POST /api/v1/admin/users/{userId}/suspend`
+
+**Auth:** bearer + `users.suspend`.
+
+**Body (optional):** `{ "reason"?: string }` — accepted, not persisted.
+
+**Response** `200` `data`: `UserPublic` — `status=suspended`. Active sessions are revoked.
+
+---
+
+### Reactivate user (admin)
+
+`POST /api/v1/admin/users/{userId}/reactivate`
+
+**Auth:** bearer + `users.suspend`.
+
+**Response** `200` `data`: `UserPublic` — `status=active`.
+
+---
+
+### Disable user (admin)
+
+`POST /api/v1/admin/users/{userId}/disable`
+
+**Auth:** bearer + `users.suspend` (until a dedicated disable permission is split).
+
+**Body (optional):** `{ "reason"?: string }` — accepted, not persisted.
+
+**Response** `200` `data`: `UserPublic` — `status=disabled`. Active sessions are revoked.
+
+---
+
+### Enable user (admin)
+
+`POST /api/v1/admin/users/{userId}/enable`
+
+**Auth:** bearer + `users.suspend`.
+
+**Response** `200` `data`: `UserPublic` — `status=active`.
+
+---
+
+### Revoke all user sessions (admin)
+
+`POST /api/v1/admin/users/{userId}/sessions/revoke-all`
+
+**Auth:** bearer + `sessions.revoke`.
+
+**Response** `200` `data`: `{ "revokedCount": number }`.
+
+---
+
+### Admin-initiated password reset
+
+`POST /api/v1/admin/users/{userId}/password-reset`
+
+**Auth:** bearer + `users.update`.
+
+**Response** `200` `data`: `null` — emails a reset link when the user has a verified email and password; never returns the raw token. Succeeds without emailing if the user exists but is not eligible.
+
+**Errors:** `404 NOT_FOUND` (user), `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Permanently delete user (admin)
+
+`DELETE /api/v1/admin/users/{userId}?hard=true`
+
+**Auth:** bearer + `users.delete`. Query `hard=true` is required.
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR` (missing `hard=true`).
 
 ---
 

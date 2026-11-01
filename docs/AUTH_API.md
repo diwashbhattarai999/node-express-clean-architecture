@@ -1275,16 +1275,16 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 | 57  | DELETE | `/api/v1/admin/users/{userId}/roles/{roleId}`             | P1       | Done                                           |
 | 58  | PUT    | `/api/v1/admin/users/{userId}/roles`                      | P2       | Done                                           |
 | 59  | GET    | `/api/v1/admin/users/{userId}/permissions`                | P2       | Done                                           |
-| 60  | GET    | `/api/v1/admin/users`                                     | P1       |                                                |
-| 61  | GET    | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
-| 62  | PATCH  | `/api/v1/admin/users/{userId}`                            | P1       |                                                |
-| 63  | POST   | `/api/v1/admin/users/{userId}/suspend`                    | P1       |                                                |
-| 64  | POST   | `/api/v1/admin/users/{userId}/reactivate`                 | P1       |                                                |
-| 65  | POST   | `/api/v1/admin/users/{userId}/disable`                    | P1       |                                                |
-| 66  | POST   | `/api/v1/admin/users/{userId}/enable`                     | P1       |                                                |
-| 67  | POST   | `/api/v1/admin/users/{userId}/sessions/revoke-all`        | P1       |                                                |
-| 68  | POST   | `/api/v1/admin/users/{userId}/password-reset`             | P2       |                                                |
-| 69  | DELETE | `/api/v1/admin/users/{userId}`                            | P2       |                                                |
+| 60  | GET    | `/api/v1/admin/users`                                     | P1       | Done                                           |
+| 61  | GET    | `/api/v1/admin/users/{userId}`                            | P1       | Done                                           |
+| 62  | PATCH  | `/api/v1/admin/users/{userId}`                            | P1       | Done                                           |
+| 63  | POST   | `/api/v1/admin/users/{userId}/suspend`                    | P1       | Done                                           |
+| 64  | POST   | `/api/v1/admin/users/{userId}/reactivate`                 | P1       | Done                                           |
+| 65  | POST   | `/api/v1/admin/users/{userId}/disable`                    | P1       | Done                                           |
+| 66  | POST   | `/api/v1/admin/users/{userId}/enable`                     | P1       | Done                                           |
+| 67  | POST   | `/api/v1/admin/users/{userId}/sessions/revoke-all`        | P1       | Done                                           |
+| 68  | POST   | `/api/v1/admin/users/{userId}/password-reset`             | P2       | Done                                           |
+| 69  | DELETE | `/api/v1/admin/users/{userId}`                            | P2       | Done                                           |
 | 70  | GET    | `/api/v1/users/me/security-events`                        | P1       |                                                |
 | 71  | GET    | `/api/v1/admin/audit-logs`                                | P1       |                                                |
 | 72  | GET    | `/api/v1/admin/audit-logs/{eventId}`                      | P2       |                                                |
@@ -1312,5 +1312,5 @@ Contracts below are planning-level; WebAuthn payloads follow the chosen library.
 # Stats
 
 - Total: 92
-- Done: 56
-- Remaining: 36
+- Done: 66
+- Remaining: 26

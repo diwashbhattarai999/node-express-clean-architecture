@@ -22,6 +22,10 @@ describe("AddEmailUseCase", () => {
     cancelAccountDeletion: vi.fn(),
     applyDueAccountDeletions: vi.fn(),
     upsertUsername: vi.fn(),
+    listUsers: vi.fn(),
+    findAdminDetails: vi.fn(),
+    setUserStatus: vi.fn(),
+    hardDeleteById: vi.fn(),
   };
 
   const emailSender: IEmailSender = {

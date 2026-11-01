@@ -1,9 +1,12 @@
+import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
+import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
 import { ListSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/list-sessions.use-case";
 import { LogoutUseCase } from "@/modules/auth/sessions/application/use-cases/logout.use-case";
 import { LogoutAllUseCase } from "@/modules/auth/sessions/application/use-cases/logout-all.use-case";
 import { RefreshUseCase } from "@/modules/auth/sessions/application/use-cases/refresh.use-case";
+import { RevokeAdminUserSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-admin-user-sessions.use-case";
 import { RevokeOtherSessionsUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-other-sessions.use-case";
 import { RevokeSessionUseCase } from "@/modules/auth/sessions/application/use-cases/revoke-session.use-case";
 import { GetSessionController } from "@/modules/auth/sessions/presentation/http/controllers/get-session.controller";
@@ -11,6 +14,7 @@ import { ListSessionsController } from "@/modules/auth/sessions/presentation/htt
 import { LogoutController } from "@/modules/auth/sessions/presentation/http/controllers/logout.controller";
 import { LogoutAllController } from "@/modules/auth/sessions/presentation/http/controllers/logout-all.controller";
 import { RefreshController } from "@/modules/auth/sessions/presentation/http/controllers/refresh.controller";
+import { RevokeAdminUserSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-admin-user-sessions.controller";
 import { RevokeOtherSessionsController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-other-sessions.controller";
 import { RevokeSessionController } from "@/modules/auth/sessions/presentation/http/controllers/revoke-session.controller";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
@@ -20,6 +24,7 @@ import type {
 } from "@/modules/auth/shared/application/types/auth-composition";
 
 export type CreateSessionsModuleOptions = {
+  identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal" | "existsById">;
   sessionRepository: ISessionRepository;
   accessTokenSigner: IAccessTokenSigner;
   sessionOptions: AuthSessionOptions;
@@ -34,9 +39,12 @@ export type SessionsModule = {
   getSessionController: GetSessionController;
   revokeSessionController: RevokeSessionController;
   revokeOtherSessionsController: RevokeOtherSessionsController;
+  revokeAdminUserSessionsController: RevokeAdminUserSessionsController;
 };
 
 export function createSessionsModule(options: CreateSessionsModuleOptions): SessionsModule {
+  const permissionRepository = new PostgresPermissionRepository();
+
   return {
     refreshController: new RefreshController(
       new RefreshUseCase(
@@ -66,6 +74,13 @@ export function createSessionsModule(options: CreateSessionsModuleOptions): Sess
     ),
     revokeOtherSessionsController: new RevokeOtherSessionsController(
       new RevokeOtherSessionsUseCase(options.sessionRepository),
+    ),
+    revokeAdminUserSessionsController: new RevokeAdminUserSessionsController(
+      new RevokeAdminUserSessionsUseCase(
+        options.identityRepository,
+        permissionRepository,
+        options.sessionRepository,
+      ),
     ),
   };
 }

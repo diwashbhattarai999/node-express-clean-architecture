@@ -80,6 +80,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     ...createIdentityModule({
       identityRepository,
       credentialsRepository,
+      sessionRepository,
       passwordHasher: options.passwordHasher,
       emailSender: options.emailSender,
       jobQueue: options.jobQueue,
@@ -87,6 +88,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       accountDeletionGraceDays: options.env.AUTH_ACCOUNT_DELETION_GRACE_DAYS,
     }),
     ...createCredentialsModule({
+      identityRepository,
       credentialsRepository,
       sessionRepository,
       passwordHasher: options.passwordHasher,
@@ -104,6 +106,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       cookieOptions,
     }),
     ...createSessionsModule({
+      identityRepository,
       sessionRepository,
       accessTokenSigner,
       sessionOptions,

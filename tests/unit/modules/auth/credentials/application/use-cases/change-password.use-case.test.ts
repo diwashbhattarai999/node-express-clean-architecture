@@ -9,6 +9,7 @@ describe("ChangePasswordUseCase", () => {
   const credentialsRepository: ICredentialsRepository = {
     findPasswordLoginCandidate: vi.fn(),
     findPasswordResetTarget: vi.fn(),
+    findPasswordResetTargetByUserId: vi.fn(),
     replacePasswordResetToken: vi.fn(),
     validatePasswordResetTokenHash: vi.fn(),
     resetPasswordByTokenHash: vi.fn(),

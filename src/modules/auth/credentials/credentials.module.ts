@@ -1,14 +1,18 @@
+import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
+import { AdminPasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/admin-password-reset.use-case";
 import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/use-cases/change-password.use-case";
 import { ForgotPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/forgot-password.use-case";
 import { LoginUseCase } from "@/modules/auth/credentials/application/use-cases/login.use-case";
 import { ResetPasswordUseCase } from "@/modules/auth/credentials/application/use-cases/reset-password.use-case";
 import { ValidatePasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/validate-password-reset.use-case";
+import { AdminPasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/admin-password-reset.controller";
 import { ChangePasswordController } from "@/modules/auth/credentials/presentation/http/controllers/change-password.controller";
 import { ForgotPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/forgot-password.controller";
 import { LoginController } from "@/modules/auth/credentials/presentation/http/controllers/login.controller";
 import { ResetPasswordController } from "@/modules/auth/credentials/presentation/http/controllers/reset-password.controller";
 import { ValidatePasswordResetController } from "@/modules/auth/credentials/presentation/http/controllers/validate-password-reset.controller";
+import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
@@ -20,6 +24,7 @@ import type {
 import type { IEmailSender } from "@/shared/email/email-sender.port";
 
 export type CreateCredentialsModuleOptions = {
+  identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal" | "existsById">;
   credentialsRepository: ICredentialsRepository;
   sessionRepository: ISessionRepository;
   passwordHasher: IPasswordHasher;
@@ -36,11 +41,14 @@ export type CredentialsModule = {
   validatePasswordResetController: ValidatePasswordResetController;
   resetPasswordController: ResetPasswordController;
   changePasswordController: ChangePasswordController;
+  adminPasswordResetController: AdminPasswordResetController;
 };
 
 export function createCredentialsModule(
   options: CreateCredentialsModuleOptions,
 ): CredentialsModule {
+  const permissionRepository = new PostgresPermissionRepository();
+
   return {
     loginController: new LoginController(
       new LoginUseCase(
@@ -68,6 +76,15 @@ export function createCredentialsModule(
     ),
     changePasswordController: new ChangePasswordController(
       new ChangePasswordUseCase(options.credentialsRepository, options.passwordHasher),
+    ),
+    adminPasswordResetController: new AdminPasswordResetController(
+      new AdminPasswordResetUseCase(
+        options.identityRepository,
+        permissionRepository,
+        options.credentialsRepository,
+        options.emailSender,
+        options.emailOptions,
+      ),
     ),
   };
 }

@@ -3,6 +3,7 @@ import type {
   AuthUser,
   AuthUserProfile,
   TLoginIdentityType,
+  TUserStatus,
 } from "@/modules/auth/shared/application/types/auth.types";
 
 export type RegisterEmailIdentity = {
@@ -106,6 +107,31 @@ export type ApplyDueAccountDeletionsInput = {
   userId?: string;
 };
 
+export type ListUsersQuery = {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: TUserStatus;
+  sortBy: "createdAt" | "displayName" | "status";
+  sortOrder: "asc" | "desc";
+};
+
+export type ListUsersResult = {
+  items: AuthUser[];
+  total: number;
+};
+
+export type AdminUserDetails = {
+  user: AuthUser;
+  profile: AuthUserProfile;
+  identities: AuthLoginIdentity[];
+};
+
+export type SetUserStatusInput = {
+  userId: string;
+  status: Extract<TUserStatus, "active" | "suspended" | "disabled">;
+};
+
 export interface IIdentityRepository {
   findIdentityByNormalized(
     type: TLoginIdentityType,
@@ -143,4 +169,12 @@ export interface IIdentityRepository {
 
   /** Creates or replaces the user's username login identity. */
   upsertUsername(input: UpsertUsernameInput): Promise<AuthUser>;
+
+  listUsers(query: ListUsersQuery): Promise<ListUsersResult>;
+
+  findAdminDetails(userId: string): Promise<AdminUserDetails | null>;
+
+  setUserStatus(input: SetUserStatusInput): Promise<AuthUser | null>;
+
+  hardDeleteById(userId: string): Promise<"deleted" | "not_found">;
 }
