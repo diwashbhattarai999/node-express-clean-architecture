@@ -7,6 +7,7 @@ import { userRoles } from "@/infrastructure/database/drizzle/schema/authorizatio
 import { RoleAlreadyExistsError } from "@/modules/auth/authorization/application/errors/role-already-exists.error";
 import type {
   CreateRoleData,
+  DeleteRoleResult,
   IRoleRepository,
   ListRolesQuery,
   ListRolesResult,
@@ -119,6 +120,33 @@ export class PostgresRoleRepository implements IRoleRepository {
       .returning(roleColumns);
 
     return row ? toRole(row) : null;
+  }
+
+  public async deleteById(roleId: string): Promise<DeleteRoleResult> {
+    return db.transaction(async (tx) => {
+      const [role] = await tx
+        .select({ id: roles.id })
+        .from(roles)
+        .where(eq(roles.id, roleId))
+        .limit(1);
+
+      if (!role) {
+        return "not_found";
+      }
+
+      const [assignment] = await tx
+        .select({ value: count() })
+        .from(userRoles)
+        .where(eq(userRoles.roleId, roleId));
+
+      if ((assignment?.value ?? 0) > 0) {
+        return "assigned";
+      }
+
+      await tx.delete(roles).where(eq(roles.id, roleId));
+
+      return "deleted";
+    });
   }
 }
 

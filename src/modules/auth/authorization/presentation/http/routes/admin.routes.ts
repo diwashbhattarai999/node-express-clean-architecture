@@ -4,6 +4,7 @@ import { asHandler, validate } from "@/app/middleware/validation";
 import { PermissionKey } from "@/modules/auth/authorization/application/constants/permission-keys";
 import type { AuthorizationModule } from "@/modules/auth/authorization/authorization.module";
 import { createRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/create-role.validator";
+import { deleteRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/delete-role.validator";
 import { getRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/get-role.validator";
 import { listRolesSchema } from "@/modules/auth/authorization/presentation/http/validators/list-roles.validator";
 import { updateRoleSchema } from "@/modules/auth/authorization/presentation/http/validators/update-role.validator";
@@ -44,6 +45,14 @@ export function createAdminRouter(
     authModule.requireBearerAuth,
     authModule.requirePermission(PermissionKey.ROLES_UPDATE),
     asHandler(authModule.updateRoleController),
+  );
+
+  router.delete(
+    "/roles/:roleId",
+    validate(deleteRoleSchema),
+    authModule.requireBearerAuth,
+    authModule.requirePermission(PermissionKey.ROLES_DELETE),
+    asHandler(authModule.deleteRoleController),
   );
 
   return router;

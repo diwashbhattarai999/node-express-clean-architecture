@@ -136,6 +136,7 @@ Also under `/api/v1/admin` (bearer + permission):
 | `GET` | `/roles/:roleId` | bearer + `roles.read` |
 | `POST` | `/roles` | bearer + `roles.create` |
 | `PATCH` | `/roles/:roleId` | bearer + `roles.update` |
+| `DELETE` | `/roles/:roleId` | bearer + `roles.delete` |
 
 ---
 
@@ -661,6 +662,18 @@ Cookies cleared.
 **Response** `200` `data`: `Role`.
 
 **Errors:** `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
+
+---
+
+### Delete role (admin)
+
+`DELETE /api/v1/admin/roles/{roleId}`
+
+**Auth:** bearer + `roles.delete`. `roleId` must be a UUID.
+
+**Response** `200` `data`: `null`.
+
+**Errors:** `409 CONFLICT` if any user still has the role, `404 NOT_FOUND`, `403 PERMISSION_DENIED`, `401 TOKEN_*`, `422 VALIDATION_ERROR`.
 
 ---
 

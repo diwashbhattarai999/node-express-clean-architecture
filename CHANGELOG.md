@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /api/v1/admin/roles/{roleId}` — role plus assigned permissions (`roles.read`)
 - `POST /api/v1/admin/roles` — create a role (`roles.create`; unique lowercase `key`)
 - `PATCH /api/v1/admin/roles/{roleId}` — update role name/description (`roles.update`; `key` immutable)
+- `DELETE /api/v1/admin/roles/{roleId}` — delete a role (`roles.delete`; `409` if still assigned)
 - `403 PERMISSION_DENIED` plus `requirePermission` middleware for admin routes
 - `permissions` and `role_permissions` tables for RBAC
 - `pnpm db:seed` — upsert default permissions/roles (`member`, `admin`, `superadmin`) and optionally create a superadmin from `SEED_SUPERADMIN_*`

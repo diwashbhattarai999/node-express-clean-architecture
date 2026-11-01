@@ -28,6 +28,8 @@ export type UpdateRoleData = {
   description?: string | null;
 };
 
+export type DeleteRoleResult = "deleted" | "not_found" | "assigned";
+
 export interface IRoleRepository {
   listForUser(userId: string): Promise<Role[]>;
   list(query: ListRolesQuery): Promise<ListRolesResult>;
@@ -35,4 +37,5 @@ export interface IRoleRepository {
   findByKey(key: string): Promise<Role | null>;
   create(data: CreateRoleData): Promise<Role>;
   update(roleId: string, data: UpdateRoleData): Promise<Role | null>;
+  deleteById(roleId: string): Promise<DeleteRoleResult>;
 }

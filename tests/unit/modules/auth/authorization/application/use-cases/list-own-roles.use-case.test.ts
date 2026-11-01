@@ -19,6 +19,7 @@ describe("ListOwnRolesUseCase", () => {
     findByKey: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    deleteById: vi.fn(),
   };
 
   const useCase = new ListOwnRolesUseCase(identityRepository, roleRepository);
