@@ -93,16 +93,17 @@ Dependencies point inward toward the domain. Each feature module owns its own la
 src/
   app/              # Express assembly, middleware, composition root
   config/           # Typed env (Zod)
-  infrastructure/   # Shared infra (e.g. database client)
+  infrastructure/   # Shared infra adapters (DB, Redis, email, storage, jobs)
   modules/
-    health/
-    users/          # domain → application → infrastructure → presentation
-  shared/           # Cross-cutting errors, HTTP helpers, logger
+    auth/           # Auth/authz + /users/me (internal submodules)
+    uploads/        # Object storage demo slice
+    health/         # Liveness / readiness
+  shared/           # Cross-cutting errors, HTTP helpers, logger, ports
   server.ts         # API process lifecycle (listen, graceful shutdown)
   worker.ts         # Job worker process (BullMQ consumer)
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and composition conventions.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/architecture/](docs/architecture/README.md) for dependency rules and contributor guides.
 
 ## HTTP API
 
@@ -113,7 +114,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules and compos
 - Validation failures return `422` with field-level errors
 - Shared `AppError` conventions: `401` (`UnauthorizedError`), `403` (`ForbiddenError`), `409` (`ConflictError`); duplicate resources (e.g. email already exists) return `409`
 
-The `users` module is a sample vertical slice to prove the architecture—not a fixed product API. Replace or extend modules as needed. Auth for frontend: [docs/AUTH_FRONTEND.md](docs/AUTH_FRONTEND.md). Design: [docs/AUTH.md](docs/AUTH.md). Full contracts: [docs/AUTH_API.md](docs/AUTH_API.md). Tables: [docs/DATABASE.md](docs/DATABASE.md).
+Self-service account APIs live under `/api/v1/users` (auth identity + related hubs). Auth for frontend: [docs/AUTH_FRONTEND.md](docs/AUTH_FRONTEND.md). Design: [docs/AUTH.md](docs/AUTH.md). Full contracts: [docs/AUTH_API.md](docs/AUTH_API.md). Tables: [docs/DATABASE.md](docs/DATABASE.md).
 
 ## Environment
 

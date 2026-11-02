@@ -4,15 +4,13 @@ import { env } from "@/config/env";
 import { RateLimitExceededError } from "@/shared/errors/rate-limit-error";
 import { HttpStatus } from "@/shared/http/http-status";
 
+/** Skip probes only. Feature routes (including uploads) stay rate-limited. */
 const shouldSkipRateLimit = (path: string) => {
-  return path.startsWith("/health") || path.startsWith("/ready") || path.startsWith("/uploads");
+  return path.startsWith("/health") || path.startsWith("/ready");
 };
 
 /**
- * Global rate limiter middleware.
- *
- * This is a global rate limiter middleware that limits the number of requests to the server.
- * It's used to prevent abuse and DDoS attacks.
+ * Global rate limiter.
  *
  * @see https://www.npmjs.com/package/express-rate-limit
  */

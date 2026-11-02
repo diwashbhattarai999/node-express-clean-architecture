@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Architecture contributor guides under `docs/architecture/` (audit, overview, DI, modules, errors, testing, naming)
+
+### Changed
+
+- Compose application modules inside `createApp()` (injectable via `CreateAppOptions.modules`) instead of at route import time
+- Inject shared `IPermissionRepository` / `IRoleRepository` from `auth.module.ts` into identity, credentials, sessions, authorization, and audit factories (no sibling infra `new` in those factories)
+- Centralize sign-in session issuance in `issueAuthSession` (password, magic link, MFA, passkey, OAuth)
+- Move HTTP `validate` / `asHandler` helpers to `shared/http/validation` (re-exported from `app/middleware/validation`)
+- Document auth-owned `/users` surface in README; point architecture docs at `docs/architecture/`
+
+### Fixed
+
+- Remove dead global rate-limit skip for `/uploads` (uploads mount under `/api/v1/uploads` and remain rate-limited)
+
 ## [1.7.0] - 2026-11-02
 
 ### Added

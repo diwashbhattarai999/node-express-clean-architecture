@@ -7,22 +7,18 @@ import type { IOauthAccountRepository } from "@/modules/auth/oauth/application/p
 import type { OAuthProviderProfile } from "@/modules/auth/oauth/application/ports/oauth-provider-client.port";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
+import {
+  type IssuedAuthSession,
+  issueAuthSession,
+} from "@/modules/auth/shared/application/services/issue-auth-session";
 import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
-import { generateRefreshToken } from "@/modules/auth/shared/application/utils/generate-refresh-token";
-import { hashToken } from "@/modules/auth/shared/application/utils/hash-token";
 import { ErrorCode } from "@/shared/errors/error-code";
 
 export type CompleteOAuthSignInOptions = {
   refreshTokenTtlSeconds: number;
 };
 
-export type CompleteOAuthSignInResult = {
-  user: AuthUser;
-  accessToken: string;
-  tokenType: "Bearer";
-  expiresIn: number;
-  refreshToken: string;
-};
+export type CompleteOAuthSignInResult = IssuedAuthSession;
 
 export type CompleteOAuthSignInMeta = {
   ipAddress?: string | null;
@@ -140,31 +136,14 @@ export class CompleteOAuthSignIn {
   ): Promise<CompleteOAuthSignInResult> {
     await this.mfaSignInGuard.assertNotRequired(user.id);
 
-    const sessionId = randomUUID();
-    const familyId = randomUUID();
-    const refreshToken = generateRefreshToken();
-    const now = Date.now();
-
-    await this.sessionRepository.createSession(user.id, {
-      id: sessionId,
-      familyId,
-      refreshTokenHash: hashToken(refreshToken),
-      expiresAt: new Date(now + this.options.refreshTokenTtlSeconds * 1000),
-      ipAddress: meta.ipAddress ?? null,
-      userAgent: meta.userAgent ?? null,
-    });
-
-    const signed = await this.accessTokenSigner.sign({
-      userId: user.id,
-      sessionId,
-    });
-
-    return {
+    return issueAuthSession(
+      {
+        sessionRepository: this.sessionRepository,
+        accessTokenSigner: this.accessTokenSigner,
+        refreshTokenTtlSeconds: this.options.refreshTokenTtlSeconds,
+      },
       user,
-      accessToken: signed.accessToken,
-      tokenType: "Bearer",
-      expiresIn: signed.expiresIn,
-      refreshToken,
-    };
+      meta,
+    );
   }
 }

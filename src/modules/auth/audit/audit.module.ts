@@ -9,13 +9,14 @@ import { GetAdminAuditExportController } from "@/modules/auth/audit/presentation
 import { GetAdminAuditLogController } from "@/modules/auth/audit/presentation/http/controllers/get-admin-audit-log.controller";
 import { ListAdminAuditLogsController } from "@/modules/auth/audit/presentation/http/controllers/list-admin-audit-logs.controller";
 import { ListOwnSecurityEventsController } from "@/modules/auth/audit/presentation/http/controllers/list-own-security-events.controller";
-import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
+import type { IPermissionRepository } from "@/modules/auth/authorization/application/ports/permission.repository";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import type { IJobQueue } from "@/shared/jobs/job-queue.port";
 import type { IObjectStorage } from "@/shared/storage/object-storage.port";
 
 export type CreateAuditModuleOptions = {
   identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal">;
+  permissionRepository: IPermissionRepository;
   jobQueue: IJobQueue;
   objectStorage: IObjectStorage;
 };
@@ -30,7 +31,7 @@ export type AuditModule = {
 
 export function createAuditModule(options: CreateAuditModuleOptions): AuditModule {
   const auditLogRepository = new PostgresAuditLogRepository();
-  const permissionRepository = new PostgresPermissionRepository();
+  const { permissionRepository } = options;
 
   return {
     listOwnSecurityEventsController: new ListOwnSecurityEventsController(

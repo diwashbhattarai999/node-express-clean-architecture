@@ -1,7 +1,12 @@
 import { type IRouter, Router } from "express";
 
-import { v1Router } from "@/app/routes/v1";
+import type { ApplicationModules } from "@/app/composition";
+import { createV1Router } from "@/app/routes/v1";
 
-export const apiRouter: IRouter = Router();
+export function createApiRouter(modules: ApplicationModules): IRouter {
+  const apiRouter: IRouter = Router();
 
-apiRouter.use("/v1", v1Router);
+  apiRouter.use("/v1", createV1Router(modules));
+
+  return apiRouter;
+}

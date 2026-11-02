@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import type { IPermissionRepository } from "@/modules/auth/authorization/application/ports/permission.repository";
+import type { IRoleRepository } from "@/modules/auth/authorization/application/ports/role.repository";
 import { AssignRolePermissionsUseCase } from "@/modules/auth/authorization/application/use-cases/assign-role-permissions.use-case";
 import { AssignUserRoleUseCase } from "@/modules/auth/authorization/application/use-cases/assign-user-role.use-case";
 import { CheckPermissionUseCase } from "@/modules/auth/authorization/application/use-cases/check-permission.use-case";
@@ -18,8 +20,6 @@ import { RemoveRolePermissionUseCase } from "@/modules/auth/authorization/applic
 import { RemoveUserRoleUseCase } from "@/modules/auth/authorization/application/use-cases/remove-user-role.use-case";
 import { ReplaceUserRolesUseCase } from "@/modules/auth/authorization/application/use-cases/replace-user-roles.use-case";
 import { UpdateRoleUseCase } from "@/modules/auth/authorization/application/use-cases/update-role.use-case";
-import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
-import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
 import { AssignRolePermissionsController } from "@/modules/auth/authorization/presentation/http/controllers/assign-role-permissions.controller";
 import { AssignUserRoleController } from "@/modules/auth/authorization/presentation/http/controllers/assign-user-role.controller";
 import { CheckPermissionController } from "@/modules/auth/authorization/presentation/http/controllers/check-permission.controller";
@@ -43,6 +43,8 @@ import type { IIdentityRepository } from "@/modules/auth/identity/application/po
 
 export type CreateAuthorizationModuleOptions = {
   identityRepository: Pick<IIdentityRepository, "existsById" | "findAuthenticatedPrincipal">;
+  permissionRepository: IPermissionRepository;
+  roleRepository: IRoleRepository;
 };
 
 export type AuthorizationModule = {
@@ -70,8 +72,7 @@ export type AuthorizationModule = {
 export function createAuthorizationModule(
   options: CreateAuthorizationModuleOptions,
 ): AuthorizationModule {
-  const roleRepository = new PostgresRoleRepository();
-  const permissionRepository = new PostgresPermissionRepository();
+  const { roleRepository, permissionRepository } = options;
 
   return {
     listOwnRolesController: new ListOwnRolesController(

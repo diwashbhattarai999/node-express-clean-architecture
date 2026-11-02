@@ -1,4 +1,4 @@
-import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
+import type { IPermissionRepository } from "@/modules/auth/authorization/application/ports/permission.repository";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import { GetSessionUseCase } from "@/modules/auth/sessions/application/use-cases/get-session.use-case";
@@ -28,6 +28,7 @@ import type {
 export type CreateSessionsModuleOptions = {
   identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal" | "existsById">;
   sessionRepository: ISessionRepository;
+  permissionRepository: IPermissionRepository;
   accessTokenSigner: IAccessTokenSigner;
   sessionOptions: AuthSessionOptions;
   cookieOptions: AuthCookieOptions;
@@ -46,7 +47,7 @@ export type SessionsModule = {
 };
 
 export function createSessionsModule(options: CreateSessionsModuleOptions): SessionsModule {
-  const permissionRepository = new PostgresPermissionRepository();
+  const { permissionRepository } = options;
 
   return {
     refreshController: new RefreshController(

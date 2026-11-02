@@ -36,8 +36,8 @@ Checked against `docs/ROADMAP.md` and the current codebase (2026-08-29).
 
 ## Suggested next sequence
 
-1. Authentication (AUTH.md) → lock down APIs
-2. Authorization / RBAC + error conventions
-3. OpenAPI / Swagger
-4. Coverage gates, real DB tests, E2E
-5. Optional infra (Redis cache abstraction, OTel)
+1. OpenAPI / Swagger synced with AUTH_API
+2. Coverage gates, real DB tests, E2E / worker integration tests
+3. Optional: dependency-cruiser; unify Redis clients if caching lands
+4. Optional infra (Redis cache abstraction, OTel)
+5. Product decision: protect uploads routes (currently public demo)

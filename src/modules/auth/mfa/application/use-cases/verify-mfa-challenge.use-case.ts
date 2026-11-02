@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { MFA_MAX_CHALLENGE_ATTEMPTS } from "@/modules/auth/mfa/application/constants/mfa";
 import type { VerifyMfaChallengeDto } from "@/modules/auth/mfa/application/dto/verify-mfa-challenge.dto";
 import { InvalidMfaCodeError } from "@/modules/auth/mfa/application/errors/invalid-mfa-code.error";
@@ -15,21 +13,17 @@ import type { ISessionRepository } from "@/modules/auth/sessions/application/por
 import { TokenExpiredError } from "@/modules/auth/shared/application/errors/token-expired.error";
 import { TokenInvalidError } from "@/modules/auth/shared/application/errors/token-invalid.error";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
-import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
-import { generateRefreshToken } from "@/modules/auth/shared/application/utils/generate-refresh-token";
+import {
+  type IssuedAuthSession,
+  issueAuthSession,
+} from "@/modules/auth/shared/application/services/issue-auth-session";
 import { hashToken } from "@/modules/auth/shared/application/utils/hash-token";
 
 export type VerifyMfaChallengeUseCaseOptions = {
   refreshTokenTtlSeconds: number;
 };
 
-export type VerifyMfaChallengeResult = {
-  user: AuthUser;
-  accessToken: string;
-  tokenType: "Bearer";
-  expiresIn: number;
-  refreshToken: string;
-};
+export type VerifyMfaChallengeResult = IssuedAuthSession;
 
 export type VerifyMfaChallengeMeta = {
   ipAddress?: string | null;
@@ -88,31 +82,15 @@ export class VerifyMfaChallengeUseCase {
       throw new TokenInvalidError("The MFA challenge is invalid.");
     }
 
-    const sessionId = randomUUID();
-    const familyId = randomUUID();
-    const refreshToken = generateRefreshToken();
-
-    await this.sessionRepository.createSession(user.id, {
-      id: sessionId,
-      familyId,
-      refreshTokenHash: hashToken(refreshToken),
-      expiresAt: new Date(now.getTime() + this.options.refreshTokenTtlSeconds * 1000),
-      ipAddress: meta.ipAddress ?? null,
-      userAgent: meta.userAgent ?? null,
-    });
-
-    const signed = await this.accessTokenSigner.sign({
-      userId: user.id,
-      sessionId,
-    });
-
-    return {
+    return issueAuthSession(
+      {
+        sessionRepository: this.sessionRepository,
+        accessTokenSigner: this.accessTokenSigner,
+        refreshTokenTtlSeconds: this.options.refreshTokenTtlSeconds,
+      },
       user,
-      accessToken: signed.accessToken,
-      tokenType: "Bearer",
-      expiresIn: signed.expiresIn,
-      refreshToken,
-    };
+      meta,
+    );
   }
 
   private async verifyCode(

@@ -5,6 +5,8 @@ import {
   type AuthorizationModule,
   createAuthorizationModule,
 } from "@/modules/auth/authorization/authorization.module";
+import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
+import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
 import {
   type CredentialsModule,
   createCredentialsModule,
@@ -67,6 +69,8 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
   const credentialsRepository = new PostgresCredentialsRepository();
   const identityRepository = new PostgresIdentityRepository();
   const sessionRepository = new PostgresSessionRepository();
+  const permissionRepository = new PostgresPermissionRepository();
+  const roleRepository = new PostgresRoleRepository();
   const mfaRepository = new PostgresMfaRepository();
   const totpService = new Rfc6238TotpService();
   const secretEncryptor = new AesGcmSecretEncryptor(
@@ -155,6 +159,8 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       identityRepository,
       credentialsRepository,
       sessionRepository,
+      permissionRepository,
+      roleRepository,
       passwordHasher: options.passwordHasher,
       emailSender: options.emailSender,
       jobQueue: options.jobQueue,
@@ -165,6 +171,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       identityRepository,
       credentialsRepository,
       sessionRepository,
+      permissionRepository,
       passwordHasher: options.passwordHasher,
       accessTokenSigner,
       mfaSignInGuard: mfaModule.mfaSignInGuard,
@@ -183,6 +190,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     ...createSessionsModule({
       identityRepository,
       sessionRepository,
+      permissionRepository,
       accessTokenSigner,
       sessionOptions,
       cookieOptions,
@@ -199,9 +207,12 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     ...createAuthorizationModule({
       identityRepository,
+      permissionRepository,
+      roleRepository,
     }),
     ...createAuditModule({
       identityRepository,
+      permissionRepository,
       jobQueue: options.jobQueue,
       objectStorage: options.objectStorage,
     }),

@@ -1,4 +1,4 @@
-import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
+import type { IPermissionRepository } from "@/modules/auth/authorization/application/ports/permission.repository";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import { AdminPasswordResetUseCase } from "@/modules/auth/credentials/application/use-cases/admin-password-reset.use-case";
 import { ChangePasswordUseCase } from "@/modules/auth/credentials/application/use-cases/change-password.use-case";
@@ -32,6 +32,7 @@ export type CreateCredentialsModuleOptions = {
   identityRepository: Pick<IIdentityRepository, "findAuthenticatedPrincipal" | "existsById">;
   credentialsRepository: ICredentialsRepository;
   sessionRepository: ISessionRepository;
+  permissionRepository: IPermissionRepository;
   passwordHasher: IPasswordHasher;
   accessTokenSigner: IAccessTokenSigner;
   mfaSignInGuard: MfaSignInGuard;
@@ -55,7 +56,7 @@ export type CredentialsModule = {
 export function createCredentialsModule(
   options: CreateCredentialsModuleOptions,
 ): CredentialsModule {
-  const permissionRepository = new PostgresPermissionRepository();
+  const { permissionRepository } = options;
 
   return {
     loginController: new LoginController(

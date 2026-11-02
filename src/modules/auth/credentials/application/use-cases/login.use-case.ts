@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { DUMMY_PASSWORD_HASH } from "@/modules/auth/credentials/application/constants/dummy-password-hash";
 import type { LoginDto } from "@/modules/auth/credentials/application/dto/login.dto";
 import { AuthForbiddenError } from "@/modules/auth/credentials/application/errors/auth-forbidden.error";
@@ -10,22 +8,17 @@ import type { MfaSignInGuard } from "@/modules/auth/mfa/application/services/mfa
 import type { ISessionRepository } from "@/modules/auth/sessions/application/ports/session.repository";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
 import type { IPasswordHasher } from "@/modules/auth/shared/application/ports/password-hasher.port";
-import type { AuthUser } from "@/modules/auth/shared/application/types/auth.types";
-import { generateRefreshToken } from "@/modules/auth/shared/application/utils/generate-refresh-token";
-import { hashToken } from "@/modules/auth/shared/application/utils/hash-token";
+import {
+  type IssuedAuthSession,
+  issueAuthSession,
+} from "@/modules/auth/shared/application/services/issue-auth-session";
 import { ErrorCode } from "@/shared/errors/error-code";
 
 export type LoginUseCaseOptions = {
   refreshTokenTtlSeconds: number;
 };
 
-export type LoginResult = {
-  user: AuthUser;
-  accessToken: string;
-  tokenType: "Bearer";
-  expiresIn: number;
-  refreshToken: string;
-};
+export type LoginResult = IssuedAuthSession;
 
 export type LoginRequestMeta = {
   ipAddress?: string | null;
@@ -75,27 +68,13 @@ export class LoginUseCase {
 
     await this.mfaSignInGuard.assertNotRequired(candidate.userId);
 
-    const sessionId = randomUUID();
-    const familyId = randomUUID();
-    const refreshToken = generateRefreshToken();
-    const now = Date.now();
-
-    await this.sessionRepository.createSession(candidate.userId, {
-      id: sessionId,
-      familyId,
-      refreshTokenHash: hashToken(refreshToken),
-      expiresAt: new Date(now + this.options.refreshTokenTtlSeconds * 1000),
-      ipAddress: meta.ipAddress ?? null,
-      userAgent: meta.userAgent ?? null,
-    });
-
-    const signed = await this.accessTokenSigner.sign({
-      userId: candidate.userId,
-      sessionId,
-    });
-
-    return {
-      user: {
+    return issueAuthSession(
+      {
+        sessionRepository: this.sessionRepository,
+        accessTokenSigner: this.accessTokenSigner,
+        refreshTokenTtlSeconds: this.options.refreshTokenTtlSeconds,
+      },
+      {
         id: candidate.userId,
         status: candidate.status,
         displayName: candidate.displayName,
@@ -105,10 +84,7 @@ export class LoginUseCase {
         createdAt: candidate.createdAt,
         updatedAt: candidate.updatedAt,
       },
-      accessToken: signed.accessToken,
-      tokenType: "Bearer",
-      expiresIn: signed.expiresIn,
-      refreshToken,
-    };
+      meta,
+    );
   }
 }

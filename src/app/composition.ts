@@ -29,3 +29,5 @@ export function createApplicationModules() {
     uploads: createUploadsModule({ objectStorage }),
   };
 }
+
+export type ApplicationModules = ReturnType<typeof createApplicationModules>;

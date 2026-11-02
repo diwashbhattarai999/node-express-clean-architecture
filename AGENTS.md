@@ -4,11 +4,12 @@ Instructions for AI coding agents working in this repository.
 
 ## Read first
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — dependency rules
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — dependency rules summary
+- [docs/architecture/](docs/architecture/README.md) — audit, DI, module, testing guides
 - [CHANGELOG.md](CHANGELOG.md) — keep `[Unreleased]` updated
 - [docs/TODO.md](docs/TODO.md) / [docs/ROADMAP.md](docs/ROADMAP.md) — remaining work
-- [docs/AUTH.md](docs/AUTH.md) — auth design (not fully implemented)
-- [docs/AUTH_API.md](docs/AUTH_API.md) — auth/authz HTTP contracts
+- [docs/AUTH.md](docs/AUTH.md) — auth design
+- [docs/AUTH_API.md](docs/AUTH_API.md) — auth/authz HTTP contracts (inventory complete)
 - [docs/JOBS.md](docs/JOBS.md) — BullMQ worker and `IJobQueue`
 
 ## Cursor rules

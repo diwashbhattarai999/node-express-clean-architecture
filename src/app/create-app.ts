@@ -1,6 +1,7 @@
 import compression from "compression";
 import express, { type Express } from "express";
 
+import { type ApplicationModules, createApplicationModules } from "@/app/composition";
 import { env } from "@/config/env";
 
 import { cookieMiddleware } from "./middleware/cookies";
@@ -11,7 +12,7 @@ import { notFoundMiddleware } from "./middleware/not-found";
 import { globalRateLimiter } from "./middleware/rate-limit";
 import { requestIdMiddleware } from "./middleware/request-id";
 import { securityMiddleware } from "./middleware/security";
-import { apiRouter } from "./routes";
+import { createApiRouter } from "./routes";
 import { rootRouter } from "./routes/root.routes";
 
 export type CreateAppOptions = {
@@ -20,117 +21,35 @@ export type CreateAppOptions = {
    * Useful for tests that need controlled failure paths.
    */
   configure?: (app: Express) => void;
+  /** Override composition (tests). Defaults to createApplicationModules(). */
+  modules?: ApplicationModules;
 };
 
 /**
- * Creates an Express application.
- *
- * @param options - Optional application configuration.
- * @returns The Express application.
+ * Creates an Express application with global middleware and versioned API routes.
  */
 export const createApp = (options: CreateAppOptions = {}): Express => {
   const app = express();
+  const modules = options.modules ?? createApplicationModules();
 
-  /**
-   * Trust proxy middleware.
-   *
-   * This is a trust proxy middleware that sets the trust proxy.
-   * It's needed if the app is behind a proxy.
-   * For example, if the app is behind a load balancer or a CDN.
-   */
   app.set("trust proxy", env.TRUST_PROXY);
 
-  /**
-   * Request ID middleware.
-   *
-   * This is a request ID middleware that sets the request ID.
-   */
   app.use(requestIdMiddleware);
-
-  /**
-   * HTTP Logger middleware.
-   *
-   * This is a HTTP logger middleware that logs the HTTP requests.
-   */
   app.use(httpLoggerMiddleware);
-
-  /**
-   * Security middleware.
-   *
-   * This is a security middleware that sets the security headers.
-   */
   app.use(securityMiddleware);
-
-  /**
-   * CORS middleware.
-   *
-   * This is a CORS middleware that sets the CORS headers.
-   */
   app.use(corsMiddleware);
-
-  /**
-   * Body Parser middleware.
-   *
-   * This is a body parser middleware that parses the request body.
-   */
   app.use(express.json({ limit: "10mb" }));
-
-  /**
-   * URL encoded body parser middleware.
-   *
-   * This is a URL encoded body parser middleware that parses the request body.
-   */
   app.use(express.urlencoded({ extended: true, limit: "10mb", parameterLimit: 10000 }));
-
-  /**
-   * Global rate limiter middleware.
-   *
-   * This is a global rate limiter middleware that limits the number of requests to the server.
-   */
   app.use(globalRateLimiter);
-
-  /**
-   * Cookies middleware.
-   *
-   * This is a cookies middleware that parses the cookies.
-   */
   app.use(cookieMiddleware);
-
-  /**
-   * Compression middleware.
-   *
-   * This is a compression middleware that compresses the response body.
-   */
   app.use(compression({ threshold: 1024 }));
 
-  /**
-   * Routes middleware.
-   *
-   * This is a routes middleware that creates the routes.
-   */
-  app.use("/api", apiRouter);
+  app.use("/api", createApiRouter(modules));
   app.use("/", rootRouter);
 
-  /**
-   * Configure middleware.
-   *
-   * This is a configure middleware that registers additional routes/middleware
-   * before the not-found and error handlers.
-   */
   options.configure?.(app);
 
-  /**
-   * Not found middleware.
-   *
-   * This is a not found middleware that handles not found errors.
-   */
   app.use(notFoundMiddleware);
-
-  /**
-   * Error handler middleware.
-   *
-   * This is a error handler middleware that handles errors in the request pipeline.
-   */
   app.use(errorHandler);
 
   return app;

@@ -1,5 +1,5 @@
-import { PostgresPermissionRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-permission.repository";
-import { PostgresRoleRepository } from "@/modules/auth/authorization/infrastructure/repositories/postgres-role.repository";
+import type { IPermissionRepository } from "@/modules/auth/authorization/application/ports/permission.repository";
+import type { IRoleRepository } from "@/modules/auth/authorization/application/ports/role.repository";
 import type { ICredentialsRepository } from "@/modules/auth/credentials/application/ports/credentials.repository";
 import type { IIdentityRepository } from "@/modules/auth/identity/application/ports/identity.repository";
 import { AddEmailUseCase } from "@/modules/auth/identity/application/use-cases/add-email.use-case";
@@ -50,6 +50,8 @@ export type CreateIdentityModuleOptions = {
   identityRepository: IIdentityRepository;
   credentialsRepository: ICredentialsRepository;
   sessionRepository: ISessionRepository;
+  permissionRepository: IPermissionRepository;
+  roleRepository: IRoleRepository;
   passwordHasher: IPasswordHasher;
   emailSender: IEmailSender;
   jobQueue: IJobQueue;
@@ -83,9 +85,7 @@ export type IdentityModule = {
 };
 
 export function createIdentityModule(options: CreateIdentityModuleOptions): IdentityModule {
-  const { identityRepository } = options;
-  const permissionRepository = new PostgresPermissionRepository();
-  const roleRepository = new PostgresRoleRepository();
+  const { identityRepository, permissionRepository, roleRepository } = options;
   const setAdminUserStatusUseCase = new SetAdminUserStatusUseCase(
     identityRepository,
     permissionRepository,
