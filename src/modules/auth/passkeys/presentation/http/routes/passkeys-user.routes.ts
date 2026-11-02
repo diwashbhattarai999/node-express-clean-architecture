@@ -16,7 +16,9 @@ export function createPasskeysUserRouter(
     | "renamePasskeyController"
     | "deletePasskeyController"
   > &
-    Pick<AuthHttpGuards, "requireBearerAuth">,
+    Pick<AuthHttpGuards, "requireBearerAuth"> & {
+      requireStepUp: AuthHttpGuards["requireBearerAuth"];
+    },
 ): IRouter {
   const router = Router();
 
@@ -41,6 +43,7 @@ export function createPasskeysUserRouter(
     "/me/passkeys/:passkeyId",
     validate(deletePasskeySchema),
     authModule.requireBearerAuth,
+    authModule.requireStepUp,
     asHandler(authModule.deletePasskeyController),
   );
   router.get(

@@ -1,6 +1,6 @@
 # Authentication & authorization API contracts
 
-Normative HTTP contracts for auth, account management, RBAC, admin, audit, MFA, passkeys, and planned step-up.
+Normative HTTP contracts for auth, account management, RBAC, admin, audit, MFA, passkeys, and step-up.
 
 **Related:** [AUTH.md](AUTH.md) (design), [DATABASE.md](DATABASE.md) (DDL), [AUTH_FRONTEND.md](AUTH_FRONTEND.md) (implemented endpoints for frontend).  
 **Status:** Full planned contract; see AUTH_FRONTEND.md for what is live today.  
@@ -107,7 +107,7 @@ Login, password forgot, identifier check, and magic-link request must not reveal
 | `TOKEN_REUSED` | 401 | Refresh reuse detected |
 | `TOKEN_REVOKED` | 401 | Session/token revoked |
 | `MFA_REQUIRED` | 403 | Login/OAuth/magic-link needs MFA; `details.mfaToken` continues the challenge |
-| `STEP_UP_REQUIRED` | 403 | Sensitive action needs step-up (future) |
+| `STEP_UP_REQUIRED` | 403 | Sensitive action needs `X-Step-Up-Token` |
 | `OAUTH_STATE_INVALID` | 400 | Bad OAuth state/PKCE |
 | `LAST_AUTH_METHOD` | 409 | Cannot unlink last viable method |
 | `PERMISSION_DENIED` | 403 | Missing permission |
@@ -1093,7 +1093,7 @@ All require bearer + listed permission. Mutating actions should write `security_
 
 ## 10. MFA, passkeys, step-up — P2
 
-MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planned.
+MFA (#77–#83), passkeys (#84–#90), and step-up (#91–#92) are implemented.
 
 ### 10.1 MFA status — #77
 
@@ -1102,7 +1102,7 @@ MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planne
 
 ### 10.2 Begin MFA enroll — #78
 
-`POST /api/v1/users/me/mfa/enroll` · **Auth:** bearer (+ step-up later)  
+`POST /api/v1/users/me/mfa/enroll` · **Auth:** bearer + `X-Step-Up-Token`  
 **Body:** `{ "type": "totp" | "sms" | "email", "destination"?: string }`  
 **Response** `200` `data`: `{ factorId, secret?: string, otpauthUrl?: string }` (TOTP). SMS/email omit secret/otpauthUrl and send a 10-minute OTP (`destination` or the user's verified phone/email).
 
@@ -1116,9 +1116,10 @@ MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planne
 
 ### 10.4 Disable MFA — #80
 
-`DELETE /api/v1/users/me/mfa` · **Auth:** bearer (step-up later; require `code` or `password` today)  
-**Body:** `{ "code"?: string, "password"?: string }`  
-**Response** `200` `data`: `null`
+`DELETE /api/v1/users/me/mfa` · **Auth:** bearer + `X-Step-Up-Token`  
+**Body:** `{ "code"?: string, "password"?: string }` — optional once step-up succeeded  
+**Response** `200` `data`: `null`  
+**Errors:** `403 STEP_UP_REQUIRED`
 
 ### 10.5 Begin MFA challenge — #81
 
@@ -1134,8 +1135,9 @@ MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planne
 
 ### 10.7 Regenerate recovery codes — #83
 
-`POST /api/v1/users/me/mfa/recovery-codes/regenerate` · **Auth:** bearer (step-up later)  
-**Response** `200` `data`: `{ recoveryCodes: string[] }`
+`POST /api/v1/users/me/mfa/recovery-codes/regenerate` · **Auth:** bearer + `X-Step-Up-Token`  
+**Response** `200` `data`: `{ recoveryCodes: string[] }`  
+**Errors:** `403 STEP_UP_REQUIRED`
 
 ### 10.8 List passkeys — #84
 
@@ -1176,21 +1178,30 @@ MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planne
 
 ### 10.14 Delete passkey — #90
 
-`DELETE /api/v1/users/me/passkeys/{passkeyId}` · **Auth:** bearer (step-up later)  
+`DELETE /api/v1/users/me/passkeys/{passkeyId}` · **Auth:** bearer + `X-Step-Up-Token`  
 **Response** `200` `data`: `null`  
-**Errors:** `409 LAST_AUTH_METHOD`, `404`
+**Errors:** `409 LAST_AUTH_METHOD`, `404`, `403 STEP_UP_REQUIRED`
 
 ### 10.15 Step-up challenge — #91
 
 `POST /api/v1/auth/step-up/challenge` · **Auth:** bearer  
-**Body:** `{ "method": "password" | "mfa" | "passkey" }`  
-**Response** `200` `data`: method-specific challenge payload + `stepUpId`
+**Body:** `{ "method": "password" | "mfa" | "passkey", "factorId"?: string }`  
+**Response** `200` `data`:
+- password: `{ stepUpId, method, expiresAt }`
+- mfa: `{ stepUpId, method, expiresAt, challengeId }`
+- passkey: `{ stepUpId, method, expiresAt, options }` (WebAuthn request options)
+
+Challenge TTL is 5 minutes. **Errors:** `409 CONFLICT` when the method is unavailable.
 
 ### 10.16 Step-up verify — #92
 
 `POST /api/v1/auth/step-up/verify` · **Auth:** bearer  
-**Body:** `{ "stepUpId": string, "password"?: string, "code"?: string, ... }`  
-**Response** `200` `data`: `{ "stepUpToken": string, "expiresIn": number }` — short-lived elevation claim/header
+**Body:**
+- password: `{ "stepUpId", "password" }`
+- mfa: `{ "stepUpId", "code" }` (TOTP, OTP, or recovery code)
+- passkey: `{ "stepUpId", "assertion": <WebAuthn assertion JSON> }`
+
+**Response** `200` `data`: `{ "stepUpToken": string, "expiresIn": number }` — send as `X-Step-Up-Token` on sensitive routes (default TTL 300s via `AUTH_STEP_UP_TOKEN_TTL_SECONDS`).
 
 ---
 
@@ -1321,11 +1332,11 @@ MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planne
 | 88  | POST   | `/api/v1/auth/passkeys/login/verify`                      | P2       | Done                                           |
 | 89  | PATCH  | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       | Done                                           |
 | 90  | DELETE | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       | Done                                           |
-| 91  | POST   | `/api/v1/auth/step-up/challenge`                          | P2       |                                                |
-| 92  | POST   | `/api/v1/auth/step-up/verify`                             | P2       |                                                |
+| 91  | POST   | `/api/v1/auth/step-up/challenge`                          | P2       | Done                                           |
+| 92  | POST   | `/api/v1/auth/step-up/verify`                             | P2       | Done                                           |
 
 # Stats
 
 - Total: 92
-- Done: 90
-- Remaining: 2
+- Done: 92
+- Remaining: 0

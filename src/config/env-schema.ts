@@ -243,6 +243,13 @@ export const envSchema = z
       .max(3600, "OAuth state TTL must be at most 3600 seconds")
       .default(600),
 
+    AUTH_STEP_UP_TOKEN_TTL_SECONDS: z.coerce
+      .number("Auth step-up token TTL is required.")
+      .int("Auth step-up token TTL must be an integer")
+      .min(60, "Auth step-up token TTL must be at least 60 seconds")
+      .max(3600, "Auth step-up token TTL must be at most 3600 seconds")
+      .default(300),
+
     OAUTH_REDIRECT_URIS: z
       .preprocess(
         emptyToUndefined,

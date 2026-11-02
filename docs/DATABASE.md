@@ -20,6 +20,7 @@ users
  ├── mfa_challenges
  ├── passkeys
  ├── passkey_challenges
+ ├── step_up_challenges
  ├── security_audit_logs
  ├── login_attempts
  └── user_roles → roles → role_permissions → permissions
@@ -296,6 +297,24 @@ Short-lived WebAuthn registration/login challenges. File: [`auth/passkey-challen
 
 ---
 
+## `step_up_challenges`
+
+Short-lived re-authentication challenges for sensitive actions. File: [`auth/step-up-challenges.schema.ts`](../src/infrastructure/database/drizzle/schema/auth/step-up-challenges.schema.ts).
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `uuid` PK | Returned as `stepUpId` |
+| `user_id` | `uuid` FK | `ON DELETE CASCADE` |
+| `session_id` | `uuid` FK → `sessions` | Bound to current access token session |
+| `method` | `varchar(20)` | `password`, `mfa`, or `passkey` |
+| `mfa_challenge_id` | `uuid` FK → `mfa_challenges` | Nullable; MFA method |
+| `webauthn_challenge` | `text` | Nullable; passkey method |
+| `expires_at` / `verified_at` / `created_at` | `timestamptz` | |
+
+**Indexes:** `(user_id, session_id, expires_at)`; `expires_at`
+
+---
+
 ## `security_audit_logs`
 
 Append-only security events. File: [`auth/security-audit-logs.schema.ts`](../src/infrastructure/database/drizzle/schema/auth/security-audit-logs.schema.ts).
@@ -398,6 +417,7 @@ src/infrastructure/database/drizzle/schema/
     mfa-challenges.schema.ts
     passkeys.schema.ts
     passkey-challenges.schema.ts
+    step-up-challenges.schema.ts
     security-audit-logs.schema.ts
     login-attempts.schema.ts
   authorization/

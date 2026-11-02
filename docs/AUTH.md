@@ -780,11 +780,24 @@ PATCH  /api/v1/users/me/passkeys/{passkeyId}
 DELETE /api/v1/users/me/passkeys/{passkeyId}
 ```
 
-Passkeys are first-factor credentials (not MFA). Relying party ID and origin come from `FRONTEND_BASE_URL` (plus `CORS_ORIGINS`). Challenges expire in 5 minutes. Deleting the last remaining sign-in method returns `409 LAST_AUTH_METHOD`. Step-up for delete remains later.
+Passkeys are first-factor credentials (not MFA). Relying party ID and origin come from `FRONTEND_BASE_URL` (plus `CORS_ORIGINS`). Challenges expire in 5 minutes. Deleting the last remaining sign-in method returns `409 LAST_AUTH_METHOD`. Delete requires step-up (`X-Step-Up-Token`).
 
 ---
 
-# 22. Complete API Inventory
+# 22. Step-up
+
+Normative paths: [AUTH_API.md](AUTH_API.md) §10.15–10.16.
+
+```http
+POST /api/v1/auth/step-up/challenge
+POST /api/v1/auth/step-up/verify
+```
+
+Re-authenticate with `password`, `mfa`, or `passkey`, then send the returned `stepUpToken` as `X-Step-Up-Token` on sensitive routes (MFA enroll/disable/recovery regenerate, passkey delete). Token TTL defaults to 300 seconds (`AUTH_STEP_UP_TOKEN_TTL_SECONDS`).
+
+---
+
+# 23. Complete API Inventory
 
 **Normative HTTP contracts** (methods, paths, bodies, query params, auth, errors): [AUTH_API.md](AUTH_API.md).
 
@@ -886,11 +899,15 @@ POST   /api/v1/auth/passkeys/login/options
 POST   /api/v1/auth/passkeys/login/verify
 PATCH  /api/v1/users/me/passkeys/{passkeyId}
 DELETE /api/v1/users/me/passkeys/{passkeyId}
+
+STEP-UP
+POST   /api/v1/auth/step-up/challenge
+POST   /api/v1/auth/step-up/verify
 ```
 
 ---
 
-# 23. Security Requirements
+# 24. Security Requirements
 
 ### Passwords
 
@@ -943,7 +960,7 @@ Security events should be auditable.
 
 ---
 
-# 24. High-Level User Flow
+# 25. High-Level User Flow
 
 ```text
                          ┌──────────┐
@@ -991,7 +1008,7 @@ Security events should be auditable.
 
 ---
 
-# 25. Architecture Boundary
+# 26. Architecture Boundary
 
 ```text
 Presentation
@@ -1023,7 +1040,7 @@ Those are infrastructure adapters.
 
 ---
 
-# 26. Implementation Phases
+# 27. Implementation Phases
 
 ### Phase 1 — Foundation
 
@@ -1082,7 +1099,7 @@ Those are infrastructure adapters.
 
 ---
 
-# 27. Design Principle
+# 28. Design Principle
 
 The fundamental model is:
 

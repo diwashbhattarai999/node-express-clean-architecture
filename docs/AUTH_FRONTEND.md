@@ -38,6 +38,7 @@ For the full planned contract (unimplemented routes), see [AUTH_API.md](AUTH_API
 | 401 | `INVALID_CREDENTIALS` | Wrong login password/identifier |
 | 403 | `EMAIL_NOT_VERIFIED` / `ACCOUNT_SUSPENDED` / `ACCOUNT_DISABLED` | Account not allowed to sign in |
 | 403 | `MFA_REQUIRED` | Password/OAuth/magic-link succeeded; continue with `details.mfaToken` |
+| 403 | `STEP_UP_REQUIRED` | Sensitive action needs `X-Step-Up-Token` from step-up verify |
 | 403 | `PERMISSION_DENIED` | Missing required permission (admin routes) |
 | 409 | `CONFLICT` | Identity already registered |
 | 422 | `VALIDATION_ERROR` | Bad body/query (`details` has field errors) |
@@ -92,6 +93,8 @@ Frontend deep links from emails:
 | `POST` | `/mfa/challenge/verify` | public |
 | `POST` | `/passkeys/login/options` | public |
 | `POST` | `/passkeys/login/verify` | public |
+| `POST` | `/step-up/challenge` | bearer |
+| `POST` | `/step-up/verify` | bearer |
 | `POST` | `/magic-link/request` | public |
 | `POST` | `/magic-link/consume` | public |
 | `POST` | `/refresh` | refresh (+ CSRF if cookie) |
@@ -134,15 +137,15 @@ Also under `/api/v1/users` (same bearer):
 | `PATCH` | `/me/username` | bearer |
 | `GET` | `/me/security-events` | bearer |
 | `GET` | `/me/mfa` | bearer |
-| `POST` | `/me/mfa/enroll` | bearer |
+| `POST` | `/me/mfa/enroll` | bearer + step-up |
 | `POST` | `/me/mfa/enroll/confirm` | bearer |
-| `DELETE` | `/me/mfa` | bearer |
-| `POST` | `/me/mfa/recovery-codes/regenerate` | bearer |
+| `DELETE` | `/me/mfa` | bearer + step-up |
+| `POST` | `/me/mfa/recovery-codes/regenerate` | bearer + step-up |
 | `GET` | `/me/passkeys` | bearer |
 | `POST` | `/me/passkeys/register/options` | bearer |
 | `POST` | `/me/passkeys/register/verify` | bearer |
 | `PATCH` | `/me/passkeys/:passkeyId` | bearer |
-| `DELETE` | `/me/passkeys/:passkeyId` | bearer |
+| `DELETE` | `/me/passkeys/:passkeyId` | bearer + step-up |
 
 Also under `/api/v1/authz` (same bearer):
 
@@ -487,6 +490,8 @@ Email deep link: `{FRONTEND_BASE_URL}/magic-link?token=…`. POST that token to 
 
 `POST /api/v1/users/me/mfa/enroll`
 
+**Auth:** bearer + `X-Step-Up-Token`.
+
 ```json
 { "type": "totp" }
 ```
@@ -513,13 +518,9 @@ Email deep link: `{FRONTEND_BASE_URL}/magic-link?token=…`. POST that token to 
 
 `DELETE /api/v1/users/me/mfa`
 
-```json
-{ "password": "Test@1234" }
-```
+**Auth:** bearer + `X-Step-Up-Token`. Optional body `{ "password" }` or `{ "code" }`.
 
-Or `{ "code": "123456" }` (TOTP or recovery code).
-
-**Response** `200` `data`: `null`.
+**Response** `200` `data`: `null`. **Errors:** `403 STEP_UP_REQUIRED`.
 
 ---
 
@@ -555,9 +556,42 @@ Optional `factorId`. **Response** `200`: `{ challengeId, expiresAt }`.
 
 `POST /api/v1/users/me/mfa/recovery-codes/regenerate`
 
-**Auth:** bearer. Invalidates unused codes.
+**Auth:** bearer + `X-Step-Up-Token`. Invalidates unused codes.
 
 **Response** `200` `{ recoveryCodes: string[] }`.
+
+---
+
+### Step-up challenge
+
+`POST /api/v1/auth/step-up/challenge`
+
+**Auth:** bearer.
+
+```json
+{ "method": "password" }
+```
+
+`method` is `password` | `mfa` | `passkey`. MFA may include `factorId`.
+
+**Response** `200`:
+- password: `{ stepUpId, method, expiresAt }`
+- mfa: `{ stepUpId, method, expiresAt, challengeId }`
+- passkey: `{ stepUpId, method, expiresAt, options }`
+
+---
+
+### Step-up verify
+
+`POST /api/v1/auth/step-up/verify`
+
+**Auth:** bearer.
+
+Password: `{ "stepUpId": "uuid", "password": "…" }`  
+MFA: `{ "stepUpId": "uuid", "code": "123456" }`  
+Passkey: `{ "stepUpId": "uuid", "assertion": { …WebAuthn assertion… } }`
+
+**Response** `200` `{ stepUpToken, expiresIn }`. Send `X-Step-Up-Token: <stepUpToken>` on sensitive routes.
 
 ---
 
@@ -637,9 +671,9 @@ Optional `factorId`. **Response** `200`: `{ challengeId, expiresAt }`.
 
 `DELETE /api/v1/users/me/passkeys/{passkeyId}`
 
-**Auth:** bearer (step-up later).
+**Auth:** bearer + `X-Step-Up-Token`.
 
-**Response** `200` `data`: `null`. **Errors:** `409 LAST_AUTH_METHOD`, `404`.
+**Response** `200` `data`: `null`. **Errors:** `409 LAST_AUTH_METHOD`, `404`, `403 STEP_UP_REQUIRED`.
 
 ---
 

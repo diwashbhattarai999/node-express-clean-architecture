@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AesGcmSecretEncryptor } from "@/modules/auth/mfa/infrastructure/security/aes-gcm-secret.encryptor";
 import { Rfc6238TotpService } from "@/modules/auth/mfa/infrastructure/security/rfc6238-totp.service";
+import { mintStepUpToken } from "../../helpers/mint-step-up-token";
 
 const mockAuthAccountRepository = {
   findIdentityByNormalized: vi.fn(),
@@ -143,9 +144,11 @@ const encryptor = new AesGcmSecretEncryptor("test-auth-jwt-secret-at-least-32-ch
 
 describe("Auth MFA API", () => {
   const app = createApp();
+  let stepUpToken = "";
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    stepUpToken = await mintStepUpToken(userId, "session-1");
     mockAccessTokenSigner.verify.mockResolvedValue({
       userId,
       sessionId: "session-1",
@@ -214,6 +217,7 @@ describe("Auth MFA API", () => {
     const enroll = await request(app)
       .post("/api/v1/users/me/mfa/enroll")
       .set("Authorization", "Bearer access.jwt")
+      .set("X-Step-Up-Token", stepUpToken)
       .send({ type: "totp" });
 
     expect(enroll.status).toBe(200);
@@ -391,7 +395,8 @@ describe("Auth MFA API", () => {
 
     const response = await request(app)
       .post("/api/v1/users/me/mfa/recovery-codes/regenerate")
-      .set("Authorization", "Bearer access.jwt");
+      .set("Authorization", "Bearer access.jwt")
+      .set("X-Step-Up-Token", stepUpToken);
 
     expect(response.status).toBe(200);
     expect(response.body.data.recoveryCodes).toHaveLength(10);
@@ -411,6 +416,7 @@ describe("Auth MFA API", () => {
     const response = await request(app)
       .delete("/api/v1/users/me/mfa")
       .set("Authorization", "Bearer access.jwt")
+      .set("X-Step-Up-Token", stepUpToken)
       .send({ password: "StrongPassword123!" });
 
     expect(response.status).toBe(200);

@@ -21,6 +21,7 @@ import { unlinkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http
 import type { PasskeysModule } from "@/modules/auth/passkeys/passkeys.module";
 import { createPasskeysUserRouter } from "@/modules/auth/passkeys/presentation/http/routes/passkeys-user.routes";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
+import type { StepUpModule } from "@/modules/auth/step-up/step-up.module";
 
 /**
  * HTTP mount for `/api/v1/users`.
@@ -46,6 +47,7 @@ export function createUsersRouter(
       | "renamePasskeyController"
       | "deletePasskeyController"
     > &
+    Pick<StepUpModule, "requireStepUp"> &
     Pick<
       OAuthModule,
       | "listOwnOAuthAccountsController"

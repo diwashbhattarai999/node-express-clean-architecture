@@ -16,7 +16,9 @@ export function createMfaUserRouter(
     | "disableMfaController"
     | "regenerateMfaRecoveryCodesController"
   > &
-    Pick<AuthHttpGuards, "requireBearerAuth">,
+    Pick<AuthHttpGuards, "requireBearerAuth"> & {
+      requireStepUp: AuthHttpGuards["requireBearerAuth"];
+    },
 ): IRouter {
   const router = Router();
 
@@ -35,17 +37,20 @@ export function createMfaUserRouter(
     "/me/mfa/enroll",
     validate(beginMfaEnrollSchema),
     authModule.requireBearerAuth,
+    authModule.requireStepUp,
     asHandler(authModule.beginMfaEnrollController),
   );
   router.post(
     "/me/mfa/recovery-codes/regenerate",
     authModule.requireBearerAuth,
+    authModule.requireStepUp,
     asRequestHandler(authModule.regenerateMfaRecoveryCodesController),
   );
   router.delete(
     "/me/mfa",
     validate(disableMfaSchema),
     authModule.requireBearerAuth,
+    authModule.requireStepUp,
     asHandler(authModule.disableMfaController),
   );
 

@@ -29,6 +29,9 @@ import {
   type AuthHttpGuards,
   createAuthHttpGuards,
 } from "@/modules/auth/shared/presentation/http/auth-http-guards";
+import { PostgresStepUpRepository } from "@/modules/auth/step-up/infrastructure/repositories/postgres-step-up.repository";
+import { JoseStepUpTokenSigner } from "@/modules/auth/step-up/infrastructure/security/jose-step-up-token.signer";
+import { createStepUpModule, type StepUpModule } from "@/modules/auth/step-up/step-up.module";
 import {
   createVerificationModule,
   type VerificationModule,
@@ -57,6 +60,7 @@ export type AuthModule = IdentityModule &
   AuditModule &
   MfaModule &
   PasskeysModule &
+  StepUpModule &
   AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
@@ -96,17 +100,18 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
 
   const frontendOrigin = new URL(options.env.FRONTEND_BASE_URL).origin;
   const webAuthnOrigins = [...new Set([frontendOrigin, ...options.env.CORS_ORIGINS])];
+  const passkeyRepository = new PostgresPasskeyRepository();
+  const webAuthnService = new SimpleWebAuthnService({
+    rpID: new URL(options.env.FRONTEND_BASE_URL).hostname,
+    rpName: options.env.APP_NAME,
+    origin: webAuthnOrigins.length === 1 ? (webAuthnOrigins[0] ?? frontendOrigin) : webAuthnOrigins,
+  });
   const passkeysModule = createPasskeysModule({
-    passkeyRepository: new PostgresPasskeyRepository(),
+    passkeyRepository,
     identityRepository,
     sessionRepository,
     accessTokenSigner,
-    webAuthnService: new SimpleWebAuthnService({
-      rpID: new URL(options.env.FRONTEND_BASE_URL).hostname,
-      rpName: options.env.APP_NAME,
-      origin:
-        webAuthnOrigins.length === 1 ? (webAuthnOrigins[0] ?? frontendOrigin) : webAuthnOrigins,
-    }),
+    webAuthnService,
     sessionOptions,
     cookieOptions,
   });
@@ -124,6 +129,25 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     emailOptions,
     sessionOptions,
     cookieOptions,
+  });
+
+  const stepUpModule = createStepUpModule({
+    stepUpRepository: new PostgresStepUpRepository(),
+    stepUpTokenSigner: new JoseStepUpTokenSigner({
+      secret: options.env.AUTH_JWT_SECRET,
+      issuer: options.env.AUTH_JWT_ISSUER,
+      audience: options.env.AUTH_JWT_AUDIENCE,
+      expiresInSeconds: options.env.AUTH_STEP_UP_TOKEN_TTL_SECONDS,
+    }),
+    credentialsRepository,
+    passwordHasher: options.passwordHasher,
+    mfaRepository,
+    totpService,
+    secretEncryptor,
+    passkeyRepository,
+    webAuthnService,
+    emailSender: options.emailSender,
+    emailOptions,
   });
 
   return {
@@ -183,6 +207,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
     }),
     ...mfaModule,
     ...passkeysModule,
+    ...stepUpModule,
     ...createAuthHttpGuards(accessTokenSigner),
   };
 }

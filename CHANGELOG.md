@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/passkeys/login/verify` — verify assertion and issue a session
 - `PATCH /api/v1/users/me/passkeys/{passkeyId}` — rename a passkey
 - `DELETE /api/v1/users/me/passkeys/{passkeyId}` — revoke a passkey (`409 LAST_AUTH_METHOD` if last sign-in method)
+- `POST /api/v1/auth/step-up/challenge` — begin password/MFA/passkey re-auth for sensitive actions
+- `POST /api/v1/auth/step-up/verify` — verify step-up and issue a short-lived `stepUpToken` (`X-Step-Up-Token`)
+- `step_up_challenges` table (migration `0005_step_up_challenges`)
 
 ### Changed
 
@@ -42,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /auth/config` `features.mfa` is true
 - `GET /auth/config` `features.passkeys` is true
 - Password login, magic-link consume, and OAuth sign-in return `403 MFA_REQUIRED` with `details.mfaToken` when MFA is enabled (no session until challenge verify)
+- MFA enroll, MFA disable, recovery-code regenerate, and passkey delete require `X-Step-Up-Token` (`403 STEP_UP_REQUIRED`)
 
 ## [1.6.0] - 2026-11-01
 

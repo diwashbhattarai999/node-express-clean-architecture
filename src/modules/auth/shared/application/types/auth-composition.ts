@@ -17,3 +17,7 @@ export type AuthWebAuthnOptions = {
   rpName: string;
   origin: string | string[];
 };
+
+export type AuthStepUpOptions = {
+  tokenTtlSeconds: number;
+};

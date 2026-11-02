@@ -1,6 +1,8 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mintStepUpToken } from "../../helpers/mint-step-up-token";
+
 const userId = "550e8400-e29b-41d4-a716-446655440000";
 const passkeyId = "660e8400-e29b-41d4-a716-446655440000";
 const challengeValue = "dGVzdC1jaGFsbGVuZ2U";
@@ -82,9 +84,11 @@ const clientDataJSON = Buffer.from(
 
 describe("Auth passkeys API", () => {
   const app = createApp();
+  let stepUpToken = "";
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    stepUpToken = await mintStepUpToken(userId, "session-1");
     mockAccessTokenSigner.verify.mockResolvedValue({
       userId,
       sessionId: "session-1",
@@ -374,7 +378,8 @@ describe("Auth passkeys API", () => {
 
     const deleted = await request(app)
       .delete(`/api/v1/users/me/passkeys/${passkeyId}`)
-      .set("Authorization", "Bearer access.jwt");
+      .set("Authorization", "Bearer access.jwt")
+      .set("X-Step-Up-Token", stepUpToken);
 
     expect(deleted.status).toBe(200);
     expect(deleted.body.data).toBeNull();
