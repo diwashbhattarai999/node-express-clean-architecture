@@ -18,6 +18,8 @@ import type { OAuthModule } from "@/modules/auth/oauth/oauth.module";
 import { linkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http/validators/link-oauth-account.validator";
 import { startOAuthAuthorizationSchema } from "@/modules/auth/oauth/presentation/http/validators/start-oauth-authorization.validator";
 import { unlinkOAuthAccountSchema } from "@/modules/auth/oauth/presentation/http/validators/unlink-oauth-account.validator";
+import type { PasskeysModule } from "@/modules/auth/passkeys/passkeys.module";
+import { createPasskeysUserRouter } from "@/modules/auth/passkeys/presentation/http/routes/passkeys-user.routes";
 import type { AuthHttpGuards } from "@/modules/auth/shared/presentation/http/auth-http-guards";
 
 /**
@@ -37,6 +39,14 @@ export function createUsersRouter(
       | "regenerateMfaRecoveryCodesController"
     > &
     Pick<
+      PasskeysModule,
+      | "listPasskeysController"
+      | "beginPasskeyRegisterController"
+      | "verifyPasskeyRegisterController"
+      | "renamePasskeyController"
+      | "deletePasskeyController"
+    > &
+    Pick<
       OAuthModule,
       | "listOwnOAuthAccountsController"
       | "startOAuthLinkAuthorizationController"
@@ -48,6 +58,7 @@ export function createUsersRouter(
   const router = Router();
 
   router.use(createMfaUserRouter(authModule));
+  router.use(createPasskeysUserRouter(authModule));
 
   router.get(
     "/me/security-events",

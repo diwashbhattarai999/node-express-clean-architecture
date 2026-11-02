@@ -32,7 +32,7 @@ export class GetAuthConfigUseCase {
         ),
         magicLink: providers.some((provider) => provider.type === "magic_link" && provider.enabled),
         mfa: true,
-        passkeys: false,
+        passkeys: true,
         phoneAuth: true,
       },
       providers,

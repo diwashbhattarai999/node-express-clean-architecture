@@ -4,6 +4,7 @@ import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
 import { externalIdentities } from "@/infrastructure/database/drizzle/schema/auth/external-identities.schema";
 import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
+import { passkeys } from "@/infrastructure/database/drizzle/schema/auth/passkeys.schema";
 import { users } from "@/infrastructure/database/drizzle/schema/users.schema";
 import type { TOauthProviderName } from "@/modules/auth/oauth/application/constants/oauth-providers";
 import { OAuthIdentityLinkedError } from "@/modules/auth/oauth/application/errors/oauth-identity-linked.error";
@@ -237,7 +238,13 @@ export class PostgresOAuthAccountRepository implements IOauthAccountRepository {
         .where(eq(loginIdentities.userId, userId))
         .limit(1);
 
-      if (!otherOauth && !otherLogin) {
+      const [otherPasskey] = await tx
+        .select({ id: passkeys.id })
+        .from(passkeys)
+        .where(and(eq(passkeys.userId, userId), isNull(passkeys.revokedAt)))
+        .limit(1);
+
+      if (!otherOauth && !otherLogin && !otherPasskey) {
         return { outcome: "last_auth_method" };
       }
 

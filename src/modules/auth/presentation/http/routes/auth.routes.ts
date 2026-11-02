@@ -5,6 +5,7 @@ import { createCredentialsRouter } from "@/modules/auth/credentials/presentation
 import { createIdentityRouter } from "@/modules/auth/identity/presentation/http/routes/identity.routes";
 import { createMfaRouter } from "@/modules/auth/mfa/presentation/http/routes/mfa.routes";
 import { createOAuthRouter } from "@/modules/auth/oauth/presentation/http/routes/oauth.routes";
+import { createPasskeysRouter } from "@/modules/auth/passkeys/presentation/http/routes/passkeys.routes";
 import { createSessionsRouter } from "@/modules/auth/sessions/presentation/http/routes/sessions.routes";
 import { createVerificationRouter } from "@/modules/auth/verification/presentation/http/routes/verification.routes";
 
@@ -14,6 +15,7 @@ export function createAuthRouter(authModule: AuthModule): IRouter {
   router.use(createIdentityRouter(authModule));
   router.use(createCredentialsRouter(authModule));
   router.use(createMfaRouter(authModule));
+  router.use(createPasskeysRouter(authModule));
   router.use(createVerificationRouter(authModule));
   router.use(createSessionsRouter(authModule));
   router.use(createOAuthRouter(authModule));

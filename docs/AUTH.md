@@ -14,7 +14,7 @@ The authentication module is responsible for:
 * Session management
 * Access and refresh tokens
 * Account linking
-* Future MFA and passkey authentication
+* MFA (TOTP/SMS/email) and passkey authentication
 
 Authentication is separate from authorization.
 
@@ -760,24 +760,27 @@ POST   /api/v1/auth/mfa/challenge/verify
 POST   /api/v1/users/me/mfa/recovery-codes/regenerate
 ```
 
-Mechanisms: TOTP, SMS/email OTP, recovery codes. Passkeys remain future (AUTH_API.md §10.8+).
+Mechanisms: TOTP, SMS/email OTP, recovery codes. Passkeys are separate first-factor credentials (AUTH_API.md §10.8+).
 
 Login, magic-link consume, and OAuth sign-in return `403 MFA_REQUIRED` with `details.mfaToken` when a verified factor exists. The session is issued only after challenge verify. TOTP secrets are encrypted at rest (`AUTH_MFA_ENCRYPTION_KEY`, else `AUTH_JWT_SECRET`).
 
 ---
 
-# 21. Future Passkeys
+# 21. Passkeys
 
-Planned:
+Normative paths: [AUTH_API.md](AUTH_API.md) §10.8–10.14.
 
 ```http
-POST /api/v1/auth/passkeys/register/options
-POST /api/v1/auth/passkeys/register
-POST /api/v1/auth/passkeys/login/options
-POST /api/v1/auth/passkeys/login
+GET    /api/v1/users/me/passkeys
+POST   /api/v1/users/me/passkeys/register/options
+POST   /api/v1/users/me/passkeys/register/verify
+POST   /api/v1/auth/passkeys/login/options
+POST   /api/v1/auth/passkeys/login/verify
+PATCH  /api/v1/users/me/passkeys/{passkeyId}
+DELETE /api/v1/users/me/passkeys/{passkeyId}
 ```
 
-Passkeys are treated as authentication credentials belonging to the user.
+Passkeys are first-factor credentials (not MFA). Relying party ID and origin come from `FRONTEND_BASE_URL` (plus `CORS_ORIGINS`). Challenges expire in 5 minutes. Deleting the last remaining sign-in method returns `409 LAST_AUTH_METHOD`. Step-up for delete remains later.
 
 ---
 
@@ -875,7 +878,14 @@ POST   /api/v1/auth/mfa/challenge
 POST   /api/v1/auth/mfa/challenge/verify
 POST   /api/v1/users/me/mfa/recovery-codes/regenerate
 
-PASSKEYS (future — AUTH_API.md §10)
+PASSKEYS
+GET    /api/v1/users/me/passkeys
+POST   /api/v1/users/me/passkeys/register/options
+POST   /api/v1/users/me/passkeys/register/verify
+POST   /api/v1/auth/passkeys/login/options
+POST   /api/v1/auth/passkeys/login/verify
+PATCH  /api/v1/users/me/passkeys/{passkeyId}
+DELETE /api/v1/users/me/passkeys/{passkeyId}
 ```
 
 ---

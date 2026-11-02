@@ -64,7 +64,7 @@ Access JWT TTL is short (~10 minutes; `expiresIn` is seconds). Refresh TTL is lo
 
 **Always send cookies** on auth calls from the browser: `credentials: "include"`.
 
-Endpoints that **set** cookies: login, email/phone verify, magic-link consume, MFA challenge verify, refresh.  
+Endpoints that **set** cookies: login, email/phone verify, magic-link consume, MFA challenge verify, passkey login verify, refresh.  
 Endpoints that **clear** cookies: logout, logout-all, password reset.
 
 **CSRF required** when the refresh cookie is present: refresh, logout, logout-all.
@@ -90,6 +90,8 @@ Frontend deep links from emails:
 | `POST` | `/login` | public |
 | `POST` | `/mfa/challenge` | public |
 | `POST` | `/mfa/challenge/verify` | public |
+| `POST` | `/passkeys/login/options` | public |
+| `POST` | `/passkeys/login/verify` | public |
 | `POST` | `/magic-link/request` | public |
 | `POST` | `/magic-link/consume` | public |
 | `POST` | `/refresh` | refresh (+ CSRF if cookie) |
@@ -136,6 +138,11 @@ Also under `/api/v1/users` (same bearer):
 | `POST` | `/me/mfa/enroll/confirm` | bearer |
 | `DELETE` | `/me/mfa` | bearer |
 | `POST` | `/me/mfa/recovery-codes/regenerate` | bearer |
+| `GET` | `/me/passkeys` | bearer |
+| `POST` | `/me/passkeys/register/options` | bearer |
+| `POST` | `/me/passkeys/register/verify` | bearer |
+| `PATCH` | `/me/passkeys/:passkeyId` | bearer |
+| `DELETE` | `/me/passkeys/:passkeyId` | bearer |
 
 Also under `/api/v1/authz` (same bearer):
 
@@ -554,6 +561,88 @@ Optional `factorId`. **Response** `200`: `{ challengeId, expiresAt }`.
 
 ---
 
+### List passkeys
+
+`GET /api/v1/users/me/passkeys`
+
+**Auth:** bearer.
+
+**Response** `200` `data`: `{ id, name, createdAt, lastUsedAt }[]`.
+
+---
+
+### Passkey register options
+
+`POST /api/v1/users/me/passkeys/register/options`
+
+**Auth:** bearer. Pass the JSON `data` into `navigator.credentials.create({ publicKey: data })`.
+
+**Response** `200` WebAuthn `PublicKeyCredentialCreationOptions` JSON. Challenge TTL is 5 minutes.
+
+---
+
+### Passkey register verify
+
+`POST /api/v1/users/me/passkeys/register/verify`
+
+**Auth:** bearer. Send the credential JSON from `navigator.credentials.create`, plus optional `name`.
+
+```json
+{
+  "id": "credential-id",
+  "rawId": "credential-id",
+  "type": "public-key",
+  "response": { "clientDataJSON": "…", "attestationObject": "…" },
+  "name": "Laptop"
+}
+```
+
+**Response** `201` `{ id, name, createdAt }`.
+
+---
+
+### Passkey login options
+
+`POST /api/v1/auth/passkeys/login/options`
+
+**Auth:** public. Optional `{ "identifier": "ada@example.com" }` to hint allowCredentials; omit for discoverable (usernameless) login.
+
+**Response** `200` WebAuthn `PublicKeyCredentialRequestOptions` JSON.
+
+---
+
+### Passkey login verify
+
+`POST /api/v1/auth/passkeys/login/verify`
+
+**Auth:** public. Send the credential JSON from `navigator.credentials.get`.
+
+**Response** `200` — same `AuthTokensData` + cookies as login.
+
+---
+
+### Rename passkey
+
+`PATCH /api/v1/users/me/passkeys/{passkeyId}`
+
+```json
+{ "name": "Phone" }
+```
+
+**Response** `200` `{ id, name, createdAt, lastUsedAt }`.
+
+---
+
+### Delete passkey
+
+`DELETE /api/v1/users/me/passkeys/{passkeyId}`
+
+**Auth:** bearer (step-up later).
+
+**Response** `200` `data`: `null`. **Errors:** `409 LAST_AUTH_METHOD`, `404`.
+
+---
+
 ### List auth providers
 
 `GET /api/v1/auth/providers`
@@ -586,7 +675,7 @@ Optional `factorId`. **Response** `200`: `{ challengeId, expiresAt }`.
     "oauth": true,
     "magicLink": true,
     "mfa": true,
-    "passkeys": false,
+    "passkeys": true,
     "phoneAuth": true
   },
   "providers": []

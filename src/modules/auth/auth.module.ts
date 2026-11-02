@@ -17,6 +17,9 @@ import { AesGcmSecretEncryptor } from "@/modules/auth/mfa/infrastructure/securit
 import { Rfc6238TotpService } from "@/modules/auth/mfa/infrastructure/security/rfc6238-totp.service";
 import { createMfaModule, type MfaModule } from "@/modules/auth/mfa/mfa.module";
 import { createOAuthModule, type OAuthModule } from "@/modules/auth/oauth/oauth.module";
+import { PostgresPasskeyRepository } from "@/modules/auth/passkeys/infrastructure/repositories/postgres-passkey.repository";
+import { SimpleWebAuthnService } from "@/modules/auth/passkeys/infrastructure/webauthn/simple-webauthn.service";
+import { createPasskeysModule, type PasskeysModule } from "@/modules/auth/passkeys/passkeys.module";
 import { PostgresSessionRepository } from "@/modules/auth/sessions/infrastructure/repositories/postgres-session.repository";
 import { createSessionsModule, type SessionsModule } from "@/modules/auth/sessions/sessions.module";
 import type { IAccessTokenSigner } from "@/modules/auth/shared/application/ports/access-token.signer";
@@ -53,6 +56,7 @@ export type AuthModule = IdentityModule &
   AuthorizationModule &
   AuditModule &
   MfaModule &
+  PasskeysModule &
   AuthHttpGuards;
 
 export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
@@ -89,6 +93,23 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       options.env.NODE_ENV === Environment.PRODUCTION ||
       options.env.NODE_ENV === Environment.STAGING,
   };
+
+  const frontendOrigin = new URL(options.env.FRONTEND_BASE_URL).origin;
+  const webAuthnOrigins = [...new Set([frontendOrigin, ...options.env.CORS_ORIGINS])];
+  const passkeysModule = createPasskeysModule({
+    passkeyRepository: new PostgresPasskeyRepository(),
+    identityRepository,
+    sessionRepository,
+    accessTokenSigner,
+    webAuthnService: new SimpleWebAuthnService({
+      rpID: new URL(options.env.FRONTEND_BASE_URL).hostname,
+      rpName: options.env.APP_NAME,
+      origin:
+        webAuthnOrigins.length === 1 ? (webAuthnOrigins[0] ?? frontendOrigin) : webAuthnOrigins,
+    }),
+    sessionOptions,
+    cookieOptions,
+  });
 
   const mfaModule = createMfaModule({
     mfaRepository,
@@ -161,6 +182,7 @@ export function createAuthModule(options: CreateAuthModuleOptions): AuthModule {
       objectStorage: options.objectStorage,
     }),
     ...mfaModule,
+    ...passkeysModule,
     ...createAuthHttpGuards(accessTokenSigner),
   };
 }

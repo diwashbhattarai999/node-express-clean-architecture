@@ -18,7 +18,9 @@ import {
 import { db } from "@/infrastructure/database/drizzle";
 import { isUniqueViolation } from "@/infrastructure/database/drizzle/errors";
 import { authTokens } from "@/infrastructure/database/drizzle/schema/auth/auth-tokens.schema";
+import { externalIdentities } from "@/infrastructure/database/drizzle/schema/auth/external-identities.schema";
 import { loginIdentities } from "@/infrastructure/database/drizzle/schema/auth/login-identities.schema";
+import { passkeys } from "@/infrastructure/database/drizzle/schema/auth/passkeys.schema";
 import { passwordCredentials } from "@/infrastructure/database/drizzle/schema/auth/password-credentials.schema";
 import { sessions } from "@/infrastructure/database/drizzle/schema/auth/sessions.schema";
 import { roles } from "@/infrastructure/database/drizzle/schema/authorization/roles.schema";
@@ -1037,7 +1039,19 @@ export class PostgresIdentityRepository implements IIdentityRepository {
         .where(and(eq(loginIdentities.userId, input.userId), ne(loginIdentities.id, identity.id)))
         .limit(1);
 
-      if (!other) {
+      const [otherOauth] = await tx
+        .select({ id: externalIdentities.id })
+        .from(externalIdentities)
+        .where(eq(externalIdentities.userId, input.userId))
+        .limit(1);
+
+      const [otherPasskey] = await tx
+        .select({ id: passkeys.id })
+        .from(passkeys)
+        .where(and(eq(passkeys.userId, input.userId), isNull(passkeys.revokedAt)))
+        .limit(1);
+
+      if (!other && !otherOauth && !otherPasskey) {
         return { outcome: "last_auth_method" as const };
       }
 

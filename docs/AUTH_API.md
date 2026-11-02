@@ -1,6 +1,6 @@
 # Authentication & authorization API contracts
 
-Normative HTTP contracts for auth, account management, RBAC, admin, audit, and future MFA/passkeys.
+Normative HTTP contracts for auth, account management, RBAC, admin, audit, MFA, passkeys, and planned step-up.
 
 **Related:** [AUTH.md](AUTH.md) (design), [DATABASE.md](DATABASE.md) (DDL), [AUTH_FRONTEND.md](AUTH_FRONTEND.md) (implemented endpoints for frontend).  
 **Status:** Full planned contract; see AUTH_FRONTEND.md for what is live today.  
@@ -1093,7 +1093,7 @@ All require bearer + listed permission. Mutating actions should write `security_
 
 ## 10. MFA, passkeys, step-up — P2
 
-MFA (#77–#83) is implemented. Passkey/WebAuthn and step-up remain planned.
+MFA (#77–#83) and passkeys (#84–#90) are implemented. Step-up remains planned.
 
 ### 10.1 MFA status — #77
 
@@ -1140,42 +1140,45 @@ MFA (#77–#83) is implemented. Passkey/WebAuthn and step-up remain planned.
 ### 10.8 List passkeys — #84
 
 `GET /api/v1/users/me/passkeys` · **Auth:** bearer  
-**Response** `200` `data`: `{ id, name, createdAt, lastUsedAt }[]`
+**Response** `200` `data`: `{ id, name, createdAt, lastUsedAt }[]` — non-revoked credentials only.
 
 ### 10.9 Passkey register options — #85
 
 `POST /api/v1/users/me/passkeys/register/options` · **Auth:** bearer  
-**Response** `200` `data`: WebAuthn `PublicKeyCredentialCreationOptions` JSON
+**Response** `200` `data`: WebAuthn `PublicKeyCredentialCreationOptions` JSON (5-minute challenge). RP ID/origin from `FRONTEND_BASE_URL`.
 
 ### 10.10 Passkey register verify — #86
 
 `POST /api/v1/users/me/passkeys/register/verify` · **Auth:** bearer  
 **Body:** WebAuthn attestation response + `{ "name"?: string }`  
-**Response** `201` `data`: `{ id, name, createdAt }`
+**Response** `201` `data`: `{ id, name, createdAt }`  
+**Errors:** `401 TOKEN_INVALID` / `TOKEN_EXPIRED`, `409 CONFLICT`.
 
 ### 10.11 Passkey login options — #87
 
 `POST /api/v1/auth/passkeys/login/options` · **Auth:** public  
-**Body:** `{ "identifier"?: string }`  
+**Body:** `{ "identifier"?: string }` — omit for discoverable credentials. Unknown identifiers still return options (empty `allowCredentials`).  
 **Response** `200` `data`: WebAuthn `PublicKeyCredentialRequestOptions` JSON
 
 ### 10.12 Passkey login verify — #88
 
 `POST /api/v1/auth/passkeys/login/verify` · **Auth:** public  
 **Body:** WebAuthn assertion response  
-**Response** `200` `data`: `AuthTokensData`
+**Response** `200` `data`: `AuthTokensData` + cookies  
+**Errors:** `401 INVALID_CREDENTIALS` / `TOKEN_INVALID` / `TOKEN_EXPIRED`, `403 ACCOUNT_*`. Passkey login does not require MFA.
 
 ### 10.13 Rename passkey — #89
 
 `PATCH /api/v1/users/me/passkeys/{passkeyId}` · **Auth:** bearer  
-**Body:** `{ "name": string }`  
-**Response** `200` `data`: `{ id, name, ... }`
+**Body:** `{ "name": string }` (1–100)  
+**Response** `200` `data`: `{ id, name, createdAt, lastUsedAt }`  
+**Errors:** `404`.
 
 ### 10.14 Delete passkey — #90
 
-`DELETE /api/v1/users/me/passkeys/{passkeyId}` · **Auth:** bearer + step-up  
+`DELETE /api/v1/users/me/passkeys/{passkeyId}` · **Auth:** bearer (step-up later)  
 **Response** `200` `data`: `null`  
-**Errors:** `409 LAST_AUTH_METHOD`
+**Errors:** `409 LAST_AUTH_METHOD`, `404`
 
 ### 10.15 Step-up challenge — #91
 
@@ -1311,18 +1314,18 @@ MFA (#77–#83) is implemented. Passkey/WebAuthn and step-up remain planned.
 | 81  | POST   | `/api/v1/auth/mfa/challenge`                              | P2       | Done                                           |
 | 82  | POST   | `/api/v1/auth/mfa/challenge/verify`                       | P2       | Done                                           |
 | 83  | POST   | `/api/v1/users/me/mfa/recovery-codes/regenerate`          | P2       | Done                                           |
-| 84  | GET    | `/api/v1/users/me/passkeys`                               | P2       |                                                |
-| 85  | POST   | `/api/v1/users/me/passkeys/register/options`              | P2       |                                                |
-| 86  | POST   | `/api/v1/users/me/passkeys/register/verify`               | P2       |                                                |
-| 87  | POST   | `/api/v1/auth/passkeys/login/options`                     | P2       |                                                |
-| 88  | POST   | `/api/v1/auth/passkeys/login/verify`                      | P2       |                                                |
-| 89  | PATCH  | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       |                                                |
-| 90  | DELETE | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       |                                                |
+| 84  | GET    | `/api/v1/users/me/passkeys`                               | P2       | Done                                           |
+| 85  | POST   | `/api/v1/users/me/passkeys/register/options`              | P2       | Done                                           |
+| 86  | POST   | `/api/v1/users/me/passkeys/register/verify`               | P2       | Done                                           |
+| 87  | POST   | `/api/v1/auth/passkeys/login/options`                     | P2       | Done                                           |
+| 88  | POST   | `/api/v1/auth/passkeys/login/verify`                      | P2       | Done                                           |
+| 89  | PATCH  | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       | Done                                           |
+| 90  | DELETE | `/api/v1/users/me/passkeys/{passkeyId}`                   | P2       | Done                                           |
 | 91  | POST   | `/api/v1/auth/step-up/challenge`                          | P2       |                                                |
 | 92  | POST   | `/api/v1/auth/step-up/verify`                             | P2       |                                                |
 
 # Stats
 
 - Total: 92
-- Done: 83
-- Remaining: 9
+- Done: 90
+- Remaining: 2

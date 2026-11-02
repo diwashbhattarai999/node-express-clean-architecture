@@ -29,7 +29,7 @@ describe("GetAuthConfigUseCase", () => {
       oauth: true,
       magicLink: true,
       mfa: true,
-      passkeys: false,
+      passkeys: true,
       phoneAuth: true,
     });
     expect(result.providers.find((provider) => provider.id === "google")?.enabled).toBe(true);

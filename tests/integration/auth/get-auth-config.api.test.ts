@@ -26,7 +26,7 @@ describe("Auth config API", () => {
           oauth: true,
           magicLink: true,
           mfa: true,
-          passkeys: false,
+          passkeys: true,
           phoneAuth: true,
         },
       },

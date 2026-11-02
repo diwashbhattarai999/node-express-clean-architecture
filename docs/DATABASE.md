@@ -19,6 +19,7 @@ users
  ├── mfa_recovery_codes
  ├── mfa_challenges
  ├── passkeys
+ ├── passkey_challenges
  ├── security_audit_logs
  ├── login_attempts
  └── user_roles → roles → role_permissions → permissions
@@ -279,6 +280,22 @@ WebAuthn credentials. File: [`auth/passkeys.schema.ts`](../src/infrastructure/da
 
 ---
 
+## `passkey_challenges`
+
+Short-lived WebAuthn registration/login challenges. File: [`auth/passkey-challenges.schema.ts`](../src/infrastructure/database/drizzle/schema/auth/passkey-challenges.schema.ts).
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `uuid` PK | |
+| `user_id` | `uuid` FK | Nullable for discoverable login; `ON DELETE CASCADE` |
+| `type` | `varchar(20)` | `register` or `login` |
+| `challenge` | `text` | Unique WebAuthn challenge |
+| `expires_at` / `consumed_at` / `created_at` | `timestamptz` | |
+
+**Indexes:** Unique `challenge`; `(user_id, type, expires_at)`; `expires_at`
+
+---
+
 ## `security_audit_logs`
 
 Append-only security events. File: [`auth/security-audit-logs.schema.ts`](../src/infrastructure/database/drizzle/schema/auth/security-audit-logs.schema.ts).
@@ -380,6 +397,7 @@ src/infrastructure/database/drizzle/schema/
     mfa-recovery-codes.schema.ts
     mfa-challenges.schema.ts
     passkeys.schema.ts
+    passkey-challenges.schema.ts
     security-audit-logs.schema.ts
     login-attempts.schema.ts
   authorization/

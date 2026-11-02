@@ -28,11 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/auth/mfa/challenge` — start an MFA challenge from a login continuation token
 - `POST /api/v1/auth/mfa/challenge/verify` — verify TOTP/OTP/recovery code and issue a session
 - `POST /api/v1/users/me/mfa/recovery-codes/regenerate` — replace unused recovery codes
+- `GET /api/v1/users/me/passkeys` — list the current user's WebAuthn credentials
+- `POST /api/v1/users/me/passkeys/register/options` — WebAuthn registration options
+- `POST /api/v1/users/me/passkeys/register/verify` — verify attestation and store a passkey
+- `POST /api/v1/auth/passkeys/login/options` — public WebAuthn authentication options (`identifier` optional)
+- `POST /api/v1/auth/passkeys/login/verify` — verify assertion and issue a session
+- `PATCH /api/v1/users/me/passkeys/{passkeyId}` — rename a passkey
+- `DELETE /api/v1/users/me/passkeys/{passkeyId}` — revoke a passkey (`409 LAST_AUTH_METHOD` if last sign-in method)
 
 ### Changed
 
 - Public `/auth/providers` and `/auth/config` now enable `magic_link` (`features.magicLink: true`)
 - `GET /auth/config` `features.mfa` is true
+- `GET /auth/config` `features.passkeys` is true
 - Password login, magic-link consume, and OAuth sign-in return `403 MFA_REQUIRED` with `details.mfaToken` when MFA is enabled (no session until challenge verify)
 
 ## [1.6.0] - 2026-11-01

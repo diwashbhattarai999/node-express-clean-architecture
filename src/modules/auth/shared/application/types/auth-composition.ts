@@ -11,3 +11,9 @@ export type AuthCookieOptions = {
   refreshTokenTtlSeconds: number;
   secureCookies: boolean;
 };
+
+export type AuthWebAuthnOptions = {
+  rpID: string;
+  rpName: string;
+  origin: string | string[];
+};

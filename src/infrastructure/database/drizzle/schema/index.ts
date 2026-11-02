@@ -6,6 +6,7 @@ export * from "./auth/mfa-challenges.schema";
 export * from "./auth/mfa-factors.schema";
 export * from "./auth/mfa-recovery-codes.schema";
 export * from "./auth/oauth-authorization-states.schema";
+export * from "./auth/passkey-challenges.schema";
 export * from "./auth/passkeys.schema";
 export * from "./auth/password-credentials.schema";
 export * from "./auth/security-audit-logs.schema";
